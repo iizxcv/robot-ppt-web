@@ -281,7 +281,7 @@ const ParametricURDFRobot: React.FC<{
         </group>
 
         {/* Minimal English Name Badge Box */}
-        <Html position={[0, kinematics.height_m + 0.28, 0]} center distanceFactor={9}>
+        <Html position={[0, kinematics.height_m + 0.32, 0]} center distanceFactor={10}>
           <div
             onClick={(e) => {
               e.stopPropagation();
@@ -289,22 +289,25 @@ const ParametricURDFRobot: React.FC<{
             }}
             title="클릭하여 모델 상세 정보 보기"
             style={{
-              background: isSelected ? "#1e3a8a" : "rgba(10, 16, 32, 0.88)",
-              border: `1.5px solid ${isSelected ? "#60a5fa" : "#3b82f6"}`,
-              borderRadius: 6,
+              background: "rgba(10, 16, 32, 0.94)",
+              border: `1.5px solid ${isSelected ? "#38bdf8" : "rgba(255, 255, 255, 0.16)"}`,
+              borderRadius: 99,
               padding: "4px 12px",
               color: "#ffffff",
-              fontSize: 12,
-              fontWeight: 700,
+              fontSize: 11.5,
+              fontWeight: 800,
               fontFamily: "Calibri, 'Malgun Gothic', sans-serif",
-              letterSpacing: "0.03em",
+              letterSpacing: "0.04em",
               whiteSpace: "nowrap",
               cursor: "pointer",
-              boxShadow: isSelected ? "0 0 14px rgba(96, 165, 250, 0.6)" : "0 3px 10px rgba(0, 0, 0, 0.5)",
+              boxShadow: isSelected
+                ? "0 0 16px rgba(56, 189, 248, 0.6), 0 4px 12px rgba(0, 0, 0, 0.7)"
+                : "0 4px 14px rgba(0, 0, 0, 0.6)",
               display: "flex",
               alignItems: "center",
-              gap: 6,
+              gap: 7,
               userSelect: "none",
+              transition: "all 0.15s ease",
             }}
           >
             <span
@@ -313,10 +316,10 @@ const ParametricURDFRobot: React.FC<{
                 height: 6,
                 borderRadius: "50%",
                 background: telemetry?.online_mode === "LIVE_WEBSOCKET_REDIS" ? "#22c55e" : "#64748b",
-                boxShadow: telemetry?.online_mode === "LIVE_WEBSOCKET_REDIS" ? "0 0 6px #22c55e" : "none",
+                boxShadow: telemetry?.online_mode === "LIVE_WEBSOCKET_REDIS" ? "0 0 8px #22c55e" : "none",
               }}
             />
-            <span>{englishName}</span>
+            <span style={{ color: isSelected ? "#38bdf8" : "#ffffff" }}>{englishName}</span>
           </div>
         </Html>
       </group>
@@ -412,28 +415,58 @@ export const UnifiedMapViewer3D: React.FC<UnifiedMapViewer3DProps> = ({
 
         <VirtualFacilityPOIs pois={masterMap?.spatial_pois || []} />
 
-        {/* Per-Robot Most-Frequent Patrol Path (Solid Line with Waypoint Spheres) */}
+        {/* Per-Robot Most-Frequent Patrol Path (Refined Gray Dashed Line with Sleek Waypoint Markers) */}
         {liveRobots.map((robot) => {
           const rawPts = robot.patrol_path_world || [];
           if (rawPts.length < 2) return null;
-          const pts = rawPts.map(([x, y]) => [x, 0.04, -y] as [number, number, number]);
-          const pathColor = robot.color || (robot.id.includes("power") ? "#f59e0b" : "#3b82f6");
+          const pts = rawPts.map(([x, y]) => [x, 0.025, -y] as [number, number, number]);
 
           return (
             <group key={`patrol-path-${robot.id}`}>
-              {/* Solid Patrol Trajectory Line */}
+              {/* Elegant Gray Dashed Patrol Trajectory Line */}
               <Line
                 points={pts}
-                color={pathColor}
-                lineWidth={3.0}
+                color="#64748b"
+                lineWidth={1.8}
+                dashed
+                dashSize={0.24}
+                gapSize={0.14}
+                dashScale={1}
               />
-              {/* Waypoint Markers */}
-              {pts.map((p, idx) => (
-                <mesh key={`wp-${robot.id}-${idx}`} position={p}>
-                  <sphereGeometry args={[0.045, 12, 12]} />
-                  <meshBasicMaterial color={pathColor} />
-                </mesh>
-              ))}
+
+              {/* Refined Waypoint Nodes (Subtle Flat Rings with Center Markers) */}
+              {pts.map((p, idx) => {
+                const isDock = idx === 0 || idx === pts.length - 1;
+                return (
+                  <group key={`wp-${robot.id}-${idx}`} position={p}>
+                    {isDock ? (
+                      // Charging Dock Origin Station (Subtle Emerald Green Ring)
+                      <group position={[0, 0.005, 0]}>
+                        <mesh rotation={[-Math.PI / 2, 0, 0]}>
+                          <ringGeometry args={[0.08, 0.13, 24]} />
+                          <meshBasicMaterial color="#10b981" side={THREE.DoubleSide} transparent opacity={0.85} />
+                        </mesh>
+                        <mesh rotation={[-Math.PI / 2, 0, 0]}>
+                          <ringGeometry args={[0.03, 0.05, 16]} />
+                          <meshBasicMaterial color="#34d399" side={THREE.DoubleSide} />
+                        </mesh>
+                      </group>
+                    ) : (
+                      // Standard Waypoint Node: Sleek Slate Gray Ring + Center Point
+                      <group position={[0, 0.002, 0]}>
+                        <mesh rotation={[-Math.PI / 2, 0, 0]}>
+                          <ringGeometry args={[0.035, 0.055, 16]} />
+                          <meshBasicMaterial color="#64748b" side={THREE.DoubleSide} transparent opacity={0.55} />
+                        </mesh>
+                        <mesh position={[0, 0.002, 0]}>
+                          <sphereGeometry args={[0.018, 10, 10]} />
+                          <meshBasicMaterial color="#94a3b8" />
+                        </mesh>
+                      </group>
+                    )}
+                  </group>
+                );
+              })}
             </group>
           );
         })}
@@ -458,21 +491,22 @@ export const UnifiedMapViewer3D: React.FC<UnifiedMapViewer3DProps> = ({
           position: "absolute",
           top: 16,
           left: 16,
-          background: "rgba(14, 14, 18, 0.92)",
-          border: "1px solid #27272a",
-          borderRadius: 12,
+          background: "linear-gradient(145deg, rgba(16, 24, 40, 0.92) 0%, rgba(10, 15, 28, 0.95) 100%)",
+          border: "1px solid rgba(59, 130, 246, 0.25)",
+          borderRadius: 14,
           padding: "10px 14px",
           fontSize: 12,
           color: "#e4e4e7",
           pointerEvents: "none",
+          boxShadow: "0 8px 24px rgba(0, 0, 0, 0.5)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 800 }}>
           <span style={{ color: "#22c55e" }}>● LIVE WEBSOCKET TWIN</span>
           <span>실환경 WebSocket 기반 로봇 현위치 관제 시스템</span>
         </div>
-        <div style={{ fontSize: 11, color: "#a1a1aa", marginTop: 4 }}>
-          💡 3D 공간 위의 <b>로봇 아바타 또는 이름표를 클릭</b>하면 해당 모델의 핵심 강점·부품 구성·실시간 API 상세 팝업이 열립니다.
+        <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 4 }}>
+          💡 3D 공간 위의 <b>로봇 아바타 또는 이름표를 클릭</b>하면 해당 모델의 4-슬라이드 상세 팝업이 열립니다.
         </div>
       </div>
     </div>
