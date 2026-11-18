@@ -5,7 +5,6 @@ import { MapCalibrationModal, RobotDetailPopupModal } from "./components/Showcas
 export const App: React.FC = () => {
   const [slides, setSlides] = useState<any[]>([]);
   const [currentSlideIdx, setCurrentSlideIdx] = useState<number>(0);
-  const [isCurtainSweeping, setIsCurtainSweeping] = useState<boolean>(false);
   const [mapData, setMapData] = useState<any>(null);
   const [robots, setRobots] = useState<RobotRecord[]>([]);
   const [selectedRobotId, setSelectedRobotId] = useState<string>("flag-01");
@@ -62,13 +61,7 @@ export const App: React.FC = () => {
 
   const navigateToSlide = (targetIdx: number) => {
     if (targetIdx === currentSlideIdx || targetIdx < 0 || targetIdx >= (slides.length || 6)) return;
-    setIsCurtainSweeping(true);
-    setTimeout(() => {
-      setCurrentSlideIdx(targetIdx);
-    }, 240);
-    setTimeout(() => {
-      setIsCurtainSweeping(false);
-    }, 620);
+    setCurrentSlideIdx(targetIdx);
   };
 
   useEffect(() => {
@@ -137,9 +130,6 @@ export const App: React.FC = () => {
         userSelect: "none",
       }}
     >
-      {/* Curtain Call Sweep Effect */}
-      {isCurtainSweeping && <div className="curtain-sweep" />}
-
       {/* Left Sidebar TOC */}
       <aside
         style={{
