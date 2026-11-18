@@ -7,11 +7,13 @@ export interface RobotRecord {
   id: string;
   hostname: string;
   display_name: string;
+  english_name?: string;
   edition_badge?: string;
   model_type: string;
   model_code: string;
   target_site?: string;
   color: string;
+  patrol_path_world?: number[][];
   rra_cert_no?: string;
   rra_cert_date?: string;
   ip: string;
@@ -119,18 +121,9 @@ const ExtrudedWalls: React.FC<{
   );
 };
 
-const VirtualFacilityPOIs: React.FC<{ pois: any[]; corridor: number[][] }> = ({ pois, corridor }) => {
-  const corridorPts = useMemo(() => {
-    if (!corridor?.length) return [];
-    return corridor.map(([x, y]) => [x, 0.04, -y] as [number, number, number]);
-  }, [corridor]);
-
+const VirtualFacilityPOIs: React.FC<{ pois: any[] }> = ({ pois }) => {
   return (
     <group>
-      {corridorPts.length > 1 && (
-        <Line points={corridorPts} color="#3f3f46" lineWidth={1.8} dashed dashSize={0.22} gapSize={0.14} />
-      )}
-
       {(pois || []).map((poi) => {
         const isCharger = poi.kind === "charger";
         if (!isCharger) return null;
@@ -171,7 +164,7 @@ const ParametricURDFRobot: React.FC<{
   const ptzPanRad = THREE.MathUtils.degToRad(telemetry?.ptz_pan_deg ?? 0);
   const isPro = robot.model_type === "profession_4wd" || robot.id.includes("pro");
   const isPower = robot.model_type === "power_4wd" || robot.id.includes("pwr");
-  const englishName = isPower ? "Power" : isPro ? "Professional" : "Flagship";
+  const englishName = robot.english_name || (isPower ? "Power" : isPro ? "Professional" : "Flagship");
 
   return (
     <group>
@@ -417,10 +410,33 @@ export const UnifiedMapViewer3D: React.FC<UnifiedMapViewer3DProps> = ({
           masterMap?.wall_blocks && <ExtrudedWalls blocks={masterMap.wall_blocks} wallHeight={wallHeight} />
         )}
 
-        <VirtualFacilityPOIs
-          pois={masterMap?.spatial_pois || []}
-          corridor={masterMap?.patrol_corridor || []}
-        />
+        <VirtualFacilityPOIs pois={masterMap?.spatial_pois || []} />
+
+        {/* Per-Robot Most-Frequent Patrol Path (Solid Line with Waypoint Spheres) */}
+        {liveRobots.map((robot) => {
+          const rawPts = robot.patrol_path_world || [];
+          if (rawPts.length < 2) return null;
+          const pts = rawPts.map(([x, y]) => [x, 0.04, -y] as [number, number, number]);
+          const pathColor = robot.color || (robot.id.includes("power") ? "#f59e0b" : "#3b82f6");
+
+          return (
+            <group key={`patrol-path-${robot.id}`}>
+              {/* Solid Patrol Trajectory Line */}
+              <Line
+                points={pts}
+                color={pathColor}
+                lineWidth={3.0}
+              />
+              {/* Waypoint Markers */}
+              {pts.map((p, idx) => (
+                <mesh key={`wp-${robot.id}-${idx}`} position={p}>
+                  <sphereGeometry args={[0.045, 12, 12]} />
+                  <meshBasicMaterial color={pathColor} />
+                </mesh>
+              ))}
+            </group>
+          );
+        })}
 
         {liveRobots.map((robot) => (
           <ParametricURDFRobot
