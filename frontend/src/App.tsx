@@ -112,7 +112,7 @@ export const App: React.FC = () => {
     return (
       <>
         {head}{" "}
-        <span style={{ color: "#ff3b30" }}>{tail}.</span>
+        <span style={{ color: "#3b82f6" }}>{tail}</span>
       </>
     );
   };
@@ -149,7 +149,7 @@ export const App: React.FC = () => {
                 width: 36,
                 height: 36,
                 borderRadius: 10,
-                background: "#ff3b30",
+                background: "#3b82f6",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -179,8 +179,8 @@ export const App: React.FC = () => {
                   key={s.id}
                   onClick={() => navigateToSlide(idx)}
                   style={{
-                    background: active ? "rgba(255, 59, 48, 0.14)" : "transparent",
-                    border: `1.5px solid ${active ? "#ff3b30" : "transparent"}`,
+                    background: active ? "rgba(59, 130, 246, 0.14)" : "transparent",
+                    border: `1.5px solid ${active ? "#3b82f6" : "transparent"}`,
                     borderRadius: 12,
                     padding: "12px 14px",
                     textAlign: "left",
@@ -196,7 +196,7 @@ export const App: React.FC = () => {
                     style={{
                       fontSize: 12,
                       fontWeight: 800,
-                      color: active ? "#ff3b30" : "#52525b",
+                      color: active ? "#3b82f6" : "#52525b",
                       fontFamily: "monospace",
                     }}
                   >
@@ -312,9 +312,9 @@ export const App: React.FC = () => {
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <span
                 style={{
-                  background: "rgba(255, 59, 48, 0.16)",
-                  color: "#ff3b30",
-                  border: "1px solid rgba(255, 59, 48, 0.4)",
+                  background: "rgba(59, 130, 246, 0.16)",
+                  color: "#3b82f6",
+                  border: "1px solid rgba(59, 130, 246, 0.4)",
                   fontWeight: 800,
                   fontSize: 12,
                   padding: "4px 12px",
@@ -350,7 +350,7 @@ export const App: React.FC = () => {
                 key={i}
                 style={{
                   background: "#131317",
-                  borderLeft: i === 0 ? "3px solid #ff3b30" : "3px solid #27272a",
+                  borderLeft: i === 0 ? "3px solid #3b82f6" : "3px solid #27272a",
                   borderRadius: "0 10px 10px 0",
                   padding: "10px 14px",
                   fontSize: 12.5,
@@ -381,7 +381,7 @@ export const App: React.FC = () => {
                 }}
               >
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 800, color: "#ff3b30", marginBottom: 8 }}>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: "#3b82f6", marginBottom: 8 }}>
                     AI 스마트 순찰 시스템, 새로운 기준을 제시하다
                   </div>
                   <p style={{ fontSize: 14, color: "#e4e4e7", lineHeight: 1.65, margin: "0 0 18px 0" }}>
@@ -399,7 +399,7 @@ export const App: React.FC = () => {
                       { num: "100건+", label: "글로벌 데이터센터/배전실 성공 사례" },
                     ].map((stat) => (
                       <div key={stat.label} style={{ background: "#0b0b0e", padding: 16, borderRadius: 14 }}>
-                        <div style={{ fontSize: 28, fontWeight: 900, color: "#ff3b30" }}>{stat.num}</div>
+                        <div style={{ fontSize: 28, fontWeight: 900, color: "#3b82f6" }}>{stat.num}</div>
                         <div style={{ fontSize: 12, color: "#a1a1aa", marginTop: 4 }}>{stat.label}</div>
                       </div>
                     ))}
@@ -413,8 +413,8 @@ export const App: React.FC = () => {
                       로봇으로 기업 인프라의 운영 효율성과 안전의 새로운 기준을 재정의합니다.
                     </div>
                   </div>
-                  <div style={{ background: "#0b0b0e", borderLeft: "3px solid #ff3b30", padding: 14, borderRadius: "0 12px 12px 0" }}>
-                    <div style={{ fontSize: 12, fontWeight: 800, color: "#ff3b30" }}>VISION</div>
+                  <div style={{ background: "#0b0b0e", borderLeft: "3px solid #3b82f6", padding: 14, borderRadius: "0 12px 12px 0" }}>
+                    <div style={{ fontSize: 12, fontWeight: 800, color: "#3b82f6" }}>VISION</div>
                     <div style={{ fontSize: 13, color: "#e4e4e7", marginTop: 4 }}>
                       인프라 운영의 첫 번째 파트너로 성장하여 비즈니스를 더욱 안전하고 신뢰할 수 있게 만듭니다.
                     </div>
@@ -441,7 +441,7 @@ export const App: React.FC = () => {
                         key={zone}
                         style={{
                           background: "#0b0b0e",
-                          borderLeft: "3px solid #ff3b30",
+                          borderLeft: "3px solid #3b82f6",
                           padding: "10px 12px",
                           borderRadius: "0 8px 8px 0",
                           fontSize: 12.5,
@@ -524,7 +524,7 @@ export const App: React.FC = () => {
                       <span style={{ color: "#e4e4e7" }}>
                         📍 현위치: <b>{r.telemetry?.position_name}</b>
                       </span>
-                      <span style={{ color: "#ff3b30", fontWeight: 800 }}>상세 강점 팝업 열기 ➔</span>
+                      <span style={{ color: "#3b82f6", fontWeight: 800 }}>상세 강점 팝업 열기 ➔</span>
                     </div>
                   </div>
                 ))}
@@ -570,7 +570,7 @@ export const App: React.FC = () => {
                     {
                       num: "03 VISION RECOGNITION",
                       title: "표시등 & 계측기 비전 인식",
-                      color: "#ff3b30",
+                      color: "#3b82f6",
                       items: [
                         "표시등 색상 감지 및 점멸 빈도 측정",
                         "장비 고장 등급 판정 근거 자동 생성",
@@ -710,8 +710,8 @@ export const App: React.FC = () => {
                   </div>
                 </div>
 
-                <div style={{ background: "#131317", border: "1px solid #ff3b30", borderRadius: 18, padding: 18 }}>
-                  <div style={{ fontSize: 13, fontWeight: 800, color: "#ff3b30", marginBottom: 8 }}>
+                <div style={{ background: "#131317", border: "1px solid #3b82f6", borderRadius: 18, padding: 18 }}>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: "#3b82f6", marginBottom: 8 }}>
                     🔥 SOLUTION 04 · 화재 예방 & 170℃ 능동 에어로졸 소화 패치 (Page 20~21)
                   </div>
                   <div style={{ fontSize: 12.5, color: "#d4d4d8", lineHeight: 1.55 }}>
@@ -746,7 +746,7 @@ export const App: React.FC = () => {
                         key={m.id}
                         onClick={() => requestVisionFrame(selectedRobot?.hostname || "flagship.robot.local", m.id)}
                         style={{
-                          background: visionMode === m.id ? "#ff3b30" : "#27272a",
+                          background: visionMode === m.id ? "#3b82f6" : "#27272a",
                           color: "#fff",
                           border: "none",
                           borderRadius: 8,
@@ -922,7 +922,7 @@ export const App: React.FC = () => {
                     badge: "CASE 01 · SK하이닉스 자산관리 시스템",
                     stats: "1,000㎡ (IDC 3개) · 900개 캐비닛 · 3,000대 장비",
                     desc: "순찰 로봇 3대 + 멀티로봇 관리 플랫폼 도입, 데이터센터 IT 자산 생애주기 관리 및 CMDB 시각화 구현",
-                    color: "#ff3b30",
+                    color: "#3b82f6",
                   },
                   {
                     badge: "CASE 02 · 삼성SDI(시안) 서버실 스마트 순찰",
@@ -1000,7 +1000,7 @@ export const App: React.FC = () => {
               disabled={currentSlideIdx >= totalSlides - 1}
               onClick={() => navigateToSlide(currentSlideIdx + 1)}
               style={{
-                background: "#ff3b30",
+                background: "#3b82f6",
                 color: "#fff",
                 border: "none",
                 borderRadius: 8,

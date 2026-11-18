@@ -139,7 +139,7 @@ export const RobotDetailPopupModal: React.FC<{
               key={t.id}
               onClick={() => setTab(t.id as any)}
               style={{
-                background: tab === t.id ? "#ff3b30" : "#18181f",
+                background: tab === t.id ? "#3b82f6" : "#18181f",
                 color: "#ffffff",
                 border: "none",
                 borderRadius: 10,
@@ -261,7 +261,7 @@ export const RobotDetailPopupModal: React.FC<{
         {tab === "live_api" && (
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
             <div style={{ background: "#0b0b0e", borderRadius: 14, padding: 16, fontSize: 13 }}>
-              <div style={{ color: "#ff3b30", fontWeight: 800, marginBottom: 10 }}>
+              <div style={{ color: "#3b82f6", fontWeight: 800, marginBottom: 10 }}>
                 📍 실시간 위치 & 오도메트리 정합 상태
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8, fontFamily: "monospace" }}>
@@ -342,13 +342,13 @@ export const MapCalibrationModal: React.FC<{
           maxHeight: "90vh",
           overflowY: "auto",
           background: "#111116",
-          border: "1.5px solid #ff3b30",
+          border: "1.5px solid #3b82f6",
           borderRadius: 16,
           padding: 24,
           color: "#f8fafc",
         }}
       >
-        <h3 style={{ margin: "0 0 6px 0", color: "#ff3b30" }}>
+        <h3 style={{ margin: "0 0 6px 0", color: "#3b82f6" }}>
           🧭 다중 로봇 map.pgm + map.yaml SE(2) 정합 & 통합 맵 빌더
         </h3>
         <p style={{ margin: "0 0 14px 0", fontSize: 12.5, color: "#a1a1aa", lineHeight: 1.55 }}>
@@ -458,7 +458,7 @@ export const MapCalibrationModal: React.FC<{
           <button
             onClick={() => onSave(transforms, wallHeight)}
             style={{
-              background: "#ff3b30",
+              background: "#3b82f6",
               color: "#fff",
               border: "none",
               borderRadius: 8,
