@@ -260,43 +260,45 @@ export const App: React.FC = () => {
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {robots.map((r) => {
-              const isLive = r.telemetry?.online_mode === "LIVE_WEBSOCKET_REDIS";
-              return (
-                <div
-                  key={r.id}
-                  onClick={() => {
-                    setSelectedRobotId(r.id);
-                    setPopupRobot(r);
-                  }}
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    fontSize: 12,
-                    cursor: "pointer",
-                    padding: "6px 8px",
-                    borderRadius: 8,
-                    background: r.id === selectedRobotId ? "rgba(255,255,255,0.06)" : "transparent",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                    <span
-                      style={{
-                        width: 7,
-                        height: 7,
-                        borderRadius: "50%",
-                        background: isLive ? "#22c55e" : "#71717a",
-                      }}
-                    />
-                    <span style={{ fontWeight: 800, color: r.color }}>{r.display_name.split(" ")[0]}</span>
+            {robots
+              .filter((r) => r.telemetry?.online_mode === "LIVE_WEBSOCKET_REDIS")
+              .map((r) => {
+                const isLive = r.telemetry?.online_mode === "LIVE_WEBSOCKET_REDIS";
+                return (
+                  <div
+                    key={r.id}
+                    onClick={() => {
+                      setSelectedRobotId(r.id);
+                      setPopupRobot(r);
+                    }}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      fontSize: 12,
+                      cursor: "pointer",
+                      padding: "6px 8px",
+                      borderRadius: 8,
+                      background: r.id === selectedRobotId ? "rgba(255,255,255,0.06)" : "transparent",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                      <span
+                        style={{
+                          width: 7,
+                          height: 7,
+                          borderRadius: "50%",
+                          background: isLive ? "#22c55e" : "#71717a",
+                        }}
+                      />
+                      <span style={{ fontWeight: 800, color: r.color }}>{r.display_name.split(" ")[0]}</span>
+                    </div>
+                    <span style={{ fontSize: 11, color: "#e4e4e7", fontFamily: "monospace" }}>
+                      {r.telemetry?.position_name?.split(" ")[0]} ({r.telemetry?.battery_pct}%)
+                    </span>
                   </div>
-                  <span style={{ fontSize: 11, color: "#e4e4e7", fontFamily: "monospace" }}>
-                    {r.telemetry?.position_name?.split(" ")[0]} ({r.telemetry?.battery_pct}%)
-                  </span>
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
         </div>
       </aside>
@@ -836,18 +838,20 @@ export const App: React.FC = () => {
                   }}
                 >
                   {JSON.stringify(
-                    robots.map((r) => ({
-                      robot: r.display_name,
-                      hostname: r.hostname,
-                      ip: r.ip,
-                      status: r.telemetry?.online_mode,
-                      last_sync: r.telemetry?.last_sync_time,
-                      current_station: r.telemetry?.position_name,
-                      raw_odom_xy: [r.telemetry?.local_x, r.telemetry?.local_y],
-                      calibrated_3d_xy: [r.telemetry?.world_x, r.telemetry?.world_y],
-                      battery: `${r.telemetry?.battery_pct}% (${r.telemetry?.voltage_v}V)`,
-                      lift_height_m: r.telemetry?.lift_height_m,
-                    })),
+                    robots
+                      .filter((r) => r.telemetry?.online_mode === "LIVE_WEBSOCKET_REDIS")
+                      .map((r) => ({
+                        robot: r.display_name,
+                        hostname: r.hostname,
+                        ip: r.ip,
+                        status: r.telemetry?.online_mode,
+                        last_sync: r.telemetry?.last_sync_time,
+                        current_station: r.telemetry?.position_name,
+                        raw_odom_xy: [r.telemetry?.local_x, r.telemetry?.local_y],
+                        calibrated_3d_xy: [r.telemetry?.world_x, r.telemetry?.world_y],
+                        battery: `${r.telemetry?.battery_pct}% (${r.telemetry?.voltage_v}V)`,
+                        lift_height_m: r.telemetry?.lift_height_m,
+                      })),
                     null,
                     2
                   )}
