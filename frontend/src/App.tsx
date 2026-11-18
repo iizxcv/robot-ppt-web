@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { UnifiedMapViewer3D, RobotRecord } from "./components/viewer3d/UnifiedMapViewer3D";
 import { MapCalibrationModal, RobotDetailPopupModal } from "./components/ShowcasePanels";
+import { RobotLiveOperationModal } from "./components/RobotLiveOperationModal";
 
 export const App: React.FC = () => {
   const [slides, setSlides] = useState<any[]>([]);
@@ -9,21 +10,36 @@ export const App: React.FC = () => {
   const [robots, setRobots] = useState<RobotRecord[]>([]);
   const [selectedRobotId, setSelectedRobotId] = useState<string>("flag-01");
   const [popupRobot, setPopupRobot] = useState<RobotRecord | null>(null);
+  const [liveOpRobot, setLiveOpRobot] = useState<RobotRecord | null>(null);
+  const [fleetData, setFleetData] = useState<any>(null);
   const [showCalibModal, setShowCalibModal] = useState<boolean>(false);
 
   const fetchInitialData = async () => {
     try {
-      const [slidesRes, mapRes, telRes] = await Promise.all([
+      const [slidesRes, mapRes, telRes, fleetRes] = await Promise.all([
         fetch("/api/v1/slides").then((r) => r.json()),
         fetch("/api/v1/maps/unified3d").then((r) => r.json()),
         fetch("/api/v1/telemetry").then((r) => r.json()),
+        fetch("/api/v1/fleet/details").then((r) => r.json()).catch(() => null),
       ]);
       if (slidesRes?.slides) setSlides(slidesRes.slides);
       if (mapRes) setMapData(mapRes);
       if (telRes?.robots) setRobots(telRes.robots);
+      if (fleetRes) setFleetData(fleetRes);
     } catch (e) {
       console.error("Initial load error:", e);
     }
+  };
+
+  const handleExecuteAction = async (actionType: string, params: any) => {
+    if (!liveOpRobot) return null;
+    const res = await fetch(`/api/v1/robots/${liveOpRobot.hostname || liveOpRobot.id}/oneclick_action`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action_type: actionType, ...params }),
+    }).then((r) => r.json());
+    fetchInitialData();
+    return res;
   };
 
   useEffect(() => {
@@ -49,7 +65,7 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (popupRobot || showCalibModal) return;
+      if (popupRobot || showCalibModal || liveOpRobot) return;
       if (e.key === "ArrowRight" || e.key === "ArrowDown") {
         navigateToSlide(currentSlideIdx + 1);
       } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
@@ -58,9 +74,9 @@ export const App: React.FC = () => {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [currentSlideIdx, slides.length, popupRobot, showCalibModal]);
+  }, [currentSlideIdx, slides.length, popupRobot, showCalibModal, liveOpRobot]);
 
-  const totalSlides = slides.length || 5;
+  const totalSlides = slides.length || 6;
   const currentSlide = slides[currentSlideIdx] || {
     number: "01",
     nav_label: "PART 01 · 기업 소개 & 비전",
@@ -1176,6 +1192,232 @@ export const App: React.FC = () => {
               </div>
             </div>
           )}
+
+          {/* ==============================================================
+              Slide 06: PART 05 Live Robot Fleet Camera, Sensors & One-Click Operations
+             ============================================================== */}
+          {currentSlideIdx === 5 && (
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 14, minHeight: 0 }}>
+              {/* Top Fleet Information Hub Bar */}
+              <div
+                style={{
+                  background: "linear-gradient(90deg, rgba(16, 24, 40, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%)",
+                  border: "1px solid rgba(59, 130, 246, 0.3)",
+                  borderRadius: 14,
+                  padding: "10px 18px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: 8,
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span
+                    style={{
+                      background: "rgba(34, 197, 94, 0.18)",
+                      border: "1px solid #22c55e",
+                      color: "#4ade80",
+                      padding: "3px 10px",
+                      borderRadius: 6,
+                      fontSize: 11,
+                      fontWeight: 800,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                    }}
+                  >
+                    <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e" }} />
+                    LIVE TELEMETRY BUS CONNECTED
+                  </span>
+                  <span style={{ fontSize: 13.5, fontWeight: 800, color: "#ffffff" }}>
+                    실환경 로봇 카메라 소켓 · 센서 텔레메트리 & 원클릭 작업 제어 허브
+                  </span>
+                </div>
+
+                <div style={{ display: "flex", gap: 8, fontSize: 11, fontFamily: "monospace" }}>
+                  <span style={{ background: "rgba(2, 6, 23, 0.7)", border: "1px solid #334155", borderRadius: 6, padding: "3px 8px", color: "#38bdf8" }}>
+                    WS: ws://10.200.28.63/websocket/ (Flagship)
+                  </span>
+                  <span style={{ background: "rgba(2, 6, 23, 0.7)", border: "1px solid #334155", borderRadius: 6, padding: "3px 8px", color: "#00f2fe" }}>
+                    WS: ws://10.200.28.61/websocket/ (Power)
+                  </span>
+                  <span style={{ background: "rgba(2, 6, 23, 0.7)", border: "1px solid #334155", borderRadius: 6, padding: "3px 8px", color: "#a855f7" }}>
+                    11개 랙/캐비닛 자산 연동
+                  </span>
+                </div>
+              </div>
+
+              {/* 3 Robot Cards Grid */}
+              <div style={{ flex: 1, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, minHeight: 0 }}>
+                {robots.map((r) => {
+                  const isPower = r.id.includes("pwr") || r.id.includes("power");
+                  const isPro = r.id.includes("pro");
+                  const frontImg = isPower
+                    ? "/proposal_images/power_front.jpeg"
+                    : isPro
+                    ? "/proposal_images/pro_front.jpeg"
+                    : "/proposal_images/flagship_front.jpeg";
+                  const isLive = r.telemetry?.online_mode === "LIVE_WEBSOCKET_REDIS";
+                  const rFleet = fleetData?.fleet?.[r.id] || {};
+                  const camCount = rFleet.cameras?.length || (isPower ? 23 : isPro ? 8 : 12);
+                  const pathCount = rFleet.paths?.length || (isPower ? 1 : isPro ? 0 : 4);
+
+                  return (
+                    <div
+                      key={r.id}
+                      onClick={() => setLiveOpRobot(r)}
+                      style={{
+                        background: "linear-gradient(145deg, rgba(16, 24, 40, 0.92) 0%, rgba(10, 15, 28, 0.98) 100%)",
+                        border: "1.5px solid rgba(59, 130, 246, 0.28)",
+                        borderRadius: 18,
+                        padding: "16px 18px",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "space-between",
+                        cursor: "pointer",
+                        transition: "all 0.25s ease",
+                        boxShadow: "0 8px 24px rgba(0, 0, 0, 0.45)",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = "#3b82f6";
+                        e.currentTarget.style.transform = "translateY(-4px)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = "rgba(59, 130, 246, 0.28)";
+                        e.currentTarget.style.transform = "translateY(0px)";
+                      }}
+                    >
+                      <div>
+                        {/* Card Header */}
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                          <div>
+                            <span
+                              style={{
+                                background: "rgba(59, 130, 246, 0.16)",
+                                border: "1px solid rgba(59, 130, 246, 0.4)",
+                                color: "#38bdf8",
+                                fontSize: 11,
+                                fontWeight: 800,
+                                padding: "2px 8px",
+                                borderRadius: 5,
+                                marginRight: 6,
+                              }}
+                            >
+                              {r.edition_badge || "EDITION"}
+                            </span>
+                            <span style={{ fontSize: 15.5, fontWeight: 900, color: "#ffffff" }}>
+                              {r.display_name.split(" (")[0]}
+                            </span>
+                          </div>
+
+                          <span
+                            style={{
+                              fontSize: 11,
+                              fontWeight: 800,
+                              color: isLive ? "#4ade80" : "#a1a1aa",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 5,
+                            }}
+                          >
+                            <span
+                              style={{
+                                width: 6,
+                                height: 6,
+                                borderRadius: "50%",
+                                background: isLive ? "#22c55e" : "#71717a",
+                              }}
+                            />
+                            {isLive ? `${r.ip}:80` : "STANDBY"}
+                          </span>
+                        </div>
+
+                        {/* Large Front Photo Box */}
+                        <div
+                          style={{
+                            height: 220,
+                            background: "#030712",
+                            borderRadius: 14,
+                            overflow: "hidden",
+                            border: "1px solid rgba(255, 255, 255, 0.08)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            marginBottom: 12,
+                          }}
+                        >
+                          <img
+                            src={frontImg}
+                            alt={r.display_name}
+                            style={{ maxHeight: "95%", maxWidth: "90%", objectFit: "contain" }}
+                          />
+                        </div>
+
+                        {/* Quick 4-Grid Status Indicators */}
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 7, fontSize: 11.5 }}>
+                          <div style={{ background: "rgba(15, 23, 42, 0.75)", padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                            <div style={{ color: "#94a3b8", fontSize: 10 }}>동작 상태</div>
+                            <div style={{ color: "#4ade80", fontWeight: 800, marginTop: 2, textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
+                              {r.telemetry?.fsm_state || "READY (STANDBY)"}
+                            </div>
+                          </div>
+
+                          <div style={{ background: "rgba(15, 23, 42, 0.75)", padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                            <div style={{ color: "#94a3b8", fontSize: 10 }}>배터리 전원</div>
+                            <div style={{ color: "#38bdf8", fontWeight: 800, marginTop: 2 }}>
+                              {r.telemetry?.battery_pct ?? 100}% ({r.telemetry?.voltage_v ?? 28.09}V)
+                            </div>
+                          </div>
+
+                          <div style={{ background: "rgba(15, 23, 42, 0.75)", padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                            <div style={{ color: "#94a3b8", fontSize: 10 }}>현재 위치</div>
+                            <div style={{ color: "#ffffff", fontWeight: 700, marginTop: 2, textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
+                              {r.telemetry?.position_name || "충전 도크"}
+                            </div>
+                          </div>
+
+                          <div style={{ background: "rgba(15, 23, 42, 0.75)", padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                            <div style={{ color: "#94a3b8", fontSize: 10 }}>카메라 / 순찰경로</div>
+                            <div style={{ color: "#facc15", fontWeight: 800, marginTop: 2 }}>
+                              {camCount}대 카메라 · {pathCount}개 경로
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Bottom One-Click Trigger Button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setLiveOpRobot(r);
+                        }}
+                        style={{
+                          marginTop: 12,
+                          background: "linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%)",
+                          color: "#ffffff",
+                          border: "none",
+                          borderRadius: 10,
+                          padding: "10px 0",
+                          fontSize: 12.5,
+                          fontWeight: 800,
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 6,
+                          boxShadow: "0 4px 14px rgba(37, 99, 235, 0.4)",
+                        }}
+                      >
+                        <span>⚡</span>
+                        <span>실시간 카메라 · 센서 모니터링 & 원클릭 제어 →</span>
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Bottom Footer with Contact Info from Page 30 */}
@@ -1234,6 +1476,16 @@ export const App: React.FC = () => {
         <RobotDetailPopupModal
           robot={robots.find((r) => r.id === popupRobot.id) || popupRobot}
           onClose={() => setPopupRobot(null)}
+        />
+      )}
+
+      {/* Live Robot Multi-Camera, Sensor & One-Click Operation Modal */}
+      {liveOpRobot && (
+        <RobotLiveOperationModal
+          robot={robots.find((r) => r.id === liveOpRobot.id) || liveOpRobot}
+          fleetData={fleetData}
+          onClose={() => setLiveOpRobot(null)}
+          onActionExecute={handleExecuteAction}
         />
       )}
 

@@ -65,6 +65,19 @@
         "대표 로봇 도입 사례: SK하이닉스(로봇 3대·900개 랙·3,000대 장비 자산실사), 삼성SDI(서버실 순찰), 남방항공(로봇 7대·930개 랙·72세트 도어 연동)",
         "7×24H 유지보수 & SI: 서버·스토리지·네트워크·DB 전 계층 지원 (DELL, IBM, HUAWEI, VMware, NetApp, CISCO 핵심 파트너십)"
       ]
+    },
+    {
+      "id": "slide-06",
+      "number": "06",
+      "nav_label": "PART 05 · 실시간 관제 & 원클릭 제어",
+      "title": "실환경 로봇 카메라 소켓 · 센서 텔레메트리 & 원클릭 작업 제어",
+      "subtitle": "LIVE ROBOT TELEMETRY · WEBSOCKET CAMERA · ASSET BINDING · 1-CLICK TASK DISPATCH",
+      "focus_mode": "live_control_oneclick",
+      "highlights": [
+        "실시간 카메라 & 웹소켓 스트림: ws://<IP>/websocket/, ws://<IP>/webSocket ROS 브릿지, MediaMTX WebRTC 영상 직결",
+        "실시간 센서 & 자산 현황: 온습도, 라이다, 열화상, 초음파, 리프터 승강 및 6대 캐비닛(JM-RACK-1-1~3) 자산 바인딩",
+        "REST API 기반 원클릭 작업: 자동 순찰(Welcome, RFID-TEST, JM-Task1, TestRun), 지정 위치 점검, 충전 도크 복귀, 원격 자가진단"
+      ]
     }
   ]
 }

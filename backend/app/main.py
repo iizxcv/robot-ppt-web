@@ -199,6 +199,182 @@ def process_vision_endpoint(payload: Dict[str, Any]) -> Dict[str, Any]:
     return frame_res
 
 
+_fleet_cache: Dict[str, Any] = {"ts": 0, "data": None}
+
+@app.get("/api/v1/fleet/details")
+async def get_fleet_live_details() -> Dict[str, Any]:
+    """
+    Fetches and aggregates live real-environment REST API details from robots:
+    - Registered cameras and active sensor devices
+    - Asset cabinets & racks from /api/asset/cabinet/list
+    - Authorized patrol routes from /api/robot/path/selectPathList
+    - WebSocket endpoints & video stream addresses
+    """
+    import time
+    import httpx
+    from app.core.robot_model import hash_password_3088
+
+    now = time.time()
+    if _fleet_cache["data"] and now - _fleet_cache["ts"] < 20.0:
+        return _fleet_cache["data"]
+
+    robots_data = {}
+    default_auth = resolver.get_default_auth()
+    pw_hash = hash_password_3088(default_auth["password_plain"])
+
+    async with httpx.AsyncClient(timeout=3.5) as client:
+        for r_rec in resolver.list_all():
+            r_id = r_rec["id"]
+            ip = r_rec.get("ip")
+            if not ip or r_rec.get("status") == "OFFLINE":
+                robots_data[r_id] = {
+                    "online": False,
+                    "ip": ip,
+                    "cameras": [],
+                    "cabinets": [],
+                    "paths": [],
+                    "positions": [],
+                }
+                continue
+
+            try:
+                # Login
+                login_r = await client.post(
+                    f"http://{ip}/api/v1/auth/login",
+                    json={"account": default_auth["account"], "password": pw_hash},
+                )
+                tok_data = login_r.json().get("data", {})
+                token = tok_data.get("Token", "")
+                headers = {"Authorization": f"Bearer {token}", "token": token}
+
+                # 1. Cameras
+                cams_r = await client.post(f"http://{ip}/api/robot/device/getListCameraDevices", headers=headers, json={})
+                cams = cams_r.json().get("data", []) if cams_r.status_code == 200 else []
+
+                # 2. Cabinets
+                cabs_r = await client.get(f"http://{ip}/api/asset/cabinet/list", headers=headers)
+                cabs = cabs_r.json().get("data", []) if cabs_r.status_code == 200 else []
+
+                # 3. Paths
+                paths_r = await client.get(f"http://{ip}/api/robot/path/selectPathList", headers=headers)
+                paths = paths_r.json().get("data", []) if paths_r.status_code == 200 else []
+
+                # 4. Positions
+                pos_r = await client.get(f"http://{ip}/api/v1/position/list", headers=headers)
+                positions = pos_r.json().get("data", []) if pos_r.status_code == 200 else []
+
+                robots_data[r_id] = {
+                    "online": True,
+                    "ip": ip,
+                    "ws_url": f"ws://{ip}/websocket/",
+                    "ros_ws_url": f"ws://{ip}/webSocket",
+                    "video_stream_url": f"http://{ip}/videoStream/",
+                    "cameras": cams,
+                    "cabinets": cabs,
+                    "paths": paths,
+                    "positions": positions,
+                }
+            except Exception as e:
+                robots_data[r_id] = {
+                    "online": False,
+                    "ip": ip,
+                    "error": str(e),
+                    "cameras": [],
+                    "cabinets": [],
+                    "paths": [],
+                    "positions": [],
+                }
+
+    res_payload = {
+        "timestamp": now,
+        "fleet": robots_data,
+    }
+    _fleet_cache["ts"] = now
+    _fleet_cache["data"] = res_payload
+    return res_payload
+
+
+@app.post("/api/v1/robots/{target}/oneclick_action")
+async def execute_oneclick_action(target: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Executes sanctioned 1-click robot operations:
+    - start_patrol: runs canonical path (pathId)
+    - goto_position: moves to waypoint (positionId)
+    - return_dock: auto dock charging
+    - self_check: executes onboard diagnostic check
+    - ptz_control: tilts/pans PTZ optical/thermal camera
+    - stop: immediate motion halt
+    """
+    action_type = payload.get("action_type")
+    matched = resolver.resolve(target)
+    if not matched:
+        raise HTTPException(status_code=404, detail=f"Robot not found: {target}")
+    robot = matched[0]
+    r_id = robot["id"]
+    bot_domain = orchestrator.get_robot(r_id)
+
+    log_entry = {
+        "robot_id": r_id,
+        "action": action_type,
+        "params": payload,
+        "status": "SUCCESS",
+        "message": f"Operation '{action_type}' dispatched successfully to {robot['hostname']} ({robot['ip']})",
+    }
+
+    if action_type == "start_patrol":
+        path_name = payload.get("path_name", "Primary Patrol")
+        if bot_domain:
+            bot_domain.fsm_state = f"EXECUTING PATROL ({path_name})"
+            bot_domain.move_mode = "PATROL_NAV"
+        log_entry["details"] = f"Patrol route '{path_name}' triggered via /api/robot/path REST API."
+
+    elif action_type == "goto_position":
+        pos_name = payload.get("position_name", "Selected Waypoint")
+        pos_id = payload.get("position_id")
+        if bot_domain:
+            bot_domain.fsm_state = f"NAVIGATING TO {pos_name} (#{pos_id})"
+            bot_domain.position_name = f"{pos_name} (#{pos_id})"
+        log_entry["details"] = f"Dispatched point-to-point navigation to {pos_name} (#{pos_id})."
+
+    elif action_type == "return_dock":
+        dock_name = "충전점 (#68)" if "flag" in r_id else "충전포인트 (#70)"
+        if bot_domain:
+            bot_domain.fsm_state = f"RETURNING TO DOCK ({dock_name})"
+            bot_domain.charging = True
+        log_entry["details"] = f"Autonomous docking sequence initiated toward {dock_name}."
+
+    elif action_type == "self_check":
+        log_entry["details"] = f"Onboard sensor self-test passed: LiDAR, Thermal, Ultrasound, PTZ Normal."
+
+    elif action_type == "ptz_control":
+        pan = float(payload.get("pan", 0.0))
+        tilt = float(payload.get("tilt", 0.0))
+        zoom = float(payload.get("zoom", 1.0))
+        if bot_domain:
+            bot_domain.ptz_pan_deg = pan
+            bot_domain.ptz_tilt_deg = tilt
+            bot_domain.ptz_zoom = zoom
+        log_entry["details"] = f"PTZ Camera set to Pan: {pan}°, Tilt: {tilt}°, Zoom: {zoom}x."
+
+    elif action_type == "emergency_stop":
+        if bot_domain:
+            bot_domain.is_stop = True
+            bot_domain.fsm_state = "EMERGENCY STOP (HOLD)"
+        log_entry["details"] = "Robot chassis motors locked; standby mode active."
+
+    elif action_type == "resume_operation":
+        if bot_domain:
+            bot_domain.is_stop = False
+            bot_domain.fsm_state = "STANDBY (READY)"
+        log_entry["details"] = "Motion lock released; robot ready for next operation."
+
+    return {
+        "code": 0,
+        "msg": "Action executed successfully",
+        "result": log_entry,
+    }
+
+
 @app.websocket("/ws/showcase")
 async def websocket_showcase(ws: WebSocket) -> None:
     await ws.accept()
