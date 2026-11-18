@@ -1,14 +1,56 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { RobotRecord } from "./viewer3d/UnifiedMapViewer3D";
+
+interface ModalSlideMeta {
+  id: number;
+  tabLabel: string;
+  badge: string;
+}
+
+const MODAL_SLIDES: ModalSlideMeta[] = [
+  { id: 0, tabLabel: "01 모델 개요 & 3-View", badge: "외형 및 핵심 제원" },
+  { id: 1, tabLabel: "02 부품 구성 & 센서", badge: "위치별 부품 분해도" },
+  { id: 2, tabLabel: "03 핵심 특화 기능", badge: "차별화 솔루션" },
+  { id: 3, tabLabel: "04 실시간 관제 & REST API", badge: "실환경 텔레메트리" },
+];
 
 export const RobotDetailPopupModal: React.FC<{
   robot: RobotRecord;
   onClose: () => void;
 }> = ({ robot, onClose }) => {
-  const [tab, setTab] = useState<"strengths" | "parts" | "live_api">("strengths");
+  const [currentSlide, setCurrentSlide] = useState<number>(0);
   const specs = robot.proposal_specs;
   const tel = robot.telemetry;
   const isLive = tel?.online_mode === "LIVE_WEBSOCKET_REDIS";
+  const robotId = robot.id.toLowerCase();
+
+  // Keyboard navigation for carousel modal (Left/Right arrows, Esc to close)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      } else if (e.key === "ArrowLeft") {
+        setCurrentSlide((prev) => Math.max(0, prev - 1));
+      } else if (e.key === "ArrowRight") {
+        setCurrentSlide((prev) => Math.min(MODAL_SLIDES.length - 1, prev + 1));
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  // Determine robot image asset set
+  const isPower = robotId.includes("power") || robotId.includes("pwr");
+  const isPro = robotId.includes("pro");
+  const prefix = isPower ? "power" : isPro ? "pro" : "flagship";
+
+  const frontImg = `/proposal_images/${prefix}_front.jpeg`;
+  const sideImg = `/proposal_images/${prefix}_side.jpeg`;
+  const backImg = `/proposal_images/${prefix}_back.jpeg`;
+  const parts1Img = `/proposal_images/${prefix}_parts_1.jpeg`;
+  const parts2Img = `/proposal_images/${prefix}_parts_2.jpeg`;
+
+  const themeColor = robot.color || (isPower ? "#f59e0b" : isPro ? "#a855f7" : "#00f2fe");
 
   return (
     <div
@@ -16,291 +58,898 @@ export const RobotDetailPopupModal: React.FC<{
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(5, 5, 8, 0.84)",
-        backdropFilter: "blur(6px)",
+        background: "rgba(4, 7, 16, 0.88)",
+        backdropFilter: "blur(10px)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        zIndex: 990,
+        zIndex: 999,
+        padding: "20px",
       }}
     >
       <div
         onClick={(e) => e.stopPropagation()}
         className="stage-reveal"
         style={{
-          width: 860,
-          maxHeight: "86vh",
-          background: "#111116",
-          border: `2px solid ${robot.color}`,
+          width: "min(1180px, 94vw)",
+          height: "min(780px, 90vh)",
+          background: "linear-gradient(145deg, #0e1526 0%, #090e1a 100%)",
+          border: `1.5px solid ${themeColor}55`,
           borderRadius: 22,
-          padding: "28px 32px",
+          padding: "24px 30px",
           color: "#ffffff",
           display: "flex",
           flexDirection: "column",
-          boxShadow: `0 24px 64px rgba(0, 0, 0, 0.85), 0 0 32px ${robot.color}33`,
-          overflowY: "auto",
+          boxShadow: `0 24px 64px rgba(0, 0, 0, 0.9), 0 0 40px ${themeColor}25`,
+          overflow: "hidden",
         }}
       >
-        {/* Top Modal Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+        {/* Top Header Bar */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            paddingBottom: 14,
+            borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+          }}
+        >
+          {/* Robot Title & Badges */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+            <span
+              style={{
+                background: `${themeColor}22`,
+                color: themeColor,
+                border: `1px solid ${themeColor}`,
+                padding: "4px 12px",
+                borderRadius: 99,
+                fontSize: 12,
+                fontWeight: 800,
+                letterSpacing: "0.5px",
+              }}
+            >
+              {robot.edition_badge || robot.model_code}
+            </span>
+
+            <span
+              style={{
+                fontSize: 22,
+                fontWeight: 900,
+                letterSpacing: "-0.5px",
+                color: "#ffffff",
+              }}
+            >
+              {robot.display_name}
+            </span>
+
+            <span
+              style={{
+                background: isLive ? "rgba(34, 197, 94, 0.15)" : "rgba(113, 113, 122, 0.2)",
+                color: isLive ? "#4ade80" : "#a1a1aa",
+                border: `1px solid ${isLive ? "rgba(34, 197, 94, 0.4)" : "#3f3f46"}`,
+                padding: "4px 10px",
+                borderRadius: 99,
+                fontSize: 11.5,
+                fontWeight: 700,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
               <span
                 style={{
-                  background: `${robot.color}22`,
-                  color: robot.color,
-                  border: `1px solid ${robot.color}`,
-                  padding: "4px 12px",
-                  borderRadius: 99,
-                  fontSize: 12,
-                  fontWeight: 800,
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  background: isLive ? "#22c55e" : "#71717a",
                 }}
-              >
-                {robot.edition_badge || robot.model_code}
-              </span>
+              />
+              {isLive ? `실환경 연동 (${robot.ip})` : `대기 (${robot.ip})`}
+            </span>
+
+            {robot.rra_cert_no && (
               <span
                 style={{
-                  background: isLive ? "rgba(34,197,94,0.16)" : "rgba(113,113,122,0.2)",
-                  color: isLive ? "#4ade80" : "#a1a1aa",
+                  fontSize: 11.5,
+                  color: "#cbd5e1",
+                  background: "rgba(255, 255, 255, 0.05)",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
                   padding: "4px 10px",
                   borderRadius: 99,
-                  fontSize: 12,
-                  fontWeight: 700,
                 }}
               >
-                {isLive ? `● 실환경 WebSocket 연동 중 (${robot.ip})` : `● 대기 상태 (${robot.ip})`}
+                🇰🇷 KC인증: <b>{robot.rra_cert_no}</b>
               </span>
-              {robot.rra_cert_no && (
-                <span style={{ fontSize: 12, color: "#a1a1aa" }}>
-                  🇰🇷 KC 적합등록: <b>{robot.rra_cert_no}</b> ({robot.rra_cert_date})
-                </span>
-              )}
-            </div>
-
-            <h2 style={{ fontSize: 30, fontWeight: 800, margin: "0 0 6px 0" }}>{robot.display_name}</h2>
-            <div style={{ fontSize: 14, color: "#d4d4d8", fontWeight: 600 }}>
-              {specs?.headline || robot.target_site}
-            </div>
+            )}
           </div>
 
+          {/* Close Button */}
           <button
             onClick={onClose}
+            aria-label="닫기"
             style={{
-              background: "#27272a",
-              color: "#fff",
-              border: "none",
+              background: "rgba(255, 255, 255, 0.08)",
+              color: "#e2e8f0",
+              border: "1px solid rgba(255, 255, 255, 0.15)",
               borderRadius: 10,
               width: 36,
               height: 36,
               fontSize: 16,
               fontWeight: 800,
               cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "all 0.15s ease",
             }}
           >
             ✕
           </button>
         </div>
 
-        {/* 4 KPI Cards from SR Robotics Proposal */}
-        {specs?.kpi_cards && (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(4, 1fr)",
-              gap: 12,
-              margin: "20px 0",
-            }}
-          >
-            {specs.kpi_cards.map((kpi) => (
-              <div
-                key={kpi.label}
-                style={{
-                  background: "#18181f",
-                  borderLeft: `3.5px solid ${robot.color}`,
-                  borderRadius: "0 12px 12px 0",
-                  padding: "12px 16px",
-                }}
-              >
-                <div style={{ fontSize: 24, fontWeight: 800, color: "#ffffff" }}>{kpi.value}</div>
-                <div style={{ fontSize: 12, color: "#a1a1aa", marginTop: 4 }}>{kpi.label}</div>
-              </div>
-            ))}
+        {/* Carousel Slide Navigation Tabs */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "12px 0 14px 0",
+          }}
+        >
+          <div style={{ display: "flex", gap: 8 }}>
+            {MODAL_SLIDES.map((s) => {
+              const isActive = currentSlide === s.id;
+              return (
+                <button
+                  key={s.id}
+                  onClick={() => setCurrentSlide(s.id)}
+                  style={{
+                    background: isActive ? themeColor : "rgba(15, 23, 42, 0.7)",
+                    color: isActive ? (isPower ? "#090e1a" : "#ffffff") : "#94a3b8",
+                    border: `1px solid ${isActive ? themeColor : "rgba(255, 255, 255, 0.1)"}`,
+                    borderRadius: 10,
+                    padding: "7px 16px",
+                    fontSize: 12.5,
+                    fontWeight: 800,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  <span>{s.tabLabel}</span>
+                  <span
+                    style={{
+                      fontSize: 10.5,
+                      opacity: isActive ? 0.9 : 0.6,
+                      background: isActive ? "rgba(0,0,0,0.2)" : "rgba(255,255,255,0.06)",
+                      padding: "2px 6px",
+                      borderRadius: 4,
+                    }}
+                  >
+                    {s.badge}
+                  </span>
+                </button>
+              );
+            })}
           </div>
-        )}
 
-        {/* Tab Selector */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 16, borderBottom: "1px solid #27272a", paddingBottom: 12 }}>
-          {[
-            { id: "strengths", label: "✨ 모델별 핵심 강점 & 기본/옵션 기능" },
-            { id: "parts", label: "🔩 본체 위치별 부품 · 센서 구성" },
-            { id: "live_api", label: "📡 실환경 WebSocket & 오도메트리 관제 데이터" },
-          ].map((t) => (
+          {/* Slide Arrow Steppers & Counter */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: 12, color: "#94a3b8", fontWeight: 700 }}>
+              슬라이드 <b style={{ color: "#ffffff" }}>{currentSlide + 1}</b> / {MODAL_SLIDES.length}
+            </span>
             <button
-              key={t.id}
-              onClick={() => setTab(t.id as any)}
+              disabled={currentSlide === 0}
+              onClick={() => setCurrentSlide((prev) => Math.max(0, prev - 1))}
               style={{
-                background: tab === t.id ? "#3b82f6" : "#18181f",
-                color: "#ffffff",
-                border: "none",
-                borderRadius: 10,
-                padding: "9px 16px",
-                fontSize: 13,
+                background: currentSlide === 0 ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.1)",
+                color: currentSlide === 0 ? "#475569" : "#ffffff",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: 8,
+                padding: "6px 12px",
+                fontSize: 12,
                 fontWeight: 800,
-                cursor: "pointer",
+                cursor: currentSlide === 0 ? "not-allowed" : "pointer",
               }}
             >
-              {t.label}
+              ← 이전
             </button>
-          ))}
+            <button
+              disabled={currentSlide === MODAL_SLIDES.length - 1}
+              onClick={() => setCurrentSlide((prev) => Math.min(MODAL_SLIDES.length - 1, prev + 1))}
+              style={{
+                background:
+                  currentSlide === MODAL_SLIDES.length - 1
+                    ? "rgba(255,255,255,0.04)"
+                    : themeColor,
+                color:
+                  currentSlide === MODAL_SLIDES.length - 1
+                    ? "#475569"
+                    : isPower
+                    ? "#090e1a"
+                    : "#ffffff",
+                border: "none",
+                borderRadius: 8,
+                padding: "6px 14px",
+                fontSize: 12,
+                fontWeight: 800,
+                cursor: currentSlide === MODAL_SLIDES.length - 1 ? "not-allowed" : "pointer",
+              }}
+            >
+              다음 →
+            </button>
+          </div>
         </div>
 
-        {/* Tab 1: Strengths & Basic/Optional Functions */}
-        {tab === "strengths" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <div style={{ background: "#16161d", borderRadius: 14, padding: 18 }}>
-              <div style={{ fontSize: 13, fontWeight: 800, color: robot.color, marginBottom: 10 }}>
-                🏆 핵심 차별화 강점 (SR 로보틱스 제안서 기준)
-              </div>
-              {(specs?.key_strengths || []).map((st, i) => (
-                <div key={i} style={{ fontSize: 14, color: "#f4f4f5", marginBottom: 8, lineHeight: 1.55 }}>
-                  • {st}
-                </div>
-              ))}
-              <div style={{ fontSize: 12.5, color: "#a1a1aa", marginTop: 10, paddingTop: 10, borderTop: "1px solid #27272a" }}>
-                📐 물리 제원 요약: {specs?.capacity_summary}
-              </div>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 14 }}>
-              <div style={{ background: "#16161d", borderRadius: 14, padding: 16 }}>
-                <div style={{ fontSize: 12.5, fontWeight: 800, color: "#38bdf8", marginBottom: 10 }}>
-                  기본 탑재 기능
-                </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                  {(specs?.basic_functions || []).map((fn) => (
-                    <span
-                      key={fn}
-                      style={{
-                        background: "#0b0b0e",
-                        border: "1px solid #27272a",
-                        padding: "6px 12px",
-                        borderRadius: 8,
-                        fontSize: 12.5,
-                        fontWeight: 700,
-                      }}
-                    >
-                      ✓ {fn}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div style={{ background: "#16161d", borderRadius: 14, padding: 16 }}>
-                <div style={{ fontSize: 12.5, fontWeight: 800, color: "#f59e0b", marginBottom: 10 }}>
-                  특화 / 추가 옵션 항목
-                </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                  {(specs?.optional_items || []).map((opt) => (
-                    <span
-                      key={opt}
-                      style={{
-                        background: "rgba(245, 158, 11, 0.12)",
-                        border: "1px solid rgba(245, 158, 11, 0.4)",
-                        color: "#fbbf24",
-                        padding: "6px 12px",
-                        borderRadius: 8,
-                        fontSize: 12.5,
-                        fontWeight: 700,
-                      }}
-                    >
-                      + {opt}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Tab 2: Parts & Sensors Breakdown */}
-        {tab === "parts" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {(specs?.parts_sensors || []).map((part, i) => (
+        {/* Slide Body Container */}
+        <div style={{ flex: 1, minHeight: 0, overflowY: "auto", paddingRight: 4 }}>
+          {/* ==============================================================
+              SLIDE 0: 모델 개요 & 3-View 외형 (정면도, 측면도, 후면도 + KPI)
+             ============================================================== */}
+          {currentSlide === 0 && (
+            <div style={{ display: "grid", gridTemplateColumns: "1.1fr 1fr", gap: 18, height: "100%" }}>
+              {/* Left: 3-View Drawing Gallery */}
               <div
-                key={i}
                 style={{
-                  background: "#16161d",
-                  borderLeft: `3.5px solid ${robot.color}`,
-                  padding: "14px 18px",
-                  borderRadius: "0 12px 12px 0",
-                  fontSize: 14,
-                  color: "#e4e4e7",
-                  lineHeight: 1.5,
+                  background: "rgba(15, 23, 42, 0.6)",
+                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  borderRadius: 16,
+                  padding: 16,
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
                 }}
               >
-                {part}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: 13, fontWeight: 800, color: themeColor }}>
+                    📐 모델 정밀 3방향 뷰 (정면 · 측면 · 후면 외형도)
+                  </span>
+                  <span style={{ fontSize: 11, color: "#94a3b8" }}>제안서 Page 06/08/10 수록 규격</span>
+                </div>
+
+                {/* 3 View Images in Row */}
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(3, 1fr)",
+                    gap: 12,
+                    margin: "12px 0",
+                    background: "rgba(8, 12, 22, 0.8)",
+                    border: "1px solid rgba(255, 255, 255, 0.05)",
+                    borderRadius: 12,
+                    padding: "16px 12px",
+                  }}
+                >
+                  {[
+                    { label: "정면도 (Front)", img: frontImg },
+                    { label: "측면도 (Side)", img: sideImg },
+                    { label: "후면도 (Back)", img: backImg },
+                  ].map((v) => (
+                    <div
+                      key={v.label}
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                      }}
+                    >
+                      <div
+                        style={{
+                          height: 240,
+                          width: "100%",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          overflow: "hidden",
+                        }}
+                      >
+                        <img
+                          src={v.img}
+                          alt={v.label}
+                          style={{
+                            maxHeight: "100%",
+                            maxWidth: "100%",
+                            objectFit: "contain",
+                            filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.6))",
+                          }}
+                        />
+                      </div>
+                      <span
+                        style={{
+                          fontSize: 11.5,
+                          fontWeight: 700,
+                          color: "#cbd5e1",
+                          marginTop: 8,
+                          background: "rgba(255, 255, 255, 0.06)",
+                          padding: "3px 10px",
+                          borderRadius: 6,
+                        }}
+                      >
+                        {v.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Dimensions Caption */}
+                <div
+                  style={{
+                    background: "rgba(2, 6, 23, 0.5)",
+                    borderLeft: `3px solid ${themeColor}`,
+                    padding: "10px 14px",
+                    borderRadius: "0 8px 8px 0",
+                    fontSize: 12,
+                    color: "#cbd5e1",
+                  }}
+                >
+                  <b>외형 규격</b>: {specs?.capacity_summary}
+                </div>
               </div>
-            ))}
+
+              {/* Right: 4 Big KPIs + Specifications Box Grid */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                {/* 4 KPI Cards from Proposal */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  {(specs?.kpi_cards || []).map((kpi) => (
+                    <div
+                      key={kpi.label}
+                      style={{
+                        background: "rgba(15, 23, 42, 0.7)",
+                        borderLeft: `3.5px solid ${themeColor}`,
+                        borderRadius: "0 12px 12px 0",
+                        padding: "14px 16px",
+                      }}
+                    >
+                      <div style={{ fontSize: 26, fontWeight: 900, color: "#ffffff", letterSpacing: "-0.5px" }}>
+                        {kpi.value}
+                      </div>
+                      <div style={{ fontSize: 11.5, color: "#94a3b8", marginTop: 4, fontWeight: 600 }}>
+                        {kpi.label}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Technical Specifications Detail Table */}
+                <div
+                  style={{
+                    background: "rgba(15, 23, 42, 0.6)",
+                    border: "1px solid rgba(255, 255, 255, 0.08)",
+                    borderRadius: 14,
+                    padding: "16px 18px",
+                  }}
+                >
+                  <div style={{ fontSize: 12.5, fontWeight: 800, color: themeColor, marginBottom: 12 }}>
+                    ⚙️ 하드웨어 기구 및 구동 사양 요약
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, fontSize: 12 }}>
+                    <div style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
+                      <span style={{ color: "#94a3b8" }}>주행 방식: </span>
+                      <b style={{ color: "#f1f5f9" }}>{robot.kinematics.drive_type}</b>
+                    </div>
+                    <div style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
+                      <span style={{ color: "#94a3b8" }}>리프트 높이: </span>
+                      <b style={{ color: "#f1f5f9" }}>최대 {robot.kinematics.max_lift_height_m}m 승강</b>
+                    </div>
+                    <div style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
+                      <span style={{ color: "#94a3b8" }}>장비 자체 중량: </span>
+                      <b style={{ color: "#f1f5f9" }}>약 {robot.kinematics.weight_kg}kg</b>
+                    </div>
+                    <div style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
+                      <span style={{ color: "#94a3b8" }}>라이다 위치: </span>
+                      <b style={{ color: "#f1f5f9" }}>지상 {robot.kinematics.laser_tf_xyz[2]}m 전방 마운트</b>
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 12,
+                      paddingTop: 10,
+                      borderTop: "1px solid rgba(255, 255, 255, 0.06)",
+                      fontSize: 12,
+                      color: "#94a3b8",
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    • 적용 분야: <b style={{ color: "#e2e8f0" }}>{robot.target_site}</b>
+                  </div>
+                </div>
+
+                {/* KC Certification Box */}
+                <div
+                  style={{
+                    background: "rgba(15, 23, 42, 0.5)",
+                    border: "1px solid rgba(59, 130, 246, 0.25)",
+                    borderRadius: 12,
+                    padding: "12px 16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: "#38bdf8" }}>
+                      국립전파연구원(RRA) 방송통신기자재 적합등록 인증 완료
+                    </div>
+                    <div style={{ fontSize: 12, color: "#e2e8f0", marginTop: 4 }}>
+                      인증등록번호: <b>{robot.rra_cert_no || "등록 진행 중"}</b>
+                      {robot.rra_cert_date && ` · 등록일자: ${robot.rra_cert_date}`}
+                    </div>
+                  </div>
+                  <span style={{ fontSize: 22 }}>🇰🇷</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ==============================================================
+              SLIDE 1: 본체 부품 구성 & 센서 분해도 (위치별 부품 다이어그램)
+             ============================================================== */}
+          {currentSlide === 1 && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1.25fr", gap: 18, height: "100%" }}>
+              {/* Left: Parts Diagram Graphic */}
+              <div
+                style={{
+                  background: "rgba(15, 23, 42, 0.6)",
+                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  borderRadius: 16,
+                  padding: 16,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <div style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: 13, fontWeight: 800, color: themeColor }}>
+                    🔩 부품 및 센서 분해도 (제안서 원본)
+                  </span>
+                  <span style={{ fontSize: 11, color: "#94a3b8" }}>Page 07/09/11 인용</span>
+                </div>
+
+                <div
+                  style={{
+                    flex: 1,
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "8px 0",
+                    overflow: "hidden",
+                  }}
+                >
+                  <img
+                    src={parts1Img}
+                    alt="Parts & Sensors Breakdown"
+                    style={{
+                      maxHeight: "100%",
+                      maxWidth: "100%",
+                      objectFit: "contain",
+                      filter: "drop-shadow(0 6px 16px rgba(0,0,0,0.8))",
+                    }}
+                  />
+                </div>
+
+                <div
+                  style={{
+                    width: "100%",
+                    background: "rgba(239, 68, 68, 0.12)",
+                    border: "1px solid rgba(239, 68, 68, 0.35)",
+                    borderRadius: 10,
+                    padding: "10px 14px",
+                    fontSize: 11.5,
+                    color: "#fca5a5",
+                    lineHeight: 1.45,
+                  }}
+                >
+                  🔥 <b>자체 안전 소화 패치 2개 기본 탑재</b>: 본체 내부 170℃ 초과 또는 화염 감지 시 자동 분사되어 2차 화재를 즉각 진압합니다.
+                </div>
+              </div>
+
+              {/* Right: Categorized Modular Parts & Sensors Grid */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {/* Section 1: Vision & Perception */}
+                <div
+                  style={{
+                    background: "rgba(15, 23, 42, 0.65)",
+                    borderLeft: "3.5px solid #00f2fe",
+                    borderRadius: "0 12px 12px 0",
+                    padding: "12px 16px",
+                  }}
+                >
+                  <div style={{ fontSize: 12, fontWeight: 800, color: "#00f2fe", marginBottom: 6 }}>
+                    📷 상단 비전 & 환경 인식 카메라군
+                  </div>
+                  <div style={{ fontSize: 12, color: "#e2e8f0", lineHeight: 1.55 }}>
+                    • <b>PTZ 고성능 영상 감시 카메라</b>: 360° 팬, -90°~+90° 틸트, 광학 줌<br />
+                    • <b>듀얼 열화상 카메라 (2ea)</b>: 전자기판 표면 발열 핫스팟 및 케이블 이상 과열 즉시 진단<br />
+                    • <b>고해상도 가시광 & 산업용 카메라 (2ea)</b> + 보조 LED 조명: 랙 내부 표시등 상태 정확 판독
+                  </div>
+                </div>
+
+                {/* Section 2: Environmental & Gas Sensors */}
+                <div
+                  style={{
+                    background: "rgba(15, 23, 42, 0.65)",
+                    borderLeft: "3.5px solid #38bdf8",
+                    borderRadius: "0 12px 12px 0",
+                    padding: "12px 16px",
+                  }}
+                >
+                  <div style={{ fontSize: 12, fontWeight: 800, color: "#38bdf8", marginBottom: 6 }}>
+                    🧪 정밀 다종 환경 센서 & 유해가스 조기 감지군
+                  </div>
+                  <div style={{ fontSize: 12, color: "#e2e8f0", lineHeight: 1.55 }}>
+                    • <b>미세입자 센서</b>: PM1, PM2.5, PM10 부유 입자 실시간 측정<br />
+                    • <b>유해가스 정밀 검측</b>: TVOC, H₂S(황화수소), CO₂(이산화탄소), SO₂(이산화황), 포름알데히드
+                    {isPower && <span style={{ color: "#f59e0b" }}>, <b>SF₆(육불화황 절연가스 누출 감지)</b></span>}
+                    <br />
+                    • <b>온습도 & 소음 센서</b>: 전산실/배전실 내부 온습도 클라우드 맵 생성 및 쿨링 이상 소음 감지
+                  </div>
+                </div>
+
+                {/* Section 3: Navigation, Drive & Interactivity */}
+                <div
+                  style={{
+                    background: "rgba(15, 23, 42, 0.65)",
+                    borderLeft: "3.5px solid #10b981",
+                    borderRadius: "0 12px 12px 0",
+                    padding: "12px 16px",
+                  }}
+                >
+                  <div style={{ fontSize: 12, fontWeight: 800, color: "#10b981", marginBottom: 6 }}>
+                    🛡️ 주행 제어, 안전 센서 및 상호작용 인터페이스
+                  </div>
+                  <div style={{ fontSize: 12, color: "#e2e8f0", lineHeight: 1.55 }}>
+                    • <b>360° 고정밀 라이다 (SLAM)</b>: 복잡한 랙 복도에서 ±2cm 무궤도 자율주행<br />
+                    • <b>안전 센서군</b>: 초음파 거리 센서, 낙하 방지 센서, 전방위 충돌방지 범퍼 스트립<br />
+                    • <b>사용자 인터페이스</b>: 본체 정면 상태표시 디스플레이, 터치스크린, 양방향 음성 인터콤 마이크
+                  </div>
+                </div>
+
+                {/* Section 4: Specific Arm / Lifting Tool */}
+                <div
+                  style={{
+                    background: "rgba(15, 23, 42, 0.65)",
+                    borderLeft: `3.5px solid ${themeColor}`,
+                    borderRadius: "0 12px 12px 0",
+                    padding: "12px 16px",
+                  }}
+                >
+                  <div style={{ fontSize: 12, fontWeight: 800, color: themeColor, marginBottom: 6 }}>
+                    ✨ 모델별 특화 작업 액추에이터
+                  </div>
+                  <div style={{ fontSize: 12, color: "#e2e8f0", lineHeight: 1.55 }}>
+                    {isPro ? (
+                      <>
+                        • <b>메인 6축 로봇 팔</b>: 반복 정밀도 ±0.05mm, 작업 반경 900mm<br />
+                        • <b>보조 2축 로봇 팔</b>: 메인 암과 협동하여 캐비닛 도어 5단계 자동 개폐 및 내부 차단기/버튼 직접 조작
+                      </>
+                    ) : isPower ? (
+                      <>
+                        • <b>2축 전용 로봇 팔</b>: TEV(과도 접지 전압) + AE(초음파) 통합 부분방전 센서 탑재<br />
+                        • <b>2.3m 고전압 리프트</b>: 고압 배전반 상단 계측기까지 승강하여 정확한 비전 판독 지원
+                      </>
+                    ) : (
+                      <>
+                        • <b>48U 전고 정밀 리프트 장치</b>: 최하단 2U부터 최상단 48U까지 승강하며 랙 전면 무사각 연속 검사<br />
+                        • <b>RFID 고속 수집기</b>: 패시브 및 액티브 태그 지원으로 문을 열지 않고 초당 다량의 IT 자산 실사
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ==============================================================
+              SLIDE 2: 핵심 특화 기능 & 작업 메커니즘
+             ============================================================== */}
+          {currentSlide === 2 && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, height: "100%" }}>
+              {/* Box 1: Core Key Strengths */}
+              <div
+                style={{
+                  background: "rgba(15, 23, 42, 0.6)",
+                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  borderRadius: 16,
+                  padding: 20,
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: themeColor, marginBottom: 12 }}>
+                    🏆 모델 핵심 차별화 강점 (SR 로보틱스 제안서 수록)
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    {(specs?.key_strengths || []).map((str, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          background: "rgba(2, 6, 23, 0.5)",
+                          borderLeft: `3.5px solid ${themeColor}`,
+                          borderRadius: "0 10px 10px 0",
+                          padding: "12px 14px",
+                          fontSize: 12.5,
+                          lineHeight: 1.55,
+                          color: "#f1f5f9",
+                        }}
+                      >
+                        <b>[핵심 0{idx + 1}]</b> {str}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    background: "rgba(59, 130, 246, 0.12)",
+                    border: "1px solid rgba(59, 130, 246, 0.3)",
+                    borderRadius: 10,
+                    padding: "10px 14px",
+                    fontSize: 11.5,
+                    color: "#93c5fd",
+                  }}
+                >
+                  💡 <b>현장 적용 효과</b>: 사람이 접근하기 어려운 고전압 설비 및 야간 무인 운영 전산실에서 100% 디지털화된 안전 점검 표준을 제공합니다.
+                </div>
+              </div>
+
+              {/* Box 2: Functions Breakdown (Basic vs Optional) */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                {/* Basic Functions */}
+                <div
+                  style={{
+                    background: "rgba(15, 23, 42, 0.6)",
+                    border: "1px solid rgba(255, 255, 255, 0.08)",
+                    borderRadius: 16,
+                    padding: 18,
+                  }}
+                >
+                  <div style={{ fontSize: 12.5, fontWeight: 800, color: "#38bdf8", marginBottom: 10 }}>
+                    ✅ 3종 공통 기본 탑재 기능 (6대 표준 기능)
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
+                    {(specs?.basic_functions || []).map((fn) => (
+                      <div
+                        key={fn}
+                        style={{
+                          background: "rgba(2, 6, 23, 0.6)",
+                          border: "1px solid rgba(255, 255, 255, 0.08)",
+                          padding: "8px 10px",
+                          borderRadius: 8,
+                          fontSize: 11.5,
+                          fontWeight: 700,
+                          color: "#e2e8f0",
+                          textAlign: "center",
+                        }}
+                      >
+                        ✓ {fn}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Optional / Specialized Items */}
+                <div
+                  style={{
+                    background: "rgba(15, 23, 42, 0.6)",
+                    border: "1px solid rgba(255, 255, 255, 0.08)",
+                    borderRadius: 16,
+                    padding: 18,
+                  }}
+                >
+                  <div style={{ fontSize: 12.5, fontWeight: 800, color: "#f59e0b", marginBottom: 10 }}>
+                    ⚡ 모델 특화 및 현장 커스텀 옵션 항목
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {(specs?.optional_items || []).map((opt) => (
+                      <span
+                        key={opt}
+                        style={{
+                          background: "rgba(245, 158, 11, 0.12)",
+                          border: "1px solid rgba(245, 158, 11, 0.35)",
+                          color: "#fbbf24",
+                          padding: "6px 12px",
+                          borderRadius: 8,
+                          fontSize: 12,
+                          fontWeight: 700,
+                        }}
+                      >
+                        + {opt}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Operation Summary */}
+                <div
+                  style={{
+                    background: "rgba(15, 23, 42, 0.6)",
+                    border: "1px solid rgba(255, 255, 255, 0.08)",
+                    borderRadius: 16,
+                    padding: 16,
+                    fontSize: 12,
+                    color: "#cbd5e1",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  <b style={{ color: "#ffffff" }}>현장 운용 사이클 요약</b>:<br />
+                  • 1회 완충 시 {specs?.kpi_cards?.[2]?.value ?? "6h 이상"} 연속 주행<br />
+                  • 점검 데이터 실시간 Redis 저장 및 중앙 CMDB 즉시 동기화<br />
+                  • 배터리 저전압(20% 이하) 감지 시 지정 충전 도크로 자율 복귀 자동 급속 충전
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ==============================================================
+              SLIDE 3: 실시간 관제 & REST API 인터페이스 (Live Data & Endpoints)
+             ============================================================== */}
+          {currentSlide === 3 && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, height: "100%" }}>
+              {/* Left: Live Spatial & Kinematic Telemetry */}
+              <div
+                style={{
+                  background: "rgba(15, 23, 42, 0.6)",
+                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  borderRadius: 16,
+                  padding: 18,
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: "#38bdf8", marginBottom: 12 }}>
+                    📍 실시간 위치 및 오도메트리 공간 정합 상태
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 12 }}>
+                    <div style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
+                      <span style={{ color: "#94a3b8" }}>네트워크 호스트 / IP: </span>
+                      <b style={{ color: "#ffffff" }}>{robot.hostname} ({robot.ip})</b>
+                    </div>
+
+                    <div style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
+                      <span style={{ color: "#94a3b8" }}>현재 관제 지점명: </span>
+                      <b style={{ color: "#4ade80" }}>{tel?.position_name || "대기 상태"}</b>
+                    </div>
+
+                    <div style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
+                      <span style={{ color: "#94a3b8" }}>로컬 오도메트리 (Local X, Y, Yaw): </span>
+                      <b style={{ color: "#f1f5f9" }}>
+                        ({tel?.local_x ?? 0}m, {tel?.local_y ?? 0}m, {tel?.local_yaw_deg ?? 0}°)
+                      </b>
+                    </div>
+
+                    <div style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
+                      <span style={{ color: "#94a3b8" }}>SE(2) 변환 오프셋 (ΔX, ΔY, ΔΘ): </span>
+                      <b style={{ color: "#f59e0b" }}>
+                        ({robot.calibration?.dx_m ?? 0}m, {robot.calibration?.dy_m ?? 0}m, {robot.calibration?.yaw_deg ?? 0}°)
+                      </b>
+                    </div>
+
+                    <div style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
+                      <span style={{ color: "#94a3b8" }}>3D 디지털 트윈 통합 월드 좌표: </span>
+                      <b style={{ color: "#00f2fe" }}>
+                        ({tel?.world_x ?? 0}m, {tel?.world_y ?? 0}m)
+                      </b>
+                    </div>
+
+                    <div style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
+                      <span style={{ color: "#94a3b8" }}>배터리 / 전압 / 내부 온도: </span>
+                      <b style={{ color: "#4ade80" }}>
+                        {tel?.battery_pct ?? 0}% / {tel?.voltage_v ?? 0}V / {tel?.temp_c ?? 0}℃
+                      </b>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    background: isLive ? "rgba(34, 197, 94, 0.1)" : "rgba(113, 113, 122, 0.1)",
+                    border: `1px solid ${isLive ? "rgba(34, 197, 94, 0.3)" : "rgba(113, 113, 122, 0.3)"}`,
+                    borderRadius: 10,
+                    padding: "10px 14px",
+                    fontSize: 11.5,
+                    color: isLive ? "#86efac" : "#94a3b8",
+                  }}
+                >
+                  최근 텔레메트리 수신 동기화 시각: <b>{tel?.last_sync_time || "연결 대기 중"}</b>
+                </div>
+              </div>
+
+              {/* Right: Authoritative REST API & WebSocket Real-time Stream */}
+              <div
+                style={{
+                  background: "rgba(15, 23, 42, 0.6)",
+                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  borderRadius: 16,
+                  padding: 18,
+                  display: "flex",
+                  flexDirection: "column",
+                  overflow: "hidden",
+                }}
+              >
+                <div style={{ fontSize: 13, fontWeight: 800, color: "#4ade80", marginBottom: 8 }}>
+                  📡 실환경 REST API 규격 및 WebSocket 패킷
+                </div>
+                <div style={{ fontSize: 11.5, color: "#94a3b8", marginBottom: 10 }}>
+                  인증 헤더: <code>Authorization: Bearer &lt;Token&gt;</code> · 동기화 엔드포인트: <code>GET /api/v1/position/list</code>
+                </div>
+
+                <pre
+                  style={{
+                    flex: 1,
+                    margin: 0,
+                    background: "rgba(2, 6, 23, 0.8)",
+                    border: "1px solid rgba(255, 255, 255, 0.05)",
+                    borderRadius: 10,
+                    padding: 12,
+                    fontSize: 11,
+                    fontFamily: "monospace",
+                    color: "#4ade80",
+                    overflow: "auto",
+                    lineHeight: 1.45,
+                  }}
+                >
+                  {JSON.stringify(
+                    {
+                      auth_endpoint: `POST http://${robot.ip}/api/v1/auth/login`,
+                      auth_type: "SHA-512 (3088 rounds) Bearer JWT",
+                      position_list_api: `GET http://${robot.ip}/api/v1/position/list`,
+                      robot_info_api: `GET http://${robot.ip}/api/v1/base/robot/info`,
+                      websocket_stream: `ws://${robot.ip}${robot.ws_status_path || "/platformSocket/timely/data/robotStatus"}`,
+                      live_packet: {
+                        position_name: tel?.position_name,
+                        battery: `${tel?.battery_pct}% (${tel?.voltage_v}V)`,
+                        local_odom: { x: tel?.local_x, y: tel?.local_y, yaw: tel?.local_yaw_deg },
+                        world_pose: { x: tel?.world_x, y: tel?.world_y },
+                        lift_height_m: tel?.lift_height_m,
+                        online_mode: tel?.online_mode,
+                      },
+                    },
+                    null,
+                    2
+                  )}
+                </pre>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Bottom Slide Indicators (Dots) */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: 8,
+            paddingTop: 14,
+            borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+          }}
+        >
+          {MODAL_SLIDES.map((s) => (
             <div
+              key={s.id}
+              onClick={() => setCurrentSlide(s.id)}
               style={{
-                background: "rgba(255, 59, 48, 0.12)",
-                border: "1px solid rgba(255, 59, 48, 0.35)",
-                borderRadius: 12,
-                padding: "12px 16px",
-                fontSize: 13,
-                color: "#fca5a5",
-                marginTop: 6,
+                width: currentSlide === s.id ? 28 : 8,
+                height: 8,
+                borderRadius: 4,
+                background: currentSlide === s.id ? themeColor : "rgba(255, 255, 255, 0.2)",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
               }}
-            >
-              🔥 <b>로봇 내부 안전 사양 (소화 패치 기본 탑재)</b>: 본체 내부에 에어로졸 소화 패치 2개를 탑재하여 화염 감지 또는 내부 온도 170℃ 초과 시 자동으로 소화를 개시해 장비 손상을 최소화합니다.
-            </div>
-          </div>
-        )}
-
-        {/* Tab 3: Live WebSocket & Odometry Telemetry */}
-        {tab === "live_api" && (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-            <div style={{ background: "#0b0b0e", borderRadius: 14, padding: 16, fontSize: 13 }}>
-              <div style={{ color: "#3b82f6", fontWeight: 800, marginBottom: 10 }}>
-                📍 실시간 위치 & 오도메트리 정합 상태
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8, fontFamily: "monospace" }}>
-                <div>• DNS Hostname: <b>{robot.hostname}</b></div>
-                <div>• 현재 지점명: <b style={{ color: "#4ade80" }}>{tel?.position_name}</b></div>
-                <div>• Local Odom (x, y, yaw): ({tel?.local_x}m, {tel?.local_y}m, {tel?.local_yaw_deg}°)</div>
-                <div>• SE(2) 보정 오프셋 (ΔX, ΔY): ({robot.calibration?.dx_m ?? 0}m, {robot.calibration?.dy_m ?? 0}m)</div>
-                <div>• 3D Twin 통합 좌표: <b style={{ color: "#38bdf8" }}>({tel?.world_x}m, {tel?.world_y}m)</b></div>
-                <div>• 배터리 / 전압 / 온도: {tel?.battery_pct}% / {tel?.voltage_v}V / {tel?.temp_c}℃</div>
-                <div>• 리프트 현재 높이: {tel?.lift_height_m}m (최대 {robot.kinematics.max_lift_height_m || 2.2}m)</div>
-              </div>
-            </div>
-
-            <div style={{ background: "#0b0b0e", borderRadius: 14, padding: 16 }}>
-              <div style={{ color: "#4ade80", fontWeight: 800, fontSize: 13, marginBottom: 8 }}>
-                📡 WebSocket 실시간 수신 패킷 (`robotStatus`)
-              </div>
-              <pre
-                style={{
-                  margin: 0,
-                  fontSize: 11.5,
-                  color: "#4ade80",
-                  overflowX: "auto",
-                  lineHeight: 1.45,
-                }}
-              >
-                {JSON.stringify(
-                  {
-                    ws_url: `ws://${robot.ip}${robot.ws_status_path || "/platformSocket/timely/data/robotStatus"}`,
-                    last_sync: tel?.last_sync_time,
-                    telemetry: tel,
-                  },
-                  null,
-                  2
-                )}
-              </pre>
-            </div>
-          </div>
-        )}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
