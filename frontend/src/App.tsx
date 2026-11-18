@@ -9,8 +9,6 @@ export const App: React.FC = () => {
   const [robots, setRobots] = useState<RobotRecord[]>([]);
   const [selectedRobotId, setSelectedRobotId] = useState<string>("flag-01");
   const [popupRobot, setPopupRobot] = useState<RobotRecord | null>(null);
-  const [visionFrame, setVisionFrame] = useState<any>(null);
-  const [visionMode, setVisionMode] = useState<string>("rack_roi_led");
   const [showCalibModal, setShowCalibModal] = useState<boolean>(false);
 
   const fetchInitialData = async () => {
@@ -28,23 +26,8 @@ export const App: React.FC = () => {
     }
   };
 
-  const requestVisionFrame = async (target: string, mode: string) => {
-    try {
-      setVisionMode(mode);
-      const res = await fetch("/api/v1/vision/process", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ target, mode }),
-      }).then((r) => r.json());
-      setVisionFrame(res);
-    } catch (e) {
-      console.error("Vision error:", e);
-    }
-  };
-
   useEffect(() => {
     fetchInitialData();
-    requestVisionFrame("flagship.robot.local", "rack_roi_led");
 
     const proto = window.location.protocol === "https:" ? "wss" : "ws";
     const ws = new WebSocket(`${proto}://${window.location.host}/ws/showcase`);
@@ -77,7 +60,7 @@ export const App: React.FC = () => {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [currentSlideIdx, slides.length, popupRobot, showCalibModal]);
 
-  const totalSlides = slides.length || 6;
+  const totalSlides = slides.length || 5;
   const currentSlide = slides[currentSlideIdx] || {
     number: "01",
     nav_label: "PART 01 · 기업 소개 & 비전",
@@ -855,253 +838,9 @@ export const App: React.FC = () => {
           )}
 
           {/* ==============================================================
-              Slide 04: PART 03 4대 핵심 운영 솔루션 (Rich Solution Cards with Photos)
+              Slide 04: PLATFORM Multi-Robot Management Platform
              ============================================================== */}
           {currentSlideIdx === 3 && (
-            <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1.08fr 1fr", gap: 18, minHeight: 0 }}>
-              {/* Left Column: 4 Structured Solution Cards with Photos */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 10, justifyContent: "space-between" }}>
-                {/* Solution 03: 5-Step Cabinet Door Opening with 4 Sequential Photos */}
-                <div
-                  style={{
-                    background: "linear-gradient(145deg, rgba(16, 24, 40, 0.85) 0%, rgba(10, 15, 28, 0.95) 100%)",
-                    border: "1px solid rgba(168, 85, 247, 0.3)",
-                    borderRadius: 16,
-                    padding: "14px 16px",
-                  }}
-                >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                    <span style={{ fontSize: 12.5, fontWeight: 800, color: "#c084fc" }}>
-                      🦾 SOLUTION 03 · 프로페셔널 에디션 5단계 캐비닛 도어 자동 개폐 (Page 19)
-                    </span>
-                    <span style={{ fontSize: 10.5, color: "#94a3b8" }}>6축+2축 듀얼 암 협동</span>
-                  </div>
-
-                  {/* 5-Step Text Pills */}
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 6, marginBottom: 8 }}>
-                    {[
-                      { step: "1", title: "손잡이 식별", sub: "위치·형태 3D인식" },
-                      { step: "2", title: "손잡이 회전", sub: "잠금 해제" },
-                      { step: "3", title: "문 열기", sub: "2종 암 협동" },
-                      { step: "4", title: "내부 검사", sub: "표시등·열화상" },
-                      { step: "5", title: "문 닫기/잠금", sub: "원상 복귀" },
-                    ].map((s) => (
-                      <div
-                        key={s.step}
-                        style={{
-                          background: "rgba(8, 12, 22, 0.7)",
-                          borderTop: "2.5px solid #a855f7",
-                          borderRadius: 6,
-                          padding: "6px 4px",
-                          textAlign: "center",
-                        }}
-                      >
-                        <div style={{ fontSize: 10, fontWeight: 800, color: "#c084fc" }}>STEP 0{s.step}</div>
-                        <div style={{ fontSize: 11, fontWeight: 800, color: "#ffffff", marginTop: 2 }}>{s.title}</div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* 4 Sequential Action Photos from Page 19 */}
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
-                    {[
-                      { img: "/proposal_images/p19_img2_390x403.jpeg", label: "① 손잡이 파지" },
-                      { img: "/proposal_images/p19_img3_390x403.jpeg", label: "② 회전 잠금해제" },
-                      { img: "/proposal_images/p19_img4_390x403.jpeg", label: "③ 도어 개방" },
-                      { img: "/proposal_images/p19_img5_369x403.jpeg", label: "④ 내부 정밀검사" },
-                    ].map((p, idx) => (
-                      <div
-                        key={idx}
-                        style={{
-                          background: "#080c16",
-                          borderRadius: 8,
-                          overflow: "hidden",
-                          border: "1px solid rgba(255, 255, 255, 0.08)",
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                        }}
-                      >
-                        <img
-                          src={p.img}
-                          alt={p.label}
-                          style={{ width: "100%", height: 60, objectFit: "cover" }}
-                        />
-                        <span style={{ fontSize: 10, color: "#cbd5e1", padding: "3px 0", fontWeight: 700 }}>
-                          {p.label}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Solution 02: Contactless RFID Asset Inventory */}
-                <div
-                  style={{
-                    background: "linear-gradient(145deg, rgba(16, 24, 40, 0.85) 0%, rgba(10, 15, 28, 0.95) 100%)",
-                    border: "1px solid rgba(0, 242, 254, 0.25)",
-                    borderRadius: 14,
-                    padding: "12px 16px",
-                  }}
-                >
-                  <div style={{ fontSize: 12.5, fontWeight: 800, color: "#00f2fe", marginBottom: 4 }}>
-                    📦 SOLUTION 02 · 무개방 RFID(패시브/액티브) & QR 코드 자산 실사 (Page 18)
-                  </div>
-                  <div style={{ fontSize: 11.5, color: "#cbd5e1", lineHeight: 1.5, wordBreak: "keep-all" }}>
-                    • 캐비닛 메쉬 도어를 열지 않고 내부 48U 전체 서버·스위치 RFID 태그를 랙당 약 60초 만에 고속 스캔
-                    <br />• 중앙 CMDB와 실시간 연동되어 미승인 자산 이동 및 분실 발생 시 즉시 관제 화면 경보 푸시
-                  </div>
-                </div>
-
-                {/* Solution 04: Fire Prevention & Aerosol Fire Patch */}
-                <div
-                  style={{
-                    background: "linear-gradient(145deg, rgba(16, 24, 40, 0.85) 0%, rgba(10, 15, 28, 0.95) 100%)",
-                    border: "1px solid rgba(239, 68, 68, 0.3)",
-                    borderRadius: 14,
-                    padding: "12px 16px",
-                    display: "grid",
-                    gridTemplateColumns: "1fr 80px",
-                    gap: 12,
-                    alignItems: "center",
-                  }}
-                >
-                  <div>
-                    <div style={{ fontSize: 12.5, fontWeight: 800, color: "#f87171", marginBottom: 4 }}>
-                      🔥 SOLUTION 04 · 화재 예방 & 170℃ 능동 에어로졸 소화 패치 (Page 20~21)
-                    </div>
-                    <div style={{ fontSize: 11.5, color: "#cbd5e1", lineHeight: 1.5, wordBreak: "keep-all" }}>
-                      • 열화상 카메라 표면 온도 감시 + CO/SO₂/H₂S/SF₆ 다중 가스 센서로 발화 전 조기 경보
-                      <br />• <b style={{ color: "#ffffff" }}>3종 전 모델 내부 에어로졸 소화 패치 2개 기본 탑재</b> (화염 또는 170℃ 초과 시 자동 진압)
-                    </div>
-                  </div>
-                  <div
-                    style={{
-                      height: 70,
-                      borderRadius: 8,
-                      overflow: "hidden",
-                      border: "1px solid rgba(255, 255, 255, 0.1)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      background: "#080c16",
-                    }}
-                  >
-                    <img
-                      src="/proposal_images/p20_img1_330x265.jpeg"
-                      alt="Fire Thermal Scan"
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                    />
-                  </div>
-                </div>
-
-                {/* Solution 01 Environment Monitoring */}
-                <div
-                  style={{
-                    background: "linear-gradient(145deg, rgba(16, 24, 40, 0.85) 0%, rgba(10, 15, 28, 0.95) 100%)",
-                    border: "1px solid rgba(59, 130, 246, 0.22)",
-                    borderRadius: 14,
-                    padding: "10px 16px",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "#38bdf8" }}>
-                    🚨 7×24H 다차원 상태 모니터링: 온습도 클라우드 맵 · 부유입자(PM1/2.5/10) · 유해가스 6종 실시간 감시
-                  </span>
-                  <span style={{ fontSize: 11, color: "#4ade80", fontWeight: 800 }}>전 모델 기본 탑재</span>
-                </div>
-              </div>
-
-              {/* Right Column: Live OpenCV Vision Studio */}
-              <div
-                style={{
-                  background: "linear-gradient(145deg, rgba(16, 24, 40, 0.85) 0%, rgba(10, 15, 28, 0.95) 100%)",
-                  border: "1px solid rgba(59, 130, 246, 0.25)",
-                  borderRadius: 20,
-                  padding: 18,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                  minHeight: 0,
-                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.4)",
-                }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                  <span style={{ fontSize: 13.5, fontWeight: 800, color: "#ffffff" }}>
-                    👁️ 실시간 OpenCV 비전 판독 스튜디오
-                  </span>
-                  <div style={{ display: "flex", gap: 6 }}>
-                    {[
-                      { id: "rack_roi_led", label: "표시등 상태 감지" },
-                      { id: "thermal_hotspot", label: "열화상 온도 분포" },
-                      { id: "canny_hud", label: "도어 손잡이 3D 식별" },
-                    ].map((m) => (
-                      <button
-                        key={m.id}
-                        onClick={() => requestVisionFrame(selectedRobot?.hostname || "flagship.robot.local", m.id)}
-                        style={{
-                          background: visionMode === m.id ? "#3b82f6" : "rgba(255, 255, 255, 0.08)",
-                          color: "#fff",
-                          border: `1px solid ${visionMode === m.id ? "#3b82f6" : "rgba(255, 255, 255, 0.1)"}`,
-                          borderRadius: 8,
-                          padding: "6px 10px",
-                          fontSize: 11.5,
-                          fontWeight: 700,
-                          cursor: "pointer",
-                        }}
-                      >
-                        {m.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    flex: 1,
-                    background: "#080c16",
-                    borderRadius: 12,
-                    overflow: "hidden",
-                    border: "1px solid rgba(255, 255, 255, 0.08)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  {visionFrame?.image_base64 && (
-                    <img
-                      src={visionFrame.image_base64}
-                      alt="OpenCV Vision"
-                      style={{ width: "100%", height: "100%", objectFit: "contain" }}
-                    />
-                  )}
-                </div>
-
-                <div
-                  style={{
-                    marginTop: 10,
-                    padding: "8px 12px",
-                    background: "rgba(2, 6, 23, 0.6)",
-                    borderRadius: 8,
-                    fontSize: 11.5,
-                    color: "#94a3b8",
-                    display: "flex",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <span>현재 알고리즘: <b style={{ color: "#38bdf8" }}>{visionMode}</b></span>
-                  <span>상태: <b style={{ color: "#4ade80" }}>정상 판독 중 (HSV+ROI)</b></span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ==============================================================
-              Slide 05: SOLUTION 05 Multi-Robot Management Platform
-             ============================================================== */}
-          {currentSlideIdx === 4 && (
             <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1.05fr 1fr", gap: 18, minHeight: 0 }}>
               <div
                 style={{
@@ -1178,9 +917,9 @@ export const App: React.FC = () => {
           )}
 
           {/* ==============================================================
-              Slide 06: PART 04 Customer Value (ROI Table Page 25) & Global References
+              Slide 05: PART 04 Customer Value (ROI Table Page 25) & Global References
              ============================================================== */}
-          {currentSlideIdx === 5 && (
+          {currentSlideIdx === 4 && (
             <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1.15fr 1fr", gap: 18, minHeight: 0 }}>
               {/* Left Column: Full-Height ROI Comparison Dashboard (Page 25) */}
               <div

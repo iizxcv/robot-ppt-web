@@ -43,19 +43,6 @@
     {
       "id": "slide-04",
       "number": "04",
-      "nav_label": "PART 03 · 4대 핵심 운영 솔루션",
-      "title": "AI 스마트 순찰 · 자산 실사 · 도어 자동 개폐 · 화재 예방",
-      "subtitle": "OpenCV 실시간 비전 분석 + 5단계 도어 개폐 + 170℃ 열 에어로졸 능동 소화 패치",
-      "focus_mode": "four_solutions_vision",
-      "highlights": [
-        "AI 스마트 순찰 & 자산 실사: 7×24h 표준 절차 순찰, 표시등/온도 감지, 패시브·액티브 RFID 및 QR 코드로 무개방 자산 실사",
-        "프로페셔널 5단계 도어 자동 개폐: ①손잡이 식별 ➔ ②손잡이 회전(잠금해제) ➔ ③문 열기 ➔ ④내부 정밀검사 ➔ ⑤문 닫기/잠금",
-        "화재 예방 & 능동 소화 패치: 온습도 클라우드 맵, 유해가스(CO/SO2/H2S/SF6) 감시, 본체 내부 170℃ 자동 작동 에어로졸 소화 패치 2개 탑재"
-      ]
-    },
-    {
-      "id": "slide-05",
-      "number": "05",
       "nav_label": "PLATFORM · 다중 로봇 실시간 관제",
       "title": "실환경 WebSocket 기반 다중 로봇 통합 관리 플랫폼",
       "subtitle": "ws://<IP>/platformSocket/timely/data/robotStatus · Redis 상태 버스 실시간 연동",
@@ -67,8 +54,8 @@
       ]
     },
     {
-      "id": "slide-06",
-      "number": "06",
+      "id": "slide-05",
+      "number": "05",
       "nav_label": "PART 04 · 도입 효과 & 주요 레퍼런스",
       "title": "수동 운영 대비 도입 효과 & 글로벌 핵심 레퍼런스",
       "subtitle": "SK하이닉스 · 삼성SDI · 남방항공 · 신한은행 · 오리온 · 화홍반도체",
