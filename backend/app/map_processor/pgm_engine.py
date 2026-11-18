@@ -1,14 +1,17 @@
 """
-PGM Map Parser & Multi-Robot SE(2) Coordinate Frame Aligner.
-Reads map.pgm + map.yaml from docker_master/data/maps/<folder>/
-and aligns multiple robots into a single 3D Isometric World space.
+PGM Map Parser & Multi-Robot SE(2) Map Merger & Coordinate Aligner.
+1. Reads each robot's own `map.pgm` + `map.yaml` (e.g., Flagship 167x164, Power 199x425).
+2. Transforms every robot's occupied wall pixels into the unified World Coordinate Frame
+   using the robot's SE(2) calibration matrix (dtheta_deg, dx_m, dy_m) in `map_alignment.json`.
+3. Produces a fused 2D verification overlay PNG (Cyan = Flagship map.pgm, Orange = Power map.pgm,
+   Green = Overlapped wall match) AND fused 3D wall voxel blocks for Three.js!
+4. Transforms each robot's live pose (local_x, local_y, local_yaw) by the EXACT same SE(2) matrix.
 """
 import base64
-import io
 import json
 import math
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 
 import cv2
 import numpy as np
@@ -36,7 +39,10 @@ class MapAlignmentEngine:
 
     def local_to_world(self, robot_id: str, local_x: float, local_y: float, local_yaw_deg: float = 0.0) -> Dict[str, float]:
         """
-        Applies SE(2) Rigid Transform: (x_local, y_local, yaw_local) -> (X_world, Y_world, Yaw_world)
+        Applies the exact SE(2) Rigid Transform derived from aligning the robot's map.pgm + map.yaml
+        into the unified Master World Frame:
+          [X_world]   [cos(dtheta) -sin(dtheta)] [local_x]   [dx_m]
+          [Y_world] = [sin(dtheta)  cos(dtheta)] [local_y] + [dy_m]
         """
         cfg = self.load_alignment_config()
         tf = cfg.get("transforms", {}).get(robot_id, {"dx_m": 0.0, "dy_m": 0.0, "dtheta_deg": 0.0, "scale": 1.0})
@@ -55,10 +61,6 @@ class MapAlignmentEngine:
         return {"world_x": round(wx, 4), "world_y": round(wy, 4), "world_yaw_deg": round(wyaw, 2)}
 
     def world_to_local(self, robot_id: str, world_x: float, world_y: float, world_yaw_deg: float = 0.0) -> Dict[str, float]:
-        """
-        Applies Inverse SE(2) Transform (T^-1): (X_world, Y_world, Yaw_world) -> (x_local, y_local, yaw_local)
-        Used when clicking a point in the unified 3D view and dispatching a navigation command to a specific robot.
-        """
         cfg = self.load_alignment_config()
         tf = cfg.get("transforms", {}).get(robot_id, {"dx_m": 0.0, "dy_m": 0.0, "dtheta_deg": 0.0, "scale": 1.0})
         dx = float(tf.get("dx_m", 0.0))
@@ -78,90 +80,182 @@ class MapAlignmentEngine:
 
         return {"local_x": round(lx, 4), "local_y": round(ly, 4), "local_yaw_deg": round(lyaw, 2)}
 
-    def parse_pgm_map(self, folder_name: str = "flagship") -> Dict[str, Any]:
-        """
-        Reads map.pgm and map.yaml and extracts:
-          1. Metadata (width, height, resolution, origin)
-          2. Base64 PNG texture of the floor map
-          3. 3D Extruded Wall/Rack voxel blocks in physical meters (X, Y) for Three.js InstancedMesh rendering
-        """
+    def _extract_robot_map_points(self, folder_name: str, min_row: int = 0) -> Dict[str, Any]:
         folder = self.maps_dir / folder_name
         pgm_path = folder / "map.pgm"
         yaml_path = folder / "map.yaml"
-
         if not pgm_path.exists() or not yaml_path.exists():
-            return {"error": f"Map files not found in {folder}"}
+            return {"error": f"Map not found: {folder_name}"}
 
         with open(yaml_path, "r", encoding="utf-8") as f:
             meta = yaml.safe_load(f)
 
-        resolution = float(meta.get("resolution", 0.05))
+        res = float(meta.get("resolution", 0.05))
         origin = meta.get("origin", [0.0, 0.0, 0.0])
-        origin_x, origin_y = float(origin[0]), float(origin[1])
+        ox, oy = float(origin[0]), float(origin[1])
 
         img = cv2.imread(str(pgm_path), cv2.IMREAD_GRAYSCALE)
         if img is None:
-            return {"error": f"Failed to decode {pgm_path}"}
+            return {"error": f"Failed to read {pgm_path}"}
 
-        height, width = img.shape
+        h, w = img.shape
+        mask = img <= 100
+        if min_row > 0 and h > min_row:
+            mask[:min_row, :] = False
 
-        # Create stylized high-tech dark floor texture PNG for 3D plane
-        stylized = np.zeros((height, width, 4), dtype=np.uint8)
-        # Free space (bright in PGM >= 230) -> subtle dark cyan floor
-        free_mask = img >= 220
-        stylized[free_mask] = [30, 45, 65, 220]
-        # Occupied walls/racks (dark in PGM <= 100) -> glowing neon cyan/blue footprint
-        occ_mask = img <= 100
-        stylized[occ_mask] = [0, 242, 254, 255]
-        # Unknown space -> transparent dark
-        unk_mask = (~free_mask) & (~occ_mask)
-        stylized[unk_mask] = [10, 15, 24, 90]
-
-        _, png_buf = cv2.imencode(".png", stylized)
-        png_b64 = "data:image/png;base64," + base64.b64encode(png_buf.tobytes()).decode("ascii")
-
-        # Downsample / cluster occupied cells into 3D wall blocks (every 2 pixels = 10cm block)
-        step = 2
-        walls: List[List[float]] = []
-        for v in range(0, height, step):
-            for u in range(0, width, step):
-                patch = img[v : v + step, u : u + step]
-                if np.min(patch) <= 95:
-                    # Convert pixel (u, v) to ROS world meters
-                    wx = origin_x + (u + step * 0.5) * resolution
-                    wy = origin_y + (height - (v + step * 0.5)) * resolution
-                    walls.append([round(wx, 3), round(wy, 3), round(step * resolution, 3)])
+        ys_px, xs_px = np.where(mask)
+        local_xs = ox + (xs_px + 0.5) * res
+        local_ys = oy + (h - (ys_px + 0.5)) * res
+        pts = np.column_stack([local_xs, local_ys])
 
         return {
             "folder": folder_name,
-            "width_px": width,
-            "height_px": height,
-            "resolution": resolution,
-            "origin": [origin_x, origin_y, 0.0],
-            "physical_width_m": round(width * resolution, 3),
-            "physical_height_m": round(height * resolution, 3),
-            "center_world_m": [
-                round(origin_x + (width * resolution) / 2.0, 3),
-                round(origin_y + (height * resolution) / 2.0, 3),
-            ],
-            "texture_png_base64": png_b64,
-            "wall_blocks": walls,
-            "wall_count": len(walls),
+            "width_px": w,
+            "height_px": h,
+            "resolution": res,
+            "origin": [ox, oy, 0.0],
+            "local_wall_pts": pts,
+        }
+
+    def build_unified_fused_map(self) -> Dict[str, Any]:
+        """
+        Loads both `flagship/map.pgm` and `power/map.pgm`, applies each robot's SE(2) transform
+        from `map_alignment.json` to its wall points, and merges them into a single unified 3D voxel grid
+        plus a 2D color-coded overlay preview PNG so the user can visually verify the map fusion!
+        """
+        align_cfg = self.load_alignment_config()
+        tfs = align_cfg.get("transforms", {})
+
+        flag_raw = self._extract_robot_map_points("flagship", min_row=0)
+        # Exclude single top LiDAR ray noise above row 230 in Power's 425-row map
+        power_raw = self._extract_robot_map_points("power", min_row=230)
+
+        f_pts = flag_raw.get("local_wall_pts", np.zeros((0, 2)))
+        p_pts_local = power_raw.get("local_wall_pts", np.zeros((0, 2)))
+
+        # Transform Power local map points into the unified World Frame using Power's SE(2) matrix
+        p_tf = tfs.get("power-01", {"dx_m": 1.65, "dy_m": -5.875, "dtheta_deg": 90.25, "scale": 1.0})
+        rad = math.radians(float(p_tf.get("dtheta_deg", 90.25)))
+        c, s = math.cos(rad), math.sin(rad)
+        dx = float(p_tf.get("dx_m", 1.65))
+        dy = float(p_tf.get("dy_m", -5.875))
+
+        if len(p_pts_local) > 0:
+            p_wx = c * p_pts_local[:, 0] - s * p_pts_local[:, 1] + dx
+            p_wy = s * p_pts_local[:, 0] + c * p_pts_local[:, 1] + dy
+            p_pts_world = np.column_stack([p_wx, p_wy])
+        else:
+            p_pts_world = np.zeros((0, 2))
+
+        # Quantize into 10cm (0.10m) 3D voxel cells and track source:
+        # source 1 = Flagship only, source 2 = Power (calibrated) only, source 3 = Overlapped (Both maps agree!)
+        cell_size = 0.10
+        voxel_map: Dict[tuple, int] = {}
+
+        for x, y in f_pts:
+            key = (round(float(x) / cell_size), round(float(y) / cell_size))
+            voxel_map[key] = voxel_map.get(key, 0) | 1
+
+        for x, y in p_pts_world:
+            key = (round(float(x) / cell_size), round(float(y) / cell_size))
+            voxel_map[key] = voxel_map.get(key, 0) | 2
+
+        flag_blocks: List[List[float]] = []
+        power_blocks: List[List[float]] = []
+        overlap_blocks: List[List[float]] = []
+        all_blocks: List[List[float]] = []
+
+        for (gx, gy), src in voxel_map.items():
+            wx = round(gx * cell_size, 3)
+            wy = round(gy * cell_size, 3)
+            blk = [wx, wy, cell_size]
+            all_blocks.append(blk)
+            if src == 3:
+                overlap_blocks.append(blk)
+            elif src == 1:
+                flag_blocks.append(blk)
+            elif src == 2:
+                power_blocks.append(blk)
+
+        # Render 2D Fused Verification PNG (Cyan = Flagship, Orange = Power Transformed, Green = Overlap)
+        grid_res = 0.04
+        gx_min, gx_max = -2.2, 5.8
+        gy_min, gy_max = -6.8, 1.8
+        gw = int((gx_max - gx_min) / grid_res)
+        gh = int((gy_max - gy_min) / grid_res)
+        canvas = np.full((gh, gw, 3), (12, 14, 20), dtype=np.uint8)
+
+        for x, y in f_pts:
+            ix = int((x - gx_min) / grid_res)
+            iy = int((y - gy_min) / grid_res)
+            if 0 <= ix < gw and 0 <= iy < gh:
+                canvas[iy, ix] = (254, 242, 0)  # Cyan (BGR)
+
+        for x, y in p_pts_world:
+            ix = int((x - gx_min) / grid_res)
+            iy = int((y - gy_min) / grid_res)
+            if 0 <= ix < gw and 0 <= iy < gh:
+                if canvas[iy, ix, 0] > 100:
+                    canvas[iy, ix] = (90, 255, 110)  # Bright Green where both maps overlap!
+                else:
+                    canvas[iy, ix] = (11, 158, 245)  # Amber/Orange (BGR)
+
+        canvas_flipped = cv2.flip(canvas, 0)
+        _, png_buf = cv2.imencode(".png", canvas_flipped)
+        fused_png_b64 = "data:image/png;base64," + base64.b64encode(png_buf.tobytes()).decode("ascii")
+
+        # Compute calibrated charging station world coordinates
+        flag_charger_w = self.local_to_world("flag-01", -0.05, -0.05, 0.0)
+        power_charger_w = self.local_to_world("power-01", -0.30, -0.18, 0.0)
+
+        return {
+            "folder": "unified_flagship_power",
+            "width_px": flag_raw.get("width_px", 167),
+            "height_px": flag_raw.get("height_px", 164),
+            "resolution": 0.05,
+            "origin": flag_raw.get("origin", [-1.39123, -6.50952, 0.0]),
+            "power_map_info": {
+                "width_px": power_raw.get("width_px", 199),
+                "height_px": power_raw.get("height_px", 425),
+                "origin": power_raw.get("origin", [-2.51703, -5.52593, 0.0]),
+                "applied_se2": p_tf,
+            },
+            "center_world_m": [1.8, -2.5],
+            "fused_preview_png_base64": fused_png_b64,
+            "wall_blocks": all_blocks,
+            "flag_only_blocks": flag_blocks,
+            "power_only_blocks": power_blocks,
+            "overlap_blocks": overlap_blocks,
+            "wall_count": len(all_blocks),
+            "overlap_count": len(overlap_blocks),
             "spatial_pois": [
-                {"id": 68, "name": "Flagship 충전스테이션 (#68)", "kind": "charger", "x": -0.05, "y": -0.05},
-                {"id": 700, "name": "Power 충전스테이션 (#70 보정)", "kind": "charger", "x": -1.59, "y": -0.66}
+                {
+                    "id": 68,
+                    "name": "Flagship 충전스테이션 (#68)",
+                    "kind": "charger",
+                    "x": flag_charger_w["world_x"],
+                    "y": flag_charger_w["world_y"],
+                },
+                {
+                    "id": 70,
+                    "name": "Power 충전스테이션 (#70 통합보정)",
+                    "kind": "charger",
+                    "x": power_charger_w["world_x"],
+                    "y": power_charger_w["world_y"],
+                },
             ],
             "patrol_corridor": [
                 [-0.05, -0.05],
                 [0.65, -0.01],
                 [3.89, -0.01],
                 [3.89, -2.85],
-                [2.70, -2.85],
-                [2.08, -2.85],
                 [1.40, -2.85],
                 [1.40, -2.45],
                 [3.50, -2.45],
                 [3.50, 0.0],
-                [-0.05, -0.05]
+                [-0.05, -0.05],
             ],
         }
+
+    def parse_pgm_map(self, folder_name: str = "flagship") -> Dict[str, Any]:
+        return self.build_unified_fused_map()

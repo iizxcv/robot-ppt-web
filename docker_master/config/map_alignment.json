@@ -1,34 +1,34 @@
 {
   "master_robot_id": "flag-01",
-  "description": "SE(2) 2D Rigid Transformation aligning each robot's map.yaml origin + boot odometry frame into the unified 3D Virtual Twin Space.",
+  "description": "SE(2) 2D Rigid Transformation computed by OpenCV ICP/Cross-Correlation between Flagship map.pgm and Power map.pgm wall point clouds.",
   "wall_extrusion_height_m": 1.85,
   "transforms": {
     "flag-01": {
       "robot_hostname": "flagship.robot.local",
+      "map_folder": "flagship",
       "map_origin": [-1.39123, -6.50952, 0.0],
-      "boot_odom_offset": [0.0, 0.0, 0.0],
       "dx_m": 0.0,
       "dy_m": 0.0,
       "dtheta_deg": 0.0,
       "scale": 1.0,
-      "note": "Master reference space (Flagship map.yaml origin [-1.391, -6.509], Charging Station #68 at [-0.05, -0.05])"
+      "note": "Master reference map (Flagship map.pgm 167x164px, origin [-1.391, -6.509])"
     },
     "power-01": {
       "robot_hostname": "power.robot.local",
+      "map_folder": "power",
       "map_origin": [-2.51703, -5.52593, 0.0],
-      "boot_odom_offset": [-1.29, -0.48, 0.0],
-      "dx_m": -1.29,
-      "dy_m": -0.48,
-      "dtheta_deg": 0.0,
+      "dx_m": 1.65,
+      "dy_m": -5.875,
+      "dtheta_deg": 90.25,
       "scale": 1.0,
-      "note": "Power robot calibrated via common Rack3/Glasswall landmarks (Power turn-rack3 [1.99, -2.37] -> World [0.70, -2.85], Charging #70 [-0.30, -0.18] -> World [-1.59, -0.66])"
+      "note": "Power map.pgm (199x425px, origin [-2.517, -5.526]) rotated +90.25° and shifted (+1.65m, -5.875m) to match Flagship walls"
     },
     "pro-01": {
       "robot_hostname": "pro.robot.local",
+      "map_folder": "professional",
       "map_origin": [-1.39123, -6.50952, 0.0],
-      "boot_odom_offset": [0.0, -1.35, 0.0],
       "dx_m": 0.0,
-      "dy_m": -1.35,
+      "dy_m": -2.10,
       "dtheta_deg": 0.0,
       "scale": 1.0,
       "note": "Professional robot bay offset in unified virtual space"
