@@ -920,149 +920,255 @@ export const App: React.FC = () => {
               Slide 05: PART 04 Customer Value (ROI Table Page 25) & Global References
              ============================================================== */}
           {currentSlideIdx === 4 && (
-            <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1.15fr 1fr", gap: 18, minHeight: 0 }}>
+            <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1.18fr 1fr", gap: 18, minHeight: 0 }}>
               {/* Left Column: Full-Height ROI Comparison Dashboard (Page 25) */}
               <div
                 style={{
-                  background: "linear-gradient(145deg, rgba(16, 24, 40, 0.85) 0%, rgba(10, 15, 28, 0.95) 100%)",
-                  border: "1px solid rgba(59, 130, 246, 0.22)",
+                  background: "linear-gradient(145deg, rgba(16, 24, 40, 0.92) 0%, rgba(10, 15, 28, 0.98) 100%)",
+                  border: "1px solid rgba(59, 130, 246, 0.28)",
                   borderRadius: 20,
-                  padding: "20px 22px",
+                  padding: "20px 24px",
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "space-between",
-                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.4)",
+                  boxShadow: "0 10px 30px rgba(0, 0, 0, 0.45)",
+                  minHeight: 0,
                 }}
               >
                 <div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                    <span style={{ fontSize: 14, fontWeight: 800, color: "#38bdf8" }}>
-                      📊 수동 운영 대비 AI 로봇 도입 실측 효과 (제안서 Page 25)
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span
+                        style={{
+                          background: "rgba(59, 130, 246, 0.2)",
+                          color: "#38bdf8",
+                          border: "1px solid rgba(59, 130, 246, 0.45)",
+                          fontSize: 11.5,
+                          fontWeight: 800,
+                          padding: "3px 10px",
+                          borderRadius: 6,
+                        }}
+                      >
+                        PART 04 · CUSTOMER VALUE
+                      </span>
+                      <span style={{ fontSize: 16, fontWeight: 900, color: "#ffffff" }}>
+                        수동 운영 대비 AI 로봇 도입 실측 효과
+                      </span>
+                    </div>
+                    <span style={{ fontSize: 12, color: "#94a3b8", fontWeight: 700 }}>
+                      제안서 Page 25 실측 통계치 기준
                     </span>
-                    <span style={{ fontSize: 11, color: "#94a3b8" }}>실측 데이터 기반 ROI 분석</span>
                   </div>
 
-                  {/* 4 Impact Summary KPI Cards */}
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 14 }}>
+                  {/* 4 Impact Summary KPI Cards - Enlarged and Punchy */}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 14 }}>
                     {[
-                      { num: "300% ↑", label: "순찰 빈도 향상", sub: "2회 ➔ 6회/일" },
-                      { num: "98.7% ↓", label: "장애 발견 단축", sub: "2시간 ➔ 5~15분" },
-                      { num: "100%", label: "디지털 자동 기록", sub: "종이 수기 ➔ DB연동" },
-                      { num: "84% ↓", label: "현장 출동 감소", sub: "50회 ➔ 8회" },
+                      { num: "300% ↑", label: "순찰 빈도 향상", sub: "2회 ➔ 6회/일", color: "#38bdf8" },
+                      { num: "98.7% ↓", label: "장애 발견 단축", sub: "2시간 ➔ 5~15분", color: "#00f2fe" },
+                      { num: "100%", label: "디지털 자동 기록", sub: "종이 수기 ➔ DB연동", color: "#4ade80" },
+                      { num: "84% ↓", label: "현장 출동 감소", sub: "50회 ➔ 8회", color: "#facc15" },
                     ].map((k) => (
                       <div
                         key={k.label}
                         style={{
-                          background: "rgba(8, 12, 22, 0.7)",
-                          borderLeft: "3px solid #38bdf8",
-                          borderRadius: "0 8px 8px 0",
-                          padding: "8px 10px",
+                          background: "rgba(8, 12, 22, 0.8)",
+                          borderLeft: `4px solid ${k.color}`,
+                          border: "1px solid rgba(255, 255, 255, 0.08)",
+                          borderLeftWidth: 4,
+                          borderRadius: "0 10px 10px 0",
+                          padding: "10px 12px",
                         }}
                       >
-                        <div style={{ fontSize: 16, fontWeight: 900, color: "#38bdf8" }}>{k.num}</div>
-                        <div style={{ fontSize: 11, fontWeight: 700, color: "#ffffff", marginTop: 2 }}>{k.label}</div>
-                        <div style={{ fontSize: 9.5, color: "#94a3b8" }}>{k.sub}</div>
+                        <div style={{ fontSize: 21, fontWeight: 900, color: k.color, letterSpacing: "-0.5px" }}>{k.num}</div>
+                        <div style={{ fontSize: 12.5, fontWeight: 800, color: "#ffffff", marginTop: 2 }}>{k.label}</div>
+                        <div style={{ fontSize: 10.5, color: "#94a3b8", marginTop: 2 }}>{k.sub}</div>
                       </div>
                     ))}
                   </div>
 
-                  {/* 7-Row Comparison Table */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: 5, fontSize: 12 }}>
+                  {/* 7-Row Comparison Table - Enlarged Font and Spacious Rows */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13.5 }}>
                     <div
                       style={{
                         display: "grid",
-                        gridTemplateColumns: "1.5fr 1fr 1fr 1fr",
-                        background: "rgba(2, 132, 199, 0.85)",
-                        padding: "8px 12px",
+                        gridTemplateColumns: "1.4fr 1fr 1fr 1fr",
+                        background: "linear-gradient(90deg, rgba(2, 132, 199, 0.9) 0%, rgba(14, 165, 233, 0.9) 100%)",
+                        padding: "10px 14px",
                         borderRadius: 8,
                         fontWeight: 800,
                         color: "#ffffff",
+                        letterSpacing: "0.2px",
                       }}
                     >
                       <span>서버실 운영 항목</span>
                       <span>수동 운영</span>
-                      <span>AI 로봇</span>
-                      <span style={{ textAlign: "right" }}>도입 효과</span>
+                      <span>AI 스마트 로봇</span>
+                      <span style={{ textAlign: "right" }}>도입 실측 효과</span>
                     </div>
 
                     {[
-                      ["순찰 효율", "2회/일", "6회/일", "300% ↑"],
+                      ["순찰 효율", "2회 / 일", "6회 / 일", "300% ↑"],
                       ["순찰 기록 방식", "종이 수기 기록", "데이터 자동 기록", "100% 디지털화"],
-                      ["평균 장애 발견 시간", "2시간", "5~15분", "98.7% ↓"],
+                      ["평균 장애 발견 시간", "2시간", "5 ~ 15분", "98.7% ↓"],
                       ["평균 장애 위치 확인", "4시간", "1시간", "75% ↓"],
                       ["평균 장애 해결 시간", "6시간", "2시간", "67% ↓"],
                       ["다중 서버실 현장 운영", "50회", "8회", "84% ↓"],
-                      ["운영 보고서 통계 시간", "월 최소 4일", "필요 시 즉시 내보내기", "100% ↓"],
+                      ["운영 보고서 통계 시간", "월 최소 4일", "필요 시 즉시 내보내기", "100% 자동화"],
                     ].map(([item, manual, bot, eff]) => (
                       <div
                         key={item}
                         style={{
                           display: "grid",
-                          gridTemplateColumns: "1.5fr 1fr 1fr 1fr",
-                          background: "rgba(8, 12, 22, 0.6)",
-                          border: "1px solid rgba(255, 255, 255, 0.04)",
-                          padding: "8px 12px",
-                          borderRadius: 6,
+                          gridTemplateColumns: "1.4fr 1fr 1fr 1fr",
+                          background: "rgba(8, 12, 22, 0.7)",
+                          border: "1px solid rgba(255, 255, 255, 0.06)",
+                          padding: "9px 14px",
+                          borderRadius: 8,
                           alignItems: "center",
                         }}
                       >
-                        <span style={{ fontWeight: 700, color: "#f1f5f9" }}>{item}</span>
+                        <span style={{ fontWeight: 800, color: "#f8fafc" }}>{item}</span>
                         <span style={{ color: "#94a3b8" }}>{manual}</span>
-                        <span style={{ color: "#ffffff", fontWeight: 700 }}>{bot}</span>
-                        <span style={{ color: "#4ade80", fontWeight: 800, textAlign: "right" }}>{eff}</span>
+                        <span style={{ color: "#38bdf8", fontWeight: 800 }}>{bot}</span>
+                        <span style={{ color: "#4ade80", fontWeight: 900, textAlign: "right" }}>{eff}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div style={{ fontSize: 11, color: "#94a3b8", textAlign: "right" }}>
-                  ※ SR 로보틱스 글로벌 데이터센터 100여 개 레퍼런스 실측 통계치 기준
+                {/* Bottom Structured Service Box from Page 25: 6 Lifecycle Support Services */}
+                <div
+                  style={{
+                    marginTop: 12,
+                    background: "rgba(8, 12, 22, 0.75)",
+                    border: "1px solid rgba(59, 130, 246, 0.22)",
+                    borderRadius: 12,
+                    padding: "11px 14px",
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
+                    <span style={{ fontSize: 12.5, fontWeight: 800, color: "#38bdf8" }}>
+                      🛡️ SR ROBOTICS 6대 전주기 운영 지원 서비스 체계 (제안서 Page 25)
+                    </span>
+                    <span style={{ fontSize: 11, color: "#94a3b8" }}>글로벌 100+ 고객사 현장 검증</span>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 6 }}>
+                    {[
+                      { step: "01", title: "신속한 셋업", sub: "현장 즉시 투입" },
+                      { step: "02", title: "솔루션 설계", sub: "고객 맞춤형" },
+                      { step: "03", title: "교육 및 지원", sub: "포괄 제품 교육" },
+                      { step: "04", title: "24H 원격지원", sub: "원격 개입 대응" },
+                      { step: "05", title: "전주기 서비스", sub: "부품 수명 관리" },
+                      { step: "06", title: "전문 컨설팅", sub: "운영 유지보수" },
+                    ].map((s) => (
+                      <div
+                        key={s.step}
+                        style={{
+                          background: "rgba(15, 23, 42, 0.8)",
+                          borderTop: "2.5px solid #00f2fe",
+                          borderRadius: 6,
+                          padding: "6px 4px",
+                          textAlign: "center",
+                        }}
+                      >
+                        <div style={{ fontSize: 10, fontWeight: 800, color: "#00f2fe" }}>{s.step}</div>
+                        <div style={{ fontSize: 11.5, fontWeight: 800, color: "#ffffff", marginTop: 2 }}>{s.title}</div>
+                        <div style={{ fontSize: 9.5, color: "#94a3b8", marginTop: 1 }}>{s.sub}</div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              {/* Right Column: 4 Key Cooperation Cases (Pages 26-27) */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 10, justifyContent: "space-between" }}>
+              {/* Right Column: 4 Key Cooperation Cases - Enlarged Cards & Typography */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 12, height: "100%", minHeight: 0 }}>
                 {[
                   {
                     badge: "CASE 01 · SK하이닉스 자산관리 시스템",
                     stats: "1,000㎡ (IDC 3개) · 900개 캐비닛 · 3,000대 장비",
-                    desc: "순찰 로봇 3대 + 멀티로봇 관리 플랫폼 도입, 데이터센터 IT 자산 생애주기 관리 및 CMDB 시각화 구현",
+                    chips: ["순찰 로봇 3대", "멀티로봇 플랫폼", "자산관리 시스템 1세트"],
+                    desc: "스마트 순찰 로봇을 통한 데이터센터 IT 자산 무개방 자동 실사, CMDB·창고관리·용량계획 실시간 시각화 구현",
                     color: "#3b82f6",
                   },
                   {
                     badge: "CASE 02 · 삼성SDI(시안) 서버실 스마트 순찰",
                     stats: "150㎡ 서버실 · 50개 랙 · 300대 총 장비",
-                    desc: "IT 장비 신호등 감지, 장비 표면 온도·환경 모니터링, IT/MES·Oracle DB 운영과 결합한 인간-로봇 협업",
+                    chips: ["순찰 로봇 1대(임대)", "신호등/온도 실시간 감지", "인간-로봇 협업"],
+                    desc: "IT 장비 신호등 상태 감지, 표면 온도 및 환경 모니터링 실시간 녹화, IT/MES·Oracle DB 운영과 결합된 인간-로봇 협업",
                     color: "#00f2fe",
                   },
                   {
                     badge: "CASE 03 · 남방항공 바이윈공항 데이터센터",
                     stats: "3,400㎡ 데이터센터 · 930개 랙 · 5,500대 장비",
-                    desc: "로봇 7대 + 72세트 모듈식 도어 연동 자동 제어, 고객 CMDB 연동 IT 자산 데이터 실시간 동기화",
+                    chips: ["순찰 로봇 7대", "72세트 모듈 도어 연동", "고객 CMDB 동기화"],
+                    desc: "로봇 7대 + 멀티로봇 관리 플랫폼, 72세트 모듈식 도어 연동 자동 제어, 2D 평면도 기반 랙 상태 실시간 관제 및 고객 CMDB 동기화",
                     color: "#a855f7",
                   },
                   {
                     badge: "SI & 유지보수 · 신한은행 / 오리온 / 화홍반도체",
-                    stats: "7×24H 전 계층 인프라 유지보수 · DELL / IBM / HUAWEI / VMware / CISCO",
-                    desc: "신한은행 3개 서버실 통합 운영, 오리온 네트워크 무중단 이전, 화홍반도체 CIM 2기, 화성광전 200여 개 MES DB 운영",
+                    stats: "7×24H 전 계층 인프라 유지보수 · DELL / IBM / HUAWEI / VMware",
+                    chips: ["신한은행 3개 서버실", "오리온 무중단 이전", "화홍반도체 CIM 2기"],
+                    desc: "신한은행 메인·재해복구 64대 서버/스토리지 24×365 운영, 오리온 네트워크 L3 코어 이중화 무중단 이전, 화홍반도체 CIM 2기 및 200여 개 MES DB 운영",
                     color: "#f59e0b",
                   },
                 ].map((c) => (
                   <div
                     key={c.badge}
                     style={{
-                      background: "linear-gradient(145deg, rgba(16, 24, 40, 0.85) 0%, rgba(10, 15, 28, 0.95) 100%)",
-                      borderLeft: `4px solid ${c.color}`,
-                      borderRadius: "0 14px 14px 0",
-                      padding: "14px 18px",
-                      boxShadow: "0 4px 16px rgba(0, 0, 0, 0.3)",
+                      flex: 1,
+                      background: "linear-gradient(145deg, rgba(16, 24, 40, 0.92) 0%, rgba(10, 15, 28, 0.98) 100%)",
+                      border: "1px solid rgba(255, 255, 255, 0.08)",
+                      borderLeft: `5px solid ${c.color}`,
+                      borderRadius: "0 16px 16px 0",
+                      padding: "16px 20px",
+                      boxShadow: "0 6px 20px rgba(0, 0, 0, 0.35)",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
                     }}
                   >
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontSize: 13, fontWeight: 800, color: "#fff" }}>{c.badge}</span>
-                      <span style={{ fontSize: 11, fontWeight: 800, color: c.color }}>{c.stats}</span>
+                    <div>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                        <span style={{ fontSize: 15.5, fontWeight: 900, color: "#ffffff", letterSpacing: "-0.2px" }}>
+                          {c.badge}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 800,
+                            color: c.color,
+                            background: "rgba(8, 12, 22, 0.7)",
+                            border: `1px solid ${c.color}55`,
+                            borderRadius: 6,
+                            padding: "3px 8px",
+                          }}
+                        >
+                          {c.stats}
+                        </span>
+                      </div>
+
+                      {/* Feature Chips */}
+                      <div style={{ display: "flex", gap: 6, marginBottom: 8, flexWrap: "wrap" }}>
+                        {c.chips.map((chip, i) => (
+                          <span
+                            key={i}
+                            style={{
+                              background: "rgba(255, 255, 255, 0.05)",
+                              border: "1px solid rgba(255, 255, 255, 0.1)",
+                              borderRadius: 4,
+                              padding: "2px 8px",
+                              fontSize: 11.5,
+                              fontWeight: 700,
+                              color: "#e2e8f0",
+                            }}
+                          >
+                            ✓ {chip}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                    <div style={{ fontSize: 12, color: "#cbd5e1", marginTop: 4, lineHeight: 1.5, wordBreak: "keep-all" }}>
+
+                    <div style={{ fontSize: 13, color: "#cbd5e1", lineHeight: 1.55, wordBreak: "keep-all" }}>
                       {c.desc}
                     </div>
                   </div>
