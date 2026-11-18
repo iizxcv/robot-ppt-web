@@ -214,10 +214,12 @@ class MultiRobotOrchestrator:
     def get_all_telemetry(self) -> List[Dict[str, Any]]:
         self.tick_simulation()
         robots = self.resolver.list_all()
+        align_cfg = self.map_engine.load_alignment_config()
         result = []
         for r in robots:
             r_id = r["id"]
             st = self.states.get(r_id, {})
+            tf_info = align_cfg.get("transforms", {}).get(r_id, {})
             world_pose = self.map_engine.local_to_world(
                 r_id,
                 float(st.get("local_x", 0.0)),
@@ -233,6 +235,7 @@ class MultiRobotOrchestrator:
             result.append(
                 {
                     **r,
+                    "calibration": tf_info,
                     "telemetry": {
                         **st,
                         **world_pose,

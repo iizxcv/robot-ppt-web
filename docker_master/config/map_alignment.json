@@ -1,31 +1,37 @@
 {
   "master_robot_id": "flag-01",
-  "description": "SE(2) 2D Rigid Transformation parameters aligning each robot's SLAM pbstream/map.pgm coordinate frame into the unified 3D World Frame.",
+  "description": "SE(2) 2D Rigid Transformation aligning each robot's map.yaml origin + boot odometry frame into the unified 3D Virtual Twin Space.",
   "wall_extrusion_height_m": 1.85,
   "transforms": {
     "flag-01": {
       "robot_hostname": "flagship.robot.local",
+      "map_origin": [-1.39123, -6.50952, 0.0],
+      "boot_odom_offset": [0.0, 0.0, 0.0],
       "dx_m": 0.0,
       "dy_m": 0.0,
       "dtheta_deg": 0.0,
       "scale": 1.0,
-      "note": "Master reference frame (Flagship map.pgm: charging station at [0.02, -0.05])"
-    },
-    "pro-01": {
-      "robot_hostname": "pro.robot.local",
-      "dx_m": 0.85,
-      "dy_m": 0.0,
-      "dtheta_deg": 0.0,
-      "scale": 1.0,
-      "note": "Professional robot (currently offline for maintenance)"
+      "note": "Master reference space (Flagship map.yaml origin [-1.391, -6.509], Charging Station #68 at [-0.05, -0.05])"
     },
     "power-01": {
       "robot_hostname": "power.robot.local",
-      "dx_m": 0.65,
-      "dy_m": 0.13,
+      "map_origin": [-2.51703, -5.52593, 0.0],
+      "boot_odom_offset": [-1.29, -0.48, 0.0],
+      "dx_m": -1.29,
+      "dy_m": -0.48,
       "dtheta_deg": 0.0,
       "scale": 1.0,
-      "note": "Power robot aligned alongside Flagship charging bay (live pos [-0.24, -0.18])"
+      "note": "Power robot calibrated via common Rack3/Glasswall landmarks (Power turn-rack3 [1.99, -2.37] -> World [0.70, -2.85], Charging #70 [-0.30, -0.18] -> World [-1.59, -0.66])"
+    },
+    "pro-01": {
+      "robot_hostname": "pro.robot.local",
+      "map_origin": [-1.39123, -6.50952, 0.0],
+      "boot_odom_offset": [0.0, -1.35, 0.0],
+      "dx_m": 0.0,
+      "dy_m": -1.35,
+      "dtheta_deg": 0.0,
+      "scale": 1.0,
+      "note": "Professional robot bay offset in unified virtual space"
     }
   }
 }
