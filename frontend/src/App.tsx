@@ -553,8 +553,18 @@ export const App: React.FC = () => {
              ============================================================== */}
           {currentSlideIdx === 1 && (
             <div style={{ flex: 1, display: "grid", gridTemplateColumns: "350px 1fr", gap: 18, minHeight: 0 }}>
-              {/* Left Column: 3 Indoor Robot Lineup Cards */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 12, overflowY: "auto" }}>
+              {/* Left Column: 3 Indoor Robot Lineup Cards (Scrollbar Hidden) */}
+              <div
+                className="no-scrollbar"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 10,
+                  overflowY: "auto",
+                  scrollbarWidth: "none",
+                  msOverflowStyle: "none",
+                }}
+              >
                 {robots.map((r) => {
                   const isSel = r.id === selectedRobotId;
                   const themeCol = r.color || "#3b82f6";
@@ -578,13 +588,13 @@ export const App: React.FC = () => {
                           ? "linear-gradient(145deg, rgba(20, 32, 58, 0.95) 0%, rgba(12, 18, 34, 0.95) 100%)"
                           : "linear-gradient(145deg, rgba(16, 24, 40, 0.8) 0%, rgba(10, 15, 28, 0.9) 100%)",
                         border: `1.5px solid ${isSel ? themeCol : "rgba(255, 255, 255, 0.1)"}`,
-                        borderRadius: 18,
-                        padding: "16px 18px",
+                        borderRadius: 16,
+                        padding: "13px 16px",
                         cursor: "pointer",
-                        transition: "all 0.2s ease",
+                        transition: "all 0.15s ease",
                         display: "flex",
                         flexDirection: "column",
-                        gap: 8,
+                        gap: 6,
                         boxShadow: isSel ? `0 8px 24px ${themeCol}25` : "0 4px 16px rgba(0,0,0,0.3)",
                       }}
                     >
@@ -595,40 +605,40 @@ export const App: React.FC = () => {
                             background: `${themeCol}22`,
                             color: themeCol,
                             border: `1px solid ${themeCol}55`,
-                            padding: "3px 10px",
+                            padding: "2.5px 9px",
                             borderRadius: 99,
-                            fontSize: 11,
+                            fontSize: 10.5,
                             fontWeight: 800,
                           }}
                         >
                           {r.edition_badge}
                         </span>
-                        <span style={{ fontSize: 11, color: "#4ade80", fontWeight: 700 }}>
+                        <span style={{ fontSize: 10.5, color: "#4ade80", fontWeight: 700 }}>
                           KC {r.rra_cert_no}
                         </span>
                       </div>
 
                       {/* Robot Name & Subtitle */}
                       <div>
-                        <div style={{ fontSize: 17, fontWeight: 900, color: "#ffffff" }}>
+                        <div style={{ fontSize: 16, fontWeight: 900, color: "#ffffff" }}>
                           {r.display_name}
                         </div>
-                        <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 3, lineHeight: 1.45, wordBreak: "keep-all" }}>
+                        <div style={{ fontSize: 11.5, color: "#94a3b8", marginTop: 2, lineHeight: 1.4, wordBreak: "keep-all" }}>
                           {r.target_site}
                         </div>
                       </div>
 
                       {/* Spec Chips */}
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
                         {chips.map((c) => (
                           <span
                             key={c}
                             style={{
                               background: "rgba(255, 255, 255, 0.05)",
-                              border: "1px solid rgba(255, 255, 255, 0.1)",
-                              padding: "3px 8px",
-                              borderRadius: 6,
-                              fontSize: 11,
+                              border: "1px solid rgba(255, 255, 255, 0.08)",
+                              padding: "2.5px 7px",
+                              borderRadius: 5,
+                              fontSize: 10.5,
                               color: "#cbd5e1",
                             }}
                           >
@@ -643,17 +653,17 @@ export const App: React.FC = () => {
                           display: "flex",
                           justifyContent: "space-between",
                           alignItems: "center",
-                          marginTop: 4,
-                          paddingTop: 8,
+                          marginTop: 2,
+                          paddingTop: 6,
                           borderTop: "1px solid rgba(255, 255, 255, 0.08)",
-                          fontSize: 11.5,
+                          fontSize: 11,
                         }}
                       >
                         <span style={{ color: "#cbd5e1", display: "flex", alignItems: "center", gap: 6 }}>
                           <span
                             style={{
-                              width: 7,
-                              height: 7,
+                              width: 6,
+                              height: 6,
                               borderRadius: "50%",
                               background: r.telemetry?.online_mode === "LIVE_WEBSOCKET_REDIS" ? "#22c55e" : "#71717a",
                             }}
@@ -673,8 +683,8 @@ export const App: React.FC = () => {
                     background: "rgba(59, 130, 246, 0.1)",
                     border: "1px dashed rgba(59, 130, 246, 0.35)",
                     borderRadius: 12,
-                    padding: "10px 14px",
-                    fontSize: 11.5,
+                    padding: "8px 12px",
+                    fontSize: 11,
                     color: "#93c5fd",
                     textAlign: "center",
                   }}

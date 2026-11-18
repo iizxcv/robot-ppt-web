@@ -193,10 +193,12 @@ export const RobotDetailPopupModal: React.FC<{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            padding: "12px 0 14px 0",
+            padding: "10px 0 12px 0",
+            flexWrap: "nowrap",
+            gap: 10,
           }}
         >
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: "flex", gap: 6, flexShrink: 0, overflowX: "auto" }} className="no-scrollbar">
             {MODAL_SLIDES.map((s) => {
               const isActive = currentSlide === s.id;
               return (
@@ -207,24 +209,26 @@ export const RobotDetailPopupModal: React.FC<{
                     background: isActive ? themeColor : "rgba(15, 23, 42, 0.7)",
                     color: isActive ? (isPower ? "#090e1a" : "#ffffff") : "#94a3b8",
                     border: `1px solid ${isActive ? themeColor : "rgba(255, 255, 255, 0.1)"}`,
-                    borderRadius: 10,
-                    padding: "7px 16px",
-                    fontSize: 12.5,
+                    borderRadius: 9,
+                    padding: "6px 12px",
+                    fontSize: 12,
                     fontWeight: 800,
                     cursor: "pointer",
                     display: "flex",
                     alignItems: "center",
                     gap: 6,
-                    transition: "all 0.2s ease",
+                    whiteSpace: "nowrap",
+                    flexShrink: 0,
+                    transition: "all 0.15s ease",
                   }}
                 >
                   <span>{s.tabLabel}</span>
                   <span
                     style={{
-                      fontSize: 10.5,
+                      fontSize: 10,
                       opacity: isActive ? 0.9 : 0.6,
                       background: isActive ? "rgba(0,0,0,0.2)" : "rgba(255,255,255,0.06)",
-                      padding: "2px 6px",
+                      padding: "2px 5px",
                       borderRadius: 4,
                     }}
                   >
@@ -235,11 +239,37 @@ export const RobotDetailPopupModal: React.FC<{
             })}
           </div>
 
-          {/* Slide Arrow Steppers & Counter */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 12, color: "#94a3b8", fontWeight: 700 }}>
-              슬라이드 <b style={{ color: "#ffffff" }}>{currentSlide + 1}</b> / {MODAL_SLIDES.length}
-            </span>
+          {/* Slide Arrow Steppers & Simplified Counter (1 / 4) */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              flexShrink: 0,
+              whiteSpace: "nowrap",
+            }}
+          >
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 800,
+                color: "#cbd5e1",
+                whiteSpace: "nowrap",
+                letterSpacing: "0.5px",
+                background: "rgba(255, 255, 255, 0.05)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                borderRadius: 8,
+                padding: "4px 10px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 4,
+              }}
+            >
+              <b style={{ color: "#ffffff", fontSize: 14 }}>{currentSlide + 1}</b>
+              <span style={{ color: "#64748b" }}>/</span>
+              <span>{MODAL_SLIDES.length}</span>
+            </div>
+
             <button
               disabled={currentSlide === 0}
               onClick={() => setCurrentSlide((prev) => Math.max(0, prev - 1))}
@@ -251,6 +281,8 @@ export const RobotDetailPopupModal: React.FC<{
                 padding: "6px 12px",
                 fontSize: 12,
                 fontWeight: 800,
+                whiteSpace: "nowrap",
+                flexShrink: 0,
                 cursor: currentSlide === 0 ? "not-allowed" : "pointer",
               }}
             >
@@ -275,6 +307,8 @@ export const RobotDetailPopupModal: React.FC<{
                 padding: "6px 14px",
                 fontSize: 12,
                 fontWeight: 800,
+                whiteSpace: "nowrap",
+                flexShrink: 0,
                 cursor: currentSlide === MODAL_SLIDES.length - 1 ? "not-allowed" : "pointer",
               }}
             >
@@ -284,7 +318,17 @@ export const RobotDetailPopupModal: React.FC<{
         </div>
 
         {/* Slide Body Container */}
-        <div style={{ flex: 1, minHeight: 0, overflowY: "auto", paddingRight: 4 }}>
+        <div
+          className="no-scrollbar"
+          style={{
+            flex: 1,
+            minHeight: 0,
+            overflowY: "auto",
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+            paddingRight: 2,
+          }}
+        >
           {/* ==============================================================
               SLIDE 0: 모델 개요 & 3-View 외형 (정면도, 측면도, 후면도 + KPI)
              ============================================================== */}
