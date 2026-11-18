@@ -176,40 +176,6 @@ const ParametricURDFRobot: React.FC<{
 
   return (
     <group>
-      {showOdomVectors && (Math.abs(wx - lx) > 0.05 || Math.abs(wy - ly) > 0.05) && (
-        <group>
-          <Line
-            points={[
-              [lx, 0.15, -ly],
-              [wx, 0.15, -wy],
-            ]}
-            color="#3b82f6"
-            lineWidth={2.5}
-            dashed
-            dashSize={0.14}
-            gapSize={0.08}
-          />
-          <mesh position={[lx, 0.15, -ly]}>
-            <sphereGeometry args={[0.11, 16, 16]} />
-            <meshBasicMaterial color="#71717a" wireframe />
-          </mesh>
-          <Html position={[lx, 0.45, -ly]} center distanceFactor={11}>
-            <div
-              style={{
-                background: "rgba(24,24,27,0.9)",
-                border: "1px dashed #71717a",
-                color: "#a1a1aa",
-                padding: "3px 8px",
-                borderRadius: 6,
-                fontSize: 10,
-                whiteSpace: "nowrap",
-              }}
-            >
-              보정 전 Local Odom ({lx.toFixed(2)}, {ly.toFixed(2)})
-            </div>
-          </Html>
-        </group>
-      )}
 
       <group
         position={[wx, 0, -wy]}
