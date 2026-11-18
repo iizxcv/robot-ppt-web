@@ -7,9 +7,13 @@ export interface RobotRecord {
   id: string;
   hostname: string;
   display_name: string;
+  edition_badge?: string;
   model_type: string;
   model_code: string;
+  target_site?: string;
   color: string;
+  rra_cert_no?: string;
+  rra_cert_date?: string;
   ip: string;
   tags: string[];
   calibration?: {
@@ -24,11 +28,22 @@ export interface RobotRecord {
     length_m: number;
     width_m: number;
     height_m: number;
+    max_lift_height_m?: number;
+    weight_kg?: number;
     wheel_base_m: number;
     laser_tf_xyz: [number, number, number];
     lift_range_m: [number, number];
     drive_type: string;
     arm_type: string;
+  };
+  proposal_specs?: {
+    headline: string;
+    kpi_cards: { label: string; value: string }[];
+    capacity_summary: string;
+    basic_functions: string[];
+    optional_items: string[];
+    key_strengths: string[];
+    parts_sensors: string[];
   };
   telemetry: {
     local_x: number;
@@ -50,7 +65,9 @@ export interface RobotRecord {
     ptz_zoom: number;
     arm_pose: string;
     is_stop: boolean;
+    temp_c?: number;
     online_mode?: string;
+    last_sync_time?: string;
   };
 }
 
@@ -59,6 +76,7 @@ interface UnifiedMapViewer3DProps {
   robots: RobotRecord[];
   selectedRobotId: string;
   onSelectRobot: (id: string) => void;
+  onOpenRobotPopup?: (robot: RobotRecord) => void;
   showOdomVectors?: boolean;
 }
 
@@ -103,7 +121,6 @@ const VirtualFacilityPOIs: React.FC<{ pois: any[]; corridor: number[][] }> = ({ 
 
   return (
     <group>
-      {/* Autonomous Patrol Corridor Guideline */}
       {corridorPts.length > 1 && (
         <Line points={corridorPts} color="#3f3f46" lineWidth={1.8} dashed dashSize={0.22} gapSize={0.14} />
       )}
@@ -173,7 +190,7 @@ const ParametricURDFRobot: React.FC<{
     }
   });
 
-  const { kinematics, telemetry, color, calibration } = robot;
+  const { kinematics, telemetry, color } = robot;
   const lx = telemetry?.local_x ?? 0;
   const ly = telemetry?.local_y ?? 0;
   const wx = telemetry?.world_x ?? 0;
@@ -186,7 +203,6 @@ const ParametricURDFRobot: React.FC<{
 
   return (
     <group>
-      {/* When in Odometry Calibration View, show Raw Odom Pose vs Calibrated World Pose Vector */}
       {showOdomVectors && (Math.abs(wx - lx) > 0.05 || Math.abs(wy - ly) > 0.05) && (
         <group>
           <Line
@@ -232,7 +248,7 @@ const ParametricURDFRobot: React.FC<{
       >
         {isSelected && (
           <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
-            <ringGeometry args={[0.42, 0.52, 32]} />
+            <ringGeometry args={[0.45, 0.56, 32]} />
             <meshBasicMaterial color={color} side={THREE.DoubleSide} />
           </mesh>
         )}
@@ -299,20 +315,23 @@ const ParametricURDFRobot: React.FC<{
           </mesh>
         </group>
 
-        {/* Floating Virtual Monitoring Telemetry Tag */}
-        <Html position={[0, kinematics.height_m + 0.36, 0]} center distanceFactor={10}>
+        {/* Interactive Clickable Floating Tag -> Opens Robot Strength & Spec Popup */}
+        <Html position={[0, kinematics.height_m + 0.38, 0]} center distanceFactor={10}>
           <div
-            onClick={() => onSelect()}
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect();
+            }}
             style={{
-              background: isSelected ? "#141417" : "rgba(20, 20, 23, 0.9)",
+              background: isSelected ? "#141417" : "rgba(20, 20, 23, 0.92)",
               border: `1.5px solid ${isSelected ? "#ff3b30" : color}`,
-              borderRadius: 10,
+              borderRadius: 12,
               padding: "7px 12px",
               color: "#ffffff",
               fontSize: 11.5,
               whiteSpace: "nowrap",
               cursor: "pointer",
-              boxShadow: isSelected ? "0 8px 24px rgba(255, 59, 48, 0.35)" : "0 4px 12px rgba(0,0,0,0.5)",
+              boxShadow: isSelected ? "0 8px 24px rgba(255, 59, 48, 0.38)" : "0 4px 12px rgba(0,0,0,0.6)",
             }}
           >
             <div style={{ fontWeight: 800, display: "flex", alignItems: "center", gap: 6 }}>
@@ -321,17 +340,24 @@ const ParametricURDFRobot: React.FC<{
                   width: 8,
                   height: 8,
                   borderRadius: "50%",
-                  background: telemetry?.online_mode === "LIVE_REDIS_SYNC" ? "#22c55e" : "#f59e0b",
+                  background: telemetry?.online_mode === "LIVE_WEBSOCKET_REDIS" ? "#22c55e" : "#71717a",
                 }}
               />
-              <span>{robot.display_name}</span>
+              <span style={{ color }}>{robot.display_name}</span>
               <span style={{ color: "#4ade80", fontWeight: 700 }}>{telemetry?.battery_pct}%</span>
             </div>
-            <div style={{ fontSize: 10.5, color: "#d4d4d8", marginTop: 3 }}>
-              📍 {telemetry?.position_name || "관제 지점"}
+            <div style={{ fontSize: 10.5, color: "#e4e4e7", marginTop: 3 }}>
+              📍 {telemetry?.position_name} · ({wx.toFixed(2)}, {wy.toFixed(2)})m
             </div>
-            <div style={{ fontSize: 10, color: "#a1a1aa", marginTop: 1, fontFamily: "monospace" }}>
-              Odom({lx.toFixed(2)}, {ly.toFixed(2)}) ➔ Twin({wx.toFixed(2)}, {wy.toFixed(2)})m
+            <div
+              style={{
+                fontSize: 10,
+                color: "#ff3b30",
+                fontWeight: 800,
+                marginTop: 3,
+              }}
+            >
+              🔍 클릭하여 모델 핵심 강점 & 부품 구성 보기
             </div>
           </div>
         </Html>
@@ -345,11 +371,12 @@ export const UnifiedMapViewer3D: React.FC<UnifiedMapViewer3DProps> = ({
   robots,
   selectedRobotId,
   onSelectRobot,
-  showOdomVectors = true,
+  onOpenRobotPopup,
+  showOdomVectors = false,
 }) => {
   const masterMap = mapData?.master_map;
   const wallHeight = mapData?.alignment?.wall_extrusion_height_m ?? 1.85;
-  const center = [1.4, -1.5];
+  const center = [1.2, -1.4];
 
   return (
     <div
@@ -363,7 +390,7 @@ export const UnifiedMapViewer3D: React.FC<UnifiedMapViewer3DProps> = ({
         border: "1.5px solid #222226",
       }}
     >
-      <Canvas camera={{ position: [center[0] + 5.8, 6.2, -center[1] + 5.8], fov: 40 }}>
+      <Canvas camera={{ position: [center[0] + 5.6, 6.0, -center[1] + 5.6], fov: 40 }}>
         <color attach="background" args={["#0d0d10"]} />
         <ambientLight intensity={0.85} />
         <directionalLight position={[8, 16, 10]} intensity={1.4} />
@@ -402,7 +429,10 @@ export const UnifiedMapViewer3D: React.FC<UnifiedMapViewer3DProps> = ({
             key={robot.id}
             robot={robot}
             isSelected={robot.id === selectedRobotId}
-            onSelect={() => onSelectRobot(robot.id)}
+            onSelect={() => {
+              onSelectRobot(robot.id);
+              if (onOpenRobotPopup) onOpenRobotPopup(robot);
+            }}
             showOdomVectors={showOdomVectors}
           />
         ))}
@@ -414,7 +444,7 @@ export const UnifiedMapViewer3D: React.FC<UnifiedMapViewer3DProps> = ({
           position: "absolute",
           top: 16,
           left: 16,
-          background: "rgba(14, 14, 18, 0.9)",
+          background: "rgba(14, 14, 18, 0.92)",
           border: "1px solid #27272a",
           borderRadius: 12,
           padding: "10px 14px",
@@ -424,11 +454,11 @@ export const UnifiedMapViewer3D: React.FC<UnifiedMapViewer3DProps> = ({
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 800 }}>
-          <span style={{ color: "#ff3b30" }}>● VIRTUAL SPACE TWIN</span>
-          <span>실시간 공간 가상화 & 오도메트리 정합 관제</span>
+          <span style={{ color: "#ff3b30" }}>● LIVE WEBSOCKET TWIN</span>
+          <span>실환경 WebSocket 기반 로봇 현위치 실시간 관제 시스템</span>
         </div>
         <div style={{ fontSize: 11, color: "#a1a1aa", marginTop: 4 }}>
-          Master `map.yaml` Origin: `[-1.391m, -6.509m]` · Power Odom 보정: `ΔX = -1.29m, ΔY = -0.48m`
+          💡 3D 공간 위의 <b>로봇 아바타 또는 이름표를 클릭</b>하면 해당 모델의 핵심 강점·부품 구성·실시간 API 상세 팝업이 열립니다.
         </div>
       </div>
     </div>

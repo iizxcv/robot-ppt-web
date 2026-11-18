@@ -1,88 +1,82 @@
 {
-  "deck_title": "MOSS Spatial Digital Twin & API Monitoring Showcase",
+  "deck_title": "SR ROBOTICS — 지능형 인프라 AI 순찰 로봇 솔루션 제안서",
   "slides": [
     {
       "id": "slide-01",
       "number": "01",
-      "nav_label": "가상 공간 통합 관제 (3D Twin)",
-      "title": "실제 물리 공간의 완벽한 3D 디지털 트윈 가상화",
-      "subtitle": "Virtual Space Command Center · Multi-Robot Live Telemetry",
-      "focus_mode": "3d_virtual_space",
-      "target_tag": "#all",
+      "nav_label": "PART 01 · 기업 소개 & 비전",
+      "title": "IT 인프라 구축부터 AI 순찰 로봇까지 지능형 인프라 솔루션",
+      "subtitle": "SR ROBOTICS COMPANY PROFILE · SMART · RELIABLE · INNOVATIVE",
+      "focus_mode": "company_overview",
       "highlights": [
-        "실제 시연장(map.pgm)의 벽면, 유리벽(Glasswall), 서버 랙(Rack 1~3), 충전 스테이션을 1:1 스케일의 3D 가상 공간으로 재구축",
-        "각 로봇의 Upper-PC Redis(position_info, chassis_info, upper_info)를 실시간 수집하여 실제 물리 공간과 동일한 위치·자세 동기화",
-        "조작 개입 없이도 로봇의 현재 위치, 주행 궤적, 리프트 높이, 충전 상태가 가상 공간 위에서 실시간 관제됨"
+        "2023년 설립된 SR ROBOTICS는 자체 AI 스마트 순찰 로봇을 보유하고 데이터센터 및 고·저압 배전실 솔루션을 제공합니다.",
+        "싱가포르 본사·중국 지사에서 2010년부터 21년간 전문 역량 축적, SK하이닉스·삼성SDI·신한은행 등 100건+ 성공 사례 보유",
+        "MISSION: 로봇으로 기업 인프라 운영의 효율성과 안전의 새로운 기준을 재정의합니다."
       ]
     },
     {
       "id": "slide-02",
       "number": "02",
-      "nav_label": "오도메트리 & 좌표계 정합 원리",
-      "title": "map.yaml 원점 + 부팅 오도메트리 3D 공간 정합",
-      "subtitle": "Cartographer pbstream · Boot Odometry · SE(2) Coordinate Calibration",
-      "focus_mode": "odom_calibration",
-      "target_tag": "#all",
+      "nav_label": "PART 02 · 실내 3종 라인업 & 3D 강점",
+      "title": "AI 스마트 순찰 로봇 3종 라인업 & 3D 실시간 공간 관제",
+      "subtitle": "3D 시뮬레이션 공간에서 각 로봇을 클릭하면 모델별 핵심 강점·부품 구성·실시간 API 상태 팝업이 표시됩니다",
+      "focus_mode": "products_3d_interactive",
       "highlights": [
-        "로봇의 현재 위치는 map.yaml의 origin 좌표와 부팅 시 초기화되는 오도메트리(odom -> base_link) 및 AMCL/Cartographer 정합으로 결정",
-        "Flagship([-1.39m, -6.51m])과 Power([-2.52m, -5.53m])의 서로 다른 SLAM 원점과 오도메트리 기준점을 공통 랜드마크(Rack 3, Glasswall) 기준으로 보정",
-        "별도의 SE(2) 변환 파이프라인(ΔX=-1.29m, ΔY=-0.48m)을 통해 서로 다른 좌표계의 로봇들을 단일 3D 관제 공간에 오차 없이 통합"
+        "공통 기본 기능: 자동 순찰 · 실시간 모니터링 · 환경 검측 · 원격 제어 · 음성 인터콤 · 장비 검사 · 안전 관리 · 화재 감시",
+        "3종 공통 강점: 7×24시간 무인 운용 + 다차원 정밀 모니터링(AI 비전·RFID·도어개폐) + 모듈/센서 커스터마이징",
+        "국립전파연구원(RRA) 방송통신기자재 적합등록 KC 인증 완료 (IIR-01 / IIR-02 / IIR-03)"
       ]
     },
     {
       "id": "slide-03",
       "number": "03",
-      "nav_label": "이기종 로봇 라인업 & 기구학",
-      "title": "3종 로봇 하드웨어 스펙 & 실측 기구학 비교",
-      "subtitle": "Flagship V2.1 · Professional V3.5 · Power V3.0",
-      "focus_mode": "robot_lineup",
-      "target_tag": "#all",
+      "nav_label": "CORE TECH · 4대 핵심 기술 & 오도메트리",
+      "title": "4가지 핵심 기술 & 실환경 WebSocket 오도메트리 공간 정합",
+      "subtitle": "01 SLAM 내비게이션 · 02 6+2축 로봇 팔 · 03 표시등 비전 인식 · 04 능동/수동형 RFID",
+      "focus_mode": "core_tech_odometry",
       "highlights": [
-        "Flagship (MR-I-P2306): 0.54×0.44×1.57m, 2륜 차동 구동, 듀얼 열화상 및 초당 700장 고속 RFID 스캔 (데이터센터 특화)",
-        "Professional (MR-I-P2308): 0.58×0.54×1.57m, 4륜 독립 조향(Crab Walk), 6축 로봇암 + 힘센서 그리퍼 (캐비닛 도어 개폐 특화)",
-        "Power (MR-P-2307): 0.54×0.44×1.58m, 4륜 독립 서스펜션, 25배율 광학 PTZ + 2축 부분방전(PD) 프로브 (고압 배전실 특화)"
+        "01 SLAM 내비게이션: map.yaml 원점 + 부팅 시 오도메트리(odom) 및 센서 오차 실시간 보정으로 ±2cm 정밀 위치 추정",
+        "02 로봇 팔 복합 작업 (Pro): 6축 메인 + 2축 보조 암 협동으로 캐비닛 도어 개폐, 서버 버튼·차단기 조작",
+        "03 표시등 비전 인식 & 04 RFID 인식: 색상/점멸 빈도 판독 및 도어 폐쇄 상태 금속 메쉬 간섭 극복 무접촉 재고 실사"
       ]
     },
     {
       "id": "slide-04",
       "number": "04",
-      "nav_label": "멀티 PC & ROS 코어 아키텍처",
-      "title": "분산형 멀티 PC 하드웨어 & ROS 데이터 파이프라인",
-      "subtitle": "Upper-PC (.100 두뇌) · Chassis-PC (.120 주행) · Sensor-PC (.105 말단)",
-      "focus_mode": "core_architecture",
-      "target_tag": "#all",
+      "nav_label": "PART 03 · 4대 핵심 운영 솔루션",
+      "title": "AI 스마트 순찰 · 자산 실사 · 도어 자동 개폐 · 화재 예방",
+      "subtitle": "OpenCV 실시간 비전 분석 + 5단계 도어 개폐 + 170℃ 열 에어로졸 능동 소화 패치",
+      "focus_mode": "four_solutions_vision",
       "highlights": [
-        "Upper-PC (192.168.10.100): moss-dispatch (7대 멀티프로세스 상태머신) + moss-analytics (AI 비전) + Redis/RabbitMQ/MySQL 상태 버스",
-        "Chassis-PC (192.168.10.120): ROS Master(:11311), Pavo2/YDLidar 라이다, map_server(map.yaml), AMCL, move_base 자율주행",
-        "DNS 네이밍 레지스트리(flagship.robot.local, power.robot.local, #all)를 통한 이기종 멀티 로봇 통합 식별 및 상태 스트리밍"
+        "AI 스마트 순찰 & 자산 실사: 7×24h 표준 절차 순찰, 표시등/온도 감지, 패시브·액티브 RFID 및 QR 코드로 무개방 자산 실사",
+        "프로페셔널 5단계 도어 자동 개폐: ①손잡이 식별 ➔ ②손잡이 회전(잠금해제) ➔ ③문 열기 ➔ ④내부 정밀검사 ➔ ⑤문 닫기/잠금",
+        "화재 예방 & 능동 소화 패치: 온습도 클라우드 맵, 유해가스(CO/SO2/H2S/SF6) 감시, 본체 내부 170℃ 자동 작동 에어로졸 소화 패치 2개 탑재"
       ]
     },
     {
       "id": "slide-05",
       "number": "05",
-      "nav_label": "OpenCV & AI 비전 실시간 관제",
-      "title": "OpenCV & 온보드 AI 비전 실시간 분석 스트림",
-      "subtitle": "42U Rack ROI · HSV 상태등 인식 · 열화상 INFERNO 핫스팟 · Canny Edge",
-      "focus_mode": "opencv_vision",
-      "target_tag": "#flagship",
+      "nav_label": "PLATFORM · 다중 로봇 실시간 관제",
+      "title": "실환경 WebSocket 기반 다중 로봇 통합 관리 플랫폼",
+      "subtitle": "ws://<IP>/platformSocket/timely/data/robotStatus · Redis 상태 버스 실시간 연동",
+      "focus_mode": "live_platform_websocket",
       "highlights": [
-        "로봇 온보드 비전 엔진(:8083 /algoritmic_server/pro_roi)과 OpenCV 실시간 영상 처리 파이프라인 결합",
-        "42U 서버 랙 가이드라인 자동 분할 및 HSV 색공간 마스킹을 통한 정상(Green)/알람(Red) LED 상태등 실시간 검출",
-        "열화상(Infrared) 카메라 프레임의 COLORMAP_INFERNO 변환 및 minMaxLoc 기반 최고 발열 지점(Hotspot) 자동 추적 관제"
+        "가상 데모가 아닌 실제 로봇의 WebSocket 및 Redis 상태 버스에서 올라오는 실시간 좌표·배터리·리프트·센서 데이터를 직결 관제",
+        "다중 로봇 관리 · 다중 영상 동시 모니터링 · 순찰/알람 데이터 즉시 조회 · 보고서 자동 생성 및 타 플랫폼(CMDB) API 연동",
+        "SHA-512 3088라운드 보안 인증(/api/v1/auth/login) 및 설비 순찰점(/api/v1/position/list) 실시간 동기화"
       ]
     },
     {
       "id": "slide-06",
       "number": "06",
-      "nav_label": "보안 API & 텔레메트리 규격",
-      "title": "SHA-512 3088회 인증 & 실시간 관제 API 아키텍처",
-      "subtitle": "REST API (/api/v1/*) · WebSocket (robotStatus) · Redis Telemetry Bus",
-      "focus_mode": "api_architecture",
-      "target_tag": "#all",
+      "nav_label": "PART 04 · 도입 효과 & 주요 레퍼런스",
+      "title": "수동 운영 대비 도입 효과 & 글로벌 핵심 레퍼런스",
+      "subtitle": "SK하이닉스 · 삼성SDI · 남방항공 · 신한은행 · 오리온 · 화홍반도체",
+      "focus_mode": "roi_and_cases",
       "highlights": [
-        "고강도 인증 규격: 평문 비밀번호를 UTF-8 바이트 기준 SHA-512로 3088회 연쇄 해싱하여 JWT Token 발급",
-        "표준 관제 API(/api/v1/position/list, /api/v1/path/list, /api/v1/base/robot/info)를 통한 설비 지점 및 로봇 상태 자동 수집",
-        "WebSocket(/ws/showcase)을 통해 전 로봇의 보정 전 로컬 좌표(Local Odom/Map)와 보정 후 3D 월드 좌표(World Twin)를 실시간 브로드캐스트"
+        "수동 대비 압도적 ROI: 순찰 효율 300% ↑ (일 2회➔6회), 평균 장애 발견 시간 98.7% 단축 (2시간➔5~15분), 보고서 통계 100% 자동화",
+        "대표 로봇 도입 사례: SK하이닉스(로봇 3대·900개 랙·3,000대 장비 자산실사), 삼성SDI(서버실 순찰), 남방항공(로봇 7대·930개 랙·72세트 도어 연동)",
+        "7×24H 유지보수 & SI: 서버·스토리지·네트워크·DB 전 계층 지원 (DELL, IBM, HUAWEI, VMware, NetApp, CISCO 핵심 파트너십)"
       ]
     }
   ]
