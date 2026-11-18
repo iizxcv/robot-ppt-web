@@ -86,7 +86,7 @@ const ExtrudedWalls: React.FC<{
   color?: string;
   emissive?: string;
   opacity?: number;
-}> = ({ blocks, wallHeight, color = "#27272a", emissive = "#ff3b30", opacity = 0.78 }) => {
+}> = ({ blocks, wallHeight, color = "#27272a", emissive = "#1e3a8a", opacity = 0.78 }) => {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
 
@@ -169,8 +169,9 @@ const ParametricURDFRobot: React.FC<{
   const yawRad = THREE.MathUtils.degToRad(telemetry?.world_yaw_deg ?? 0);
   const liftH = Math.min(kinematics.height_m - 0.25, Math.max(0.17, telemetry?.lift_height_m ?? 0.17));
   const ptzPanRad = THREE.MathUtils.degToRad(telemetry?.ptz_pan_deg ?? 0);
-  const isPro = robot.model_type === "profession_4wd";
-  const isPower = robot.model_type === "power_4wd";
+  const isPro = robot.model_type === "profession_4wd" || robot.id.includes("pro");
+  const isPower = robot.model_type === "power_4wd" || robot.id.includes("pwr");
+  const englishName = isPower ? "Power" : isPro ? "Professional" : "Flagship";
 
   return (
     <group>
@@ -181,7 +182,7 @@ const ParametricURDFRobot: React.FC<{
               [lx, 0.15, -ly],
               [wx, 0.15, -wy],
             ]}
-            color="#ff3b30"
+            color="#3b82f6"
             lineWidth={2.5}
             dashed
             dashSize={0.14}
@@ -286,50 +287,43 @@ const ParametricURDFRobot: React.FC<{
           </mesh>
         </group>
 
-        {/* Interactive Clickable Floating Tag -> Opens Robot Strength & Spec Popup */}
-        <Html position={[0, kinematics.height_m + 0.38, 0]} center distanceFactor={10}>
+        {/* Minimal English Name Badge Box */}
+        <Html position={[0, kinematics.height_m + 0.28, 0]} center distanceFactor={9}>
           <div
             onClick={(e) => {
               e.stopPropagation();
               onSelect();
             }}
+            title="클릭하여 모델 상세 정보 보기"
             style={{
-              background: isSelected ? "#141417" : "rgba(20, 20, 23, 0.92)",
-              border: `1.5px solid ${isSelected ? "#ff3b30" : color}`,
-              borderRadius: 12,
-              padding: "7px 12px",
+              background: isSelected ? "#1e3a8a" : "rgba(10, 16, 32, 0.88)",
+              border: `1.5px solid ${isSelected ? "#60a5fa" : "#3b82f6"}`,
+              borderRadius: 6,
+              padding: "4px 12px",
               color: "#ffffff",
-              fontSize: 11.5,
+              fontSize: 12,
+              fontWeight: 700,
+              fontFamily: "Calibri, 'Malgun Gothic', sans-serif",
+              letterSpacing: "0.03em",
               whiteSpace: "nowrap",
               cursor: "pointer",
-              boxShadow: isSelected ? "0 8px 24px rgba(255, 59, 48, 0.38)" : "0 4px 12px rgba(0,0,0,0.6)",
+              boxShadow: isSelected ? "0 0 14px rgba(96, 165, 250, 0.6)" : "0 3px 10px rgba(0, 0, 0, 0.5)",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              userSelect: "none",
             }}
           >
-            <div style={{ fontWeight: 800, display: "flex", alignItems: "center", gap: 6 }}>
-              <span
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: "50%",
-                  background: telemetry?.online_mode === "LIVE_WEBSOCKET_REDIS" ? "#22c55e" : "#71717a",
-                }}
-              />
-              <span style={{ color }}>{robot.display_name}</span>
-              <span style={{ color: "#4ade80", fontWeight: 700 }}>{telemetry?.battery_pct}%</span>
-            </div>
-            <div style={{ fontSize: 10.5, color: "#e4e4e7", marginTop: 3 }}>
-              📍 {telemetry?.position_name} · ({wx.toFixed(2)}, {wy.toFixed(2)})m
-            </div>
-            <div
+            <span
               style={{
-                fontSize: 10,
-                color: "#ff3b30",
-                fontWeight: 800,
-                marginTop: 3,
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: telemetry?.online_mode === "LIVE_WEBSOCKET_REDIS" ? "#22c55e" : "#64748b",
+                boxShadow: telemetry?.online_mode === "LIVE_WEBSOCKET_REDIS" ? "0 0 6px #22c55e" : "none",
               }}
-            >
-              🔍 클릭하여 모델 핵심 강점 & 부품 구성 보기
-            </div>
+            />
+            <span>{englishName}</span>
           </div>
         </Html>
       </group>
@@ -368,10 +362,10 @@ export const UnifiedMapViewer3D: React.FC<UnifiedMapViewer3DProps> = ({
       }}
     >
       <Canvas camera={{ position: [center[0] + 5.6, 6.0, -center[1] + 5.6], fov: 40 }}>
-        <color attach="background" args={["#0d0d10"]} />
-        <ambientLight intensity={0.85} />
+        <color attach="background" args={["#080a14"]} />
+        <ambientLight intensity={0.9} />
         <directionalLight position={[8, 16, 10]} intensity={1.4} />
-        <pointLight position={[1.5, 4, 1.5]} intensity={1.0} color="#ff3b30" />
+        <pointLight position={[1.5, 4, 1.5]} intensity={0.8} color="#3b82f6" />
 
         <OrbitControls target={[center[0], 0.4, -center[1]]} maxPolarAngle={Math.PI / 2.08} />
 
@@ -380,16 +374,16 @@ export const UnifiedMapViewer3D: React.FC<UnifiedMapViewer3DProps> = ({
           args={[26, 26]}
           cellSize={0.5}
           cellThickness={0.6}
-          cellColor="#27272a"
+          cellColor="#1e293b"
           sectionSize={2.5}
           sectionThickness={1.2}
-          sectionColor="#ff3b30"
+          sectionColor="#2563eb"
           fadeDistance={24}
         />
 
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[center[0], 0, -center[1]]}>
           <planeGeometry args={[26, 26]} />
-          <meshStandardMaterial color="#0d0d10" transparent opacity={0.88} />
+          <meshStandardMaterial color="#080a14" transparent opacity={0.9} />
         </mesh>
 
         {masterMap?.overlap_blocks ? (
@@ -458,8 +452,8 @@ export const UnifiedMapViewer3D: React.FC<UnifiedMapViewer3DProps> = ({
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 800 }}>
-          <span style={{ color: "#ff3b30" }}>● LIVE WEBSOCKET TWIN</span>
-          <span>실환경 WebSocket 기반 로봇 현위치 실시간 관제 시스템</span>
+          <span style={{ color: "#22c55e" }}>● LIVE WEBSOCKET TWIN</span>
+          <span>실환경 WebSocket 기반 로봇 현위치 관제 시스템</span>
         </div>
         <div style={{ fontSize: 11, color: "#a1a1aa", marginTop: 4 }}>
           💡 3D 공간 위의 <b>로봇 아바타 또는 이름표를 클릭</b>하면 해당 모델의 핵심 강점·부품 구성·실시간 API 상세 팝업이 열립니다.
