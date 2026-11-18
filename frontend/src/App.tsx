@@ -125,7 +125,7 @@ export const App: React.FC = () => {
         background: "#0a0a0c",
         color: "#ffffff",
         display: "grid",
-        gridTemplateColumns: "300px 1fr",
+        gridTemplateColumns: "clamp(300px, 19vw, 340px) 1fr",
         overflow: "hidden",
         userSelect: "none",
       }}
@@ -135,7 +135,7 @@ export const App: React.FC = () => {
         style={{
           background: "#0f0f13",
           borderRight: "1px solid #1f1f26",
-          padding: "26px 20px",
+          padding: "26px 18px",
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
@@ -182,13 +182,13 @@ export const App: React.FC = () => {
                     background: active ? "rgba(59, 130, 246, 0.14)" : "transparent",
                     border: `1.5px solid ${active ? "#3b82f6" : "transparent"}`,
                     borderRadius: 12,
-                    padding: "12px 14px",
+                    padding: "10px 12px",
                     textAlign: "left",
                     color: active ? "#ffffff" : "#a1a1aa",
                     cursor: "pointer",
                     display: "flex",
                     alignItems: "center",
-                    gap: 12,
+                    gap: 10,
                     transition: "all 0.2s ease",
                   }}
                 >
@@ -202,14 +202,13 @@ export const App: React.FC = () => {
                   >
                     {s.number}
                   </span>
-                  <div style={{ flex: 1, overflow: "hidden" }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
                     <div
                       style={{
-                        fontSize: 13.5,
+                        fontSize: "clamp(12px, 0.82vw, 13px)",
                         fontWeight: active ? 800 : 600,
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
+                        wordBreak: "keep-all",
+                        lineHeight: 1.35,
                       }}
                     >
                       {s.nav_label || s.title}
@@ -230,8 +229,10 @@ export const App: React.FC = () => {
             padding: 14,
           }}
         >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-            <span style={{ fontSize: 11, fontWeight: 800, color: "#a1a1aa" }}>실환경 WebSocket 관제 로봇</span>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, flexWrap: "wrap", gap: 6 }}>
+            <span style={{ fontSize: "clamp(10.5px, 0.72vw, 11.5px)", fontWeight: 800, color: "#a1a1aa", whiteSpace: "nowrap" }}>
+              실환경 WebSocket 관제
+            </span>
             <button
               onClick={() => setShowCalibModal(true)}
               style={{
@@ -243,6 +244,7 @@ export const App: React.FC = () => {
                 fontSize: 10.5,
                 fontWeight: 700,
                 cursor: "pointer",
+                whiteSpace: "nowrap",
               }}
             >
               오도메트리 보정
@@ -353,9 +355,10 @@ export const App: React.FC = () => {
                   borderLeft: i === 0 ? "3px solid #3b82f6" : "3px solid #27272a",
                   borderRadius: "0 10px 10px 0",
                   padding: "10px 14px",
-                  fontSize: 12.5,
+                  fontSize: "clamp(11.5px, 0.78vw, 12.5px)",
                   color: "#d4d4d8",
                   lineHeight: 1.48,
+                  wordBreak: "keep-all",
                 }}
               >
                 {h}
@@ -470,7 +473,7 @@ export const App: React.FC = () => {
 
           {/* Slide 02: PART 02 Indoor 3-Robot Lineup + 3D Click-to-Popup Showcase */}
           {currentSlideIdx === 1 && (
-            <div style={{ flex: 1, display: "grid", gridTemplateColumns: "380px 1fr", gap: 18, minHeight: 0 }}>
+            <div style={{ flex: 1, display: "grid", gridTemplateColumns: "minmax(340px, 28vw) 1fr", gap: 18, minHeight: 0 }}>
               {/* Left: 3 Indoor Robot Lineup Cards (Clicking any card or 3D robot opens the Detailed Popup!) */}
               <div style={{ display: "flex", flexDirection: "column", gap: 12, overflowY: "auto" }}>
                 {robots.map((r) => (
@@ -482,49 +485,75 @@ export const App: React.FC = () => {
                     }}
                     style={{
                       background: "#131317",
-                      border: `2px solid ${r.id === selectedRobotId ? r.color : "#222228"}`,
+                      border: `2px solid ${r.id === selectedRobotId ? (r.color || "#3b82f6") : "#222228"}`,
                       borderRadius: 18,
-                      padding: 16,
+                      padding: "16px 18px",
                       cursor: "pointer",
                       transition: "all 0.2s ease",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 6,
                     }}
                   >
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 6 }}>
                       <span
                         style={{
-                          background: `${r.color}22`,
-                          color: r.color,
+                          background: `${r.color || "#3b82f6"}22`,
+                          color: r.color || "#3b82f6",
                           padding: "3px 10px",
                           borderRadius: 99,
                           fontSize: 11.5,
                           fontWeight: 800,
+                          whiteSpace: "nowrap",
                         }}
                       >
                         {r.edition_badge}
                       </span>
-                      <span style={{ fontSize: 11.5, color: "#4ade80", fontWeight: 700 }}>
+                      <span style={{ fontSize: 11.5, color: "#4ade80", fontWeight: 700, whiteSpace: "nowrap" }}>
                         KC인증 {r.rra_cert_no}
                       </span>
                     </div>
 
-                    <div style={{ fontSize: 19, fontWeight: 800, marginTop: 8 }}>{r.display_name}</div>
-                    <div style={{ fontSize: 12, color: "#a1a1aa", marginTop: 4 }}>{r.target_site}</div>
+                    <div style={{ fontSize: "clamp(16px, 1.2vw, 19px)", fontWeight: 800, marginTop: 4 }}>
+                      {r.display_name}
+                    </div>
+
+                    <div
+                      style={{
+                        fontSize: "clamp(12px, 0.8vw, 13px)",
+                        color: "#a1a1aa",
+                        lineHeight: 1.5,
+                        wordBreak: "keep-all",
+                      }}
+                    >
+                      {r.target_site}
+                    </div>
 
                     <div
                       style={{
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
-                        marginTop: 12,
+                        marginTop: 6,
                         paddingTop: 10,
                         borderTop: "1px solid #222228",
                         fontSize: 12,
                       }}
                     >
-                      <span style={{ color: "#e4e4e7" }}>
-                        📍 현위치: <b>{r.telemetry?.position_name}</b>
+                      <span style={{ color: "#e4e4e7", display: "flex", alignItems: "center", gap: 6 }}>
+                        <span
+                          style={{
+                            width: 7,
+                            height: 7,
+                            borderRadius: "50%",
+                            background: r.telemetry?.online_mode === "LIVE_WEBSOCKET_REDIS" ? "#22c55e" : "#71717a",
+                          }}
+                        />
+                        <span>현위치: <b>{r.telemetry?.position_name}</b></span>
                       </span>
-                      <span style={{ color: "#3b82f6", fontWeight: 800 }}>상세 강점 팝업 열기 ➔</span>
+                      <span style={{ color: "#4ade80", fontWeight: 700, fontSize: 12.5 }}>
+                        {r.telemetry?.battery_pct ?? 0}%
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -1009,7 +1038,7 @@ export const App: React.FC = () => {
                 cursor: "pointer",
               }}
             >
-              다음 장표 (커튼콜 전환) →
+              다음 장표 →
             </button>
           </div>
         </div>
