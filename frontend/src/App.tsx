@@ -550,75 +550,116 @@ export const App: React.FC = () => {
             </div>
           )}
 
-          {/* Slide 03: CORE TECHNOLOGY (4 Core Techs from Page 16 + Live Odometry Calibration) */}
+          {/* Slide 03: CORE TECHNOLOGY (4 Core Techs from Page 16 + Dual map.pgm SE(2) Fusion & Live Robot Pose Calibration) */}
           {currentSlideIdx === 2 && (
-            <div style={{ flex: 1, display: "grid", gridTemplateColumns: "48% 52%", gap: 18, minHeight: 0 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                {[
-                  {
-                    num: "01 SLAM NAVIGATION",
-                    title: "SLAM 내비게이션 & 오도메트리 보정",
-                    color: "#00f2fe",
-                    items: [
-                      "로봇 자율 내비게이션 및 ±2cm 정밀 위치 추정",
-                      "map.yaml 원점 + 부팅 시 오도메트리(odom) 실시간 보상",
-                      "이종 로봇 간 SE(2) 좌표 변환으로 단일 3D 관제 통합",
-                    ],
-                  },
-                  {
-                    num: "02 ROBOTIC ARM (Professional)",
-                    title: "6+2축 로봇 팔 복합 작업 기술",
-                    color: "#a855f7",
-                    items: [
-                      "6축 메인(±0.05mm) + 2축 보조 로봇 팔 상호 협동",
-                      "자동 캐비닛 도어 개폐 및 서버 버튼/계기 조작",
-                      "단로/폐로 누름, 배전 차단기 개방·폐쇄",
-                    ],
-                  },
-                  {
-                    num: "03 VISION RECOGNITION",
-                    title: "AI 표시등 & 계측기 인식 기술",
-                    color: "#ff3b30",
-                    items: [
-                      "표시등 색상 감지 및 점멸 상태·빈도 정밀 측정",
-                      "장비 고장 분석 및 고장 등급 판정 근거 자동 생성",
-                      "온보드 AI(:8083) + OpenCV ROI 실시간 비전 처리",
-                    ],
-                  },
-                  {
-                    num: "04 RFID READER",
-                    title: "능동형/수동형 RFID 무접촉 인식",
-                    color: "#f59e0b",
-                    items: [
-                      "캐비닛 도어를 닫은 상태에서도 고속 자산 태그 인식",
-                      "금속 메쉬 도어 간섭·신호 차폐 문제 완벽 해결",
-                      "로봇 자동화 및 무인 재고 실사 보고서 자동 생성",
-                    ],
-                  },
-                ].map((tech) => (
-                  <div
-                    key={tech.num}
-                    style={{
-                      background: "#131317",
-                      border: "1px solid #222228",
-                      borderRadius: 16,
-                      padding: 18,
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontSize: 11, fontWeight: 800, color: tech.color }}>{tech.num}</div>
-                      <div style={{ fontSize: 17, fontWeight: 800, margin: "6px 0 12px 0" }}>{tech.title}</div>
+            <div style={{ flex: 1, display: "grid", gridTemplateColumns: "46% 54%", gap: 18, minHeight: 0 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12, justifyContent: "space-between", minHeight: 0 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  {[
+                    {
+                      num: "01 SLAM & MAP FUSION",
+                      title: "듀얼 map.pgm 정합 & 위치 보정",
+                      color: "#00f2fe",
+                      items: [
+                        "Flagship(167×164) + Power(199×425) map.pgm 병합",
+                        "Power 맵 ΔΘ=+90.25°, ΔX=+1.65m, ΔY=-5.875m 보정",
+                        "동일 보정 행렬로 로봇 실시간 현위치 3D 자동 정합",
+                      ],
+                    },
+                    {
+                      num: "02 ROBOTIC ARM (Pro)",
+                      title: "6+2축 로봇 팔 복합 작업",
+                      color: "#a855f7",
+                      items: [
+                        "6축 메인(±0.05mm) + 2축 보조 암 상호 협동",
+                        "자동 캐비닛 도어 개폐 및 버튼/차단기 조작",
+                      ],
+                    },
+                    {
+                      num: "03 VISION RECOGNITION",
+                      title: "표시등 & 계측기 비전 인식",
+                      color: "#ff3b30",
+                      items: [
+                        "표시등 색상 감지 및 점멸 빈도 측정",
+                        "장비 고장 등급 판정 근거 자동 생성",
+                      ],
+                    },
+                    {
+                      num: "04 RFID READER",
+                      title: "능동/수동형 RFID 무접촉 실사",
+                      color: "#f59e0b",
+                      items: [
+                        "도어 폐쇄 상태 금속 메쉬 간섭 극복 인식",
+                        "무인 재고 실사 및 변경 알림 자동화",
+                      ],
+                    },
+                  ].map((tech) => (
+                    <div
+                      key={tech.num}
+                      style={{
+                        background: "#131317",
+                        border: "1px solid #222228",
+                        borderRadius: 14,
+                        padding: 14,
+                      }}
+                    >
+                      <div style={{ fontSize: 10.5, fontWeight: 800, color: tech.color }}>{tech.num}</div>
+                      <div style={{ fontSize: 15, fontWeight: 800, margin: "4px 0 8px 0" }}>{tech.title}</div>
                       {tech.items.map((it) => (
-                        <div key={it} style={{ fontSize: 12.5, color: "#d4d4d8", marginBottom: 6, lineHeight: 1.45 }}>
+                        <div key={it} style={{ fontSize: 11.5, color: "#d4d4d8", marginBottom: 4, lineHeight: 1.4 }}>
                           • {it}
                         </div>
                       ))}
                     </div>
+                  ))}
+                </div>
+
+                {/* Live 2D map.pgm Fusion Verification Card */}
+                <div
+                  style={{
+                    background: "#131317",
+                    border: "1px solid #222228",
+                    borderRadius: 16,
+                    padding: 14,
+                    display: "grid",
+                    gridTemplateColumns: "150px 1fr",
+                    gap: 14,
+                    alignItems: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      height: 125,
+                      background: "#09090b",
+                      borderRadius: 10,
+                      overflow: "hidden",
+                      border: "1px solid #27272a",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {mapData?.master_map?.fused_preview_png_base64 && (
+                      <img
+                        src={mapData.master_map.fused_preview_png_base64}
+                        alt="Merged map.pgm preview"
+                        style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                      />
+                    )}
                   </div>
-                ))}
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 800, color: "#4ade80", marginBottom: 6 }}>
+                      🧩 2개 로봇 `map.pgm` 실시간 정합 결과 (일치 블록: {mapData?.master_map?.overlap_count || 0}개)
+                    </div>
+                    <div style={{ fontSize: 11.5, color: "#d4d4d8", lineHeight: 1.55, fontFamily: "monospace" }}>
+                      • <span style={{ color: "#00f2fe" }}>■ 청록</span>: Flagship `map.pgm` |{" "}
+                      <span style={{ color: "#f59e0b" }}>■ 주황</span>: Power `map.pgm` (+90.25° 보정) |{" "}
+                      <span style={{ color: "#4ade80" }}>■ 녹색</span>: 두 맵 완벽 일치 벽면
+                      <br />• Flagship 현위치: Odom({robots[0]?.telemetry?.local_x}, {robots[0]?.telemetry?.local_y}) ➔ 3D({robots[0]?.telemetry?.world_x}, {robots[0]?.telemetry?.world_y})m
+                      <br />• Power 현위치: Odom({robots[2]?.telemetry?.local_x}, {robots[2]?.telemetry?.local_y}) ➔ 3D({robots[2]?.telemetry?.world_x}, {robots[2]?.telemetry?.world_y})m
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <UnifiedMapViewer3D

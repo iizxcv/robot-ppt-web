@@ -338,7 +338,9 @@ export const MapCalibrationModal: React.FC<{
     >
       <div
         style={{
-          width: 640,
+          width: 820,
+          maxHeight: "90vh",
+          overflowY: "auto",
           background: "#111116",
           border: "1.5px solid #ff3b30",
           borderRadius: 16,
@@ -347,11 +349,12 @@ export const MapCalibrationModal: React.FC<{
         }}
       >
         <h3 style={{ margin: "0 0 6px 0", color: "#ff3b30" }}>
-          🧭 로봇별 map.yaml 원점 + 부팅 오도메트리 3D 좌표 보정 설정
+          🧭 다중 로봇 map.pgm + map.yaml SE(2) 정합 & 통합 맵 빌더
         </h3>
-        <p style={{ margin: "0 0 16px 0", fontSize: 12, color: "#a1a1aa" }}>
-          각 로봇의 `map.yaml` 원점과 부팅 시 오도메트리 기준점 차이를 보정합니다. 저장 시{" "}
-          <code>docker_master/config/map_alignment.json</code>에 영구 반영됩니다.
+        <p style={{ margin: "0 0 14px 0", fontSize: 12.5, color: "#a1a1aa", lineHeight: 1.55 }}>
+          각 로봇 Chassis 내부의 <code>map.pgm</code>과 <code>map.yaml</code>은 매핑 기준(origin, 회전각)이 서로 다릅니다.
+          아래 보정값(ΔX, ΔY, ΔΘ)으로 <b>두 map.pgm 벽면 점군을 하나의 통합 3D 공간으로 정합</b>하고, 동일한 행렬로{" "}
+          <b>각 로봇의 실시간 현위치(Local Odom)를 통합 3D 뷰 좌표로 자동 변환</b>합니다.
         </p>
 
         <div style={{ marginBottom: 14 }}>

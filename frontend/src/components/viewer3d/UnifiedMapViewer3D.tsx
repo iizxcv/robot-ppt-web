@@ -80,7 +80,13 @@ interface UnifiedMapViewer3DProps {
   showOdomVectors?: boolean;
 }
 
-const ExtrudedWalls: React.FC<{ blocks: number[][]; wallHeight: number }> = ({ blocks, wallHeight }) => {
+const ExtrudedWalls: React.FC<{
+  blocks: number[][];
+  wallHeight: number;
+  color?: string;
+  emissive?: string;
+  opacity?: number;
+}> = ({ blocks, wallHeight, color = "#27272a", emissive = "#ff3b30", opacity = 0.78 }) => {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
 
@@ -101,11 +107,11 @@ const ExtrudedWalls: React.FC<{ blocks: number[][]; wallHeight: number }> = ({ b
     <instancedMesh ref={meshRef} args={[undefined, undefined, blocks.length]}>
       <boxGeometry args={[1, 1, 1]} />
       <meshStandardMaterial
-        color="#27272a"
-        emissive="#ff3b30"
-        emissiveIntensity={0.14}
+        color={color}
+        emissive={emissive}
+        emissiveIntensity={0.22}
         transparent
-        opacity={0.78}
+        opacity={opacity}
         roughness={0.3}
         metalness={0.65}
       />
@@ -380,8 +386,35 @@ export const UnifiedMapViewer3D: React.FC<UnifiedMapViewer3DProps> = ({
           <meshStandardMaterial color="#0d0d10" transparent opacity={0.88} />
         </mesh>
 
-        {masterMap?.wall_blocks && (
-          <ExtrudedWalls blocks={masterMap.wall_blocks} wallHeight={wallHeight} />
+        {masterMap?.overlap_blocks ? (
+          <>
+            {/* Overlapped Wall Blocks where Flagship map.pgm and Power map.pgm match */}
+            <ExtrudedWalls
+              blocks={masterMap.overlap_blocks}
+              wallHeight={wallHeight}
+              color="#1e293b"
+              emissive="#22c55e"
+              opacity={0.88}
+            />
+            {/* Flagship-only Wall Blocks */}
+            <ExtrudedWalls
+              blocks={masterMap.flag_only_blocks || []}
+              wallHeight={wallHeight}
+              color="#1e293b"
+              emissive="#00f2fe"
+              opacity={0.72}
+            />
+            {/* Power-only Calibrated Wall Blocks */}
+            <ExtrudedWalls
+              blocks={masterMap.power_only_blocks || []}
+              wallHeight={wallHeight}
+              color="#27272a"
+              emissive="#f59e0b"
+              opacity={0.68}
+            />
+          </>
+        ) : (
+          masterMap?.wall_blocks && <ExtrudedWalls blocks={masterMap.wall_blocks} wallHeight={wallHeight} />
         )}
 
         <VirtualFacilityPOIs
