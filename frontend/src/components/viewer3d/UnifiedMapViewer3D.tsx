@@ -88,7 +88,15 @@ const ExtrudedWalls: React.FC<{
   color?: string;
   emissive?: string;
   opacity?: number;
-}> = ({ blocks, wallHeight, color = "#27272a", emissive = "#1e3a8a", opacity = 0.78 }) => {
+  emissiveIntensity?: number;
+}> = ({
+  blocks,
+  wallHeight,
+  color = "#27272a",
+  emissive = "#1e3a8a",
+  opacity = 0.78,
+  emissiveIntensity = 0.22,
+}) => {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
 
@@ -111,7 +119,7 @@ const ExtrudedWalls: React.FC<{
       <meshStandardMaterial
         color={color}
         emissive={emissive}
-        emissiveIntensity={0.22}
+        emissiveIntensity={emissiveIntensity}
         transparent
         opacity={opacity}
         roughness={0.3}
@@ -384,29 +392,32 @@ export const UnifiedMapViewer3D: React.FC<UnifiedMapViewer3DProps> = ({
 
         {masterMap?.overlap_blocks ? (
           <>
-            {/* Overlapped Wall Blocks where Flagship map.pgm and Power map.pgm match */}
+            {/* Overlapped Wall Blocks where Flagship map.pgm and Power map.pgm match (Solid & Prominent) */}
             <ExtrudedWalls
               blocks={masterMap.overlap_blocks}
               wallHeight={wallHeight}
               color="#1e293b"
               emissive="#22c55e"
-              opacity={0.88}
+              opacity={0.92}
+              emissiveIntensity={0.35}
             />
-            {/* Flagship-only Wall Blocks */}
+            {/* Flagship-only Non-matching Blocks (80% 투명도 -> 20% 불투명도로 거의 안보이게 처리) */}
             <ExtrudedWalls
               blocks={masterMap.flag_only_blocks || []}
               wallHeight={wallHeight}
-              color="#1e293b"
+              color="#0f172a"
               emissive="#00f2fe"
-              opacity={0.72}
+              opacity={0.20}
+              emissiveIntensity={0.06}
             />
-            {/* Power-only Calibrated Wall Blocks */}
+            {/* Power-only Calibrated Non-matching Blocks (80% 투명도 -> 20% 불투명도로 거의 안보이게 처리) */}
             <ExtrudedWalls
               blocks={masterMap.power_only_blocks || []}
               wallHeight={wallHeight}
-              color="#27272a"
+              color="#0f172a"
               emissive="#f59e0b"
-              opacity={0.68}
+              opacity={0.20}
+              emissiveIntensity={0.06}
             />
           </>
         ) : (

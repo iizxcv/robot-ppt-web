@@ -814,9 +814,9 @@ export const App: React.FC = () => {
                       🧩 2개 로봇 `map.pgm` 실시간 정합 결과 (일치 블록: {mapData?.master_map?.overlap_count || 0}개)
                     </div>
                     <div style={{ fontSize: 11, color: "#cbd5e1", lineHeight: 1.5, fontFamily: "monospace" }}>
-                      • <span style={{ color: "#00f2fe" }}>■ 청록</span>: Flagship `map.pgm` |{" "}
-                      <span style={{ color: "#f59e0b" }}>■ 주황</span>: Power `map.pgm` (+90.25° 보정) |{" "}
-                      <span style={{ color: "#4ade80" }}>■ 녹색</span>: 두 맵 일치 벽면
+                      • <span style={{ color: "#38bdf8" }}>■ 청록 (80% 투명 불일치부)</span>: Flagship |{" "}
+                      <span style={{ color: "#fbbf24" }}>■ 주황 (80% 투명 불일치부)</span>: Power (+90.25° 보정) |{" "}
+                      <span style={{ color: "#4ade80" }}>■ 녹색</span>: 두 맵 완벽 일치 벽면
                       <br />• Flagship 현위치: Odom({robots[0]?.telemetry?.local_x}, {robots[0]?.telemetry?.local_y}) ➔ 3D({robots[0]?.telemetry?.world_x}, {robots[0]?.telemetry?.world_y})m
                       <br />• Power 현위치: Odom({robots[2]?.telemetry?.local_x}, {robots[2]?.telemetry?.local_y}) ➔ 3D({robots[2]?.telemetry?.world_x}, {robots[2]?.telemetry?.world_y})m
                     </div>

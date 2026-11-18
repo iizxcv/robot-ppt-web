@@ -177,7 +177,9 @@ class MapAlignmentEngine:
             elif src == 2:
                 power_blocks.append(blk)
 
-        # Render 2D Fused Verification PNG (Cyan = Flagship, Orange = Power Transformed, Green = Overlap)
+        # Render 2D Fused Verification PNG
+        # Non-matching Cyan/Orange: 80% transparent (alpha=0.20 onto dark bg, 거의 안보이게)
+        # Overlapping matching walls: 100% bright prominent green
         grid_res = 0.04
         gx_min, gx_max = -2.2, 5.8
         gy_min, gy_max = -6.8, 1.8
@@ -185,20 +187,29 @@ class MapAlignmentEngine:
         gh = int((gy_max - gy_min) / grid_res)
         canvas = np.full((gh, gw, 3), (12, 14, 20), dtype=np.uint8)
 
+        f_grid = np.zeros((gh, gw), dtype=bool)
+        p_grid = np.zeros((gh, gw), dtype=bool)
+
         for x, y in f_pts:
             ix = int((x - gx_min) / grid_res)
             iy = int((y - gy_min) / grid_res)
             if 0 <= ix < gw and 0 <= iy < gh:
-                canvas[iy, ix] = (254, 242, 0)  # Cyan (BGR)
+                f_grid[iy, ix] = True
 
         for x, y in p_pts_world:
             ix = int((x - gx_min) / grid_res)
             iy = int((y - gy_min) / grid_res)
             if 0 <= ix < gw and 0 <= iy < gh:
-                if canvas[iy, ix, 0] > 100:
-                    canvas[iy, ix] = (90, 255, 110)  # Bright Green where both maps overlap!
-                else:
-                    canvas[iy, ix] = (11, 158, 245)  # Amber/Orange (BGR)
+                p_grid[iy, ix] = True
+
+        overlap_mask = f_grid & p_grid
+        f_only_mask = f_grid & ~overlap_mask
+        p_only_mask = p_grid & ~overlap_mask
+
+        # 80% transparent (faint residual trace)
+        canvas[f_only_mask] = (60, 60, 16)       # Faint 80% transparent Cyan
+        canvas[p_only_mask] = (12, 43, 65)       # Faint 80% transparent Orange
+        canvas[overlap_mask] = (90, 255, 110)    # 100% Bright Green matching wall
 
         canvas_flipped = cv2.flip(canvas, 0)
         _, png_buf = cv2.imencode(".png", canvas_flipped)
