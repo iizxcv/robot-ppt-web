@@ -9,23 +9,23 @@
       "dy_m": 0.0,
       "dtheta_deg": 0.0,
       "scale": 1.0,
-      "note": "Master reference frame (Flagship map.pgm)"
+      "note": "Master reference frame (Flagship map.pgm: charging station at [0.02, -0.05])"
     },
     "pro-01": {
       "robot_hostname": "pro.robot.local",
-      "dx_m": 0.45,
-      "dy_m": -0.30,
-      "dtheta_deg": 12.5,
+      "dx_m": 0.85,
+      "dy_m": 0.0,
+      "dtheta_deg": 0.0,
       "scale": 1.0,
-      "note": "Professional robot offset & rotation relative to Flagship master frame"
+      "note": "Professional robot (currently offline for maintenance)"
     },
     "power-01": {
       "robot_hostname": "power.robot.local",
-      "dx_m": 1.1258,
-      "dy_m": -0.9836,
-      "dtheta_deg": -8.0,
+      "dx_m": 0.65,
+      "dy_m": 0.13,
+      "dtheta_deg": 0.0,
       "scale": 1.0,
-      "note": "Power robot offset derived from origin diff [-2.517, -5.525] vs [-1.391, -6.509] and LiDAR heading offset"
+      "note": "Power robot aligned alongside Flagship charging bay (live pos [-0.24, -0.18])"
     }
   }
 }
