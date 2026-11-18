@@ -1,0 +1,149 @@
+{
+  "domain_suffix": ".robot.local",
+  "default_auth": {
+    "account": "super",
+    "password_plain": "QAZWSXmoon890@",
+    "hash_algorithm": "SHA-512",
+    "hash_rounds": 3088
+  },
+  "robots": [
+    {
+      "id": "flag-01",
+      "hostname": "flagship.robot.local",
+      "aliases": ["flag", "flagship", "ult-01", "mr-i-p2306"],
+      "display_name": "MOSS Flagship V2.1",
+      "model_type": "ult_diff",
+      "model_code": "MR-I-P2306",
+      "color": "#00f2fe",
+      "ip": "10.200.28.63",
+      "sftp": {
+        "upper_port": 1002,
+        "chassis_port": 1004,
+        "user": "robot"
+      },
+      "ports": {
+        "web_api": 80,
+        "dispatch": 8888,
+        "bridge": 8000,
+        "chassis_bridge": 8001,
+        "rosbridge": 9090,
+        "algo_server": 8083
+      },
+      "ws_status_path": "/platformSocket/timely/data/robotStatus",
+      "tags": [
+        "#all",
+        "#flagship",
+        "#datacenter",
+        "#rfid-highspeed",
+        "#dual-thermal",
+        "#diff-drive"
+      ],
+      "kinematics": {
+        "length_m": 0.54,
+        "width_m": 0.44,
+        "height_m": 1.57,
+        "wheel_base_m": 0.36,
+        "inscribed_radius_m": 0.25,
+        "circumscribed_radius_m": 0.40,
+        "laser_tf_xyz": [0.044, 0.0, 0.370],
+        "lift_range_m": [0.08, 2.10],
+        "drive_type": "2WD Differential + 4 Casters",
+        "arm_type": "None (Non-contact Dual Vision & High-speed RFID)"
+      },
+      "map_folder": "flagship",
+      "is_master_map": true
+    },
+    {
+      "id": "pro-01",
+      "hostname": "pro.robot.local",
+      "aliases": ["pro", "professional", "pro-v3.5", "mr-i-p2308"],
+      "display_name": "MOSS Professional V3.5",
+      "model_type": "profession_4wd",
+      "model_code": "MR-I-P2308",
+      "color": "#a855f7",
+      "ip": "10.200.28.56",
+      "sftp": {
+        "upper_port": 1002,
+        "chassis_port": 1004,
+        "user": "robot"
+      },
+      "ports": {
+        "web_api": 80,
+        "dispatch": 8888,
+        "bridge": 8000,
+        "chassis_bridge": 8001,
+        "rosbridge": 9090,
+        "algo_server": 8083
+      },
+      "ws_status_path": "/platformSocket/timely/data/robotStatus",
+      "tags": [
+        "#all",
+        "#professional",
+        "#6dof-arm",
+        "#door-opener",
+        "#4wd-steering",
+        "#hybrid-patrol"
+      ],
+      "kinematics": {
+        "length_m": 0.58,
+        "width_m": 0.54,
+        "height_m": 1.57,
+        "wheel_base_m": 0.42,
+        "inscribed_radius_m": 0.28,
+        "circumscribed_radius_m": 0.41,
+        "laser_tf_xyz": [0.044, 0.0, 0.370],
+        "lift_range_m": [0.10, 2.20],
+        "drive_type": "4WD Hub Motors + 4 Steering Servos (Crab Walk)",
+        "arm_type": "6-DOF Main Arm + 2-DOF Sub Arm + Force Gripper"
+      },
+      "map_folder": "professional",
+      "is_master_map": false
+    },
+    {
+      "id": "power-01",
+      "hostname": "power.robot.local",
+      "aliases": ["power", "pwr-01", "power-v3.0", "mr-p-2307"],
+      "display_name": "MOSS Power V3.0",
+      "model_type": "power_4wd",
+      "model_code": "MR-P-2307",
+      "color": "#f59e0b",
+      "ip": "10.200.28.61",
+      "sftp": {
+        "upper_port": 1002,
+        "chassis_port": 1004,
+        "user": "robot"
+      },
+      "ports": {
+        "web_api": 80,
+        "dispatch": 8888,
+        "bridge": 8000,
+        "chassis_bridge": 8001,
+        "rosbridge": 9090,
+        "algo_server": 8083
+      },
+      "ws_status_path": "/platformSocket/timely/data/robotStatus",
+      "tags": [
+        "#all",
+        "#power",
+        "#substation",
+        "#ptz-25x",
+        "#partial-discharge",
+        "#4wd-steering"
+      ],
+      "kinematics": {
+        "length_m": 0.54,
+        "width_m": 0.44,
+        "height_m": 1.58,
+        "wheel_base_m": 0.33,
+        "inscribed_radius_m": 0.28,
+        "circumscribed_radius_m": 0.35,
+        "laser_tf_xyz": [0.044, 0.0, 0.370],
+        "lift_range_m": [0.05, 2.30],
+        "drive_type": "4WD Independent Suspension & Steering",
+        "arm_type": "2-DOF Compact Arm (Partial Discharge Sensor)"
+      },
+      "map_folder": "power",
+      "is_master_map": false
+    }
+  ]
+}

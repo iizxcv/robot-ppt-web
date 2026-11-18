@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<!-- Derived from MOSS Power (power_4wd) move_base_params.yaml & moss_navigation.launch -->
+<robot name="moss_power_v3_0">
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0.15" rpy="0 0 0"/>
+      <geometry><box size="0.54 0.44 0.30"/></geometry>
+    </visual>
+  </link>
+  <link name="laser">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><cylinder length="0.05" radius="0.035"/></geometry>
+    </visual>
+  </link>
+  <link name="power_mast_link">
+    <visual>
+      <origin xyz="-0.04 0 0.64" rpy="0 0 0"/>
+      <geometry><box size="0.18 0.22 1.28"/></geometry>
+    </visual>
+  </link>
+  <link name="pd_arm_2dof_link">
+    <visual>
+      <origin xyz="0.12 0 0" rpy="0 0 0"/>
+      <geometry><box size="0.24 0.08 0.08"/></geometry>
+    </visual>
+  </link>
+  <link name="ptz_25x_link">
+    <visual>
+      <origin xyz="0 0 0.10" rpy="0 0 0"/>
+      <geometry><sphere radius="0.10"/></geometry>
+    </visual>
+  </link>
+
+  <joint name="base_link_to_laser" type="fixed">
+    <parent link="base_link"/>
+    <child link="laser"/>
+    <origin xyz="0.044 0.0 0.370" rpy="0 0 0"/>
+  </joint>
+  <joint name="base_to_power_mast" type="fixed">
+    <parent link="base_link"/>
+    <child link="power_mast_link"/>
+    <origin xyz="0 0 0.30" rpy="0 0 0"/>
+  </joint>
+  <joint name="pd_lift_joint" type="prismatic">
+    <parent link="base_link"/>
+    <child link="pd_arm_2dof_link"/>
+    <origin xyz="0.05 0 0.35" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="0.05" upper="2.30" effort="150" velocity="0.25"/>
+  </joint>
+  <joint name="ptz_25x_joint" type="continuous">
+    <parent link="power_mast_link"/>
+    <child link="ptz_25x_link"/>
+    <origin xyz="0 0 1.28" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+</robot>

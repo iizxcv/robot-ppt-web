@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<!-- Derived from MOSS Professional (profession_4wd) move_base_params.yaml, moss_navigation.launch & control_center.yaml -->
+<robot name="moss_professional_v3_5">
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0.16" rpy="0 0 0"/>
+      <geometry><box size="0.58 0.54 0.32"/></geometry>
+    </visual>
+  </link>
+  <link name="laser">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><cylinder length="0.05" radius="0.035"/></geometry>
+    </visual>
+  </link>
+  <link name="elevator_mast_link">
+    <visual>
+      <origin xyz="-0.05 0 0.62" rpy="0 0 0"/>
+      <geometry><box size="0.20 0.24 1.24"/></geometry>
+    </visual>
+  </link>
+  <link name="elevator_stage_link">
+    <visual>
+      <origin xyz="0.08 0 0" rpy="0 0 0"/>
+      <geometry><box size="0.18 0.26 0.16"/></geometry>
+    </visual>
+  </link>
+  <link name="arm_6dof_base_link">
+    <visual>
+      <origin xyz="0.16 0 0" rpy="0 0 0"/>
+      <geometry><cylinder length="0.45" radius="0.045"/></geometry>
+    </visual>
+  </link>
+  <link name="ptz_360_link">
+    <visual>
+      <origin xyz="0 0 0.09" rpy="0 0 0"/>
+      <geometry><sphere radius="0.09"/></geometry>
+    </visual>
+  </link>
+
+  <joint name="base_link_to_laser" type="fixed">
+    <parent link="base_link"/>
+    <child link="laser"/>
+    <origin xyz="0.044 0.0 0.370" rpy="0 0 0"/>
+  </joint>
+  <joint name="base_to_mast" type="fixed">
+    <parent link="base_link"/>
+    <child link="elevator_mast_link"/>
+    <origin xyz="0 0 0.32" rpy="0 0 0"/>
+  </joint>
+  <joint name="elevator_joint" type="prismatic">
+    <parent link="base_link"/>
+    <child link="elevator_stage_link"/>
+    <origin xyz="0.04 0 0.35" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="0.10" upper="2.20" effort="200" velocity="0.25"/>
+  </joint>
+  <joint name="arm_shoulder_joint" type="revolute">
+    <parent link="elevator_stage_link"/>
+    <child link="arm_6dof_base_link"/>
+    <origin xyz="0.12 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-1.57" upper="1.57" effort="50" velocity="1.0"/>
+  </joint>
+  <joint name="ptz_joint" type="continuous">
+    <parent link="elevator_mast_link"/>
+    <child link="ptz_360_link"/>
+    <origin xyz="0 0 1.25" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+</robot>

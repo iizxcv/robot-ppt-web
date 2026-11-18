@@ -1,0 +1,37 @@
+{
+  "presets": {
+    "rack_roi_led": {
+      "name": "42U 서버 랙 ROI & LED 상태등 검출",
+      "description": "OpenCV 윤곽선/밝기 임계치 및 /algoritmic_server/pro_roi 규격 기반 U-레벨 분할과 녹색/적색 알람 LED 자동 마스킹",
+      "params": {
+        "u_count": 42,
+        "led_hsv_green": [[35, 80, 80], [85, 255, 255]],
+        "led_hsv_red": [[0, 100, 100], [10, 255, 255]]
+      }
+    },
+    "thermal_hotspot": {
+      "name": "열화상(Infrared) 컬러맵 & 최고온도 Hotspot 추적",
+      "description": "256x192 / 384x288 열화상 프레임에 OpenCV COLORMAP_INFERNO 적용 및 최고/최저 온도 좌표 십자선 표시",
+      "params": {
+        "colormap": "INFERNO",
+        "warn_temp_c": 45.0,
+        "alarm_temp_c": 65.0
+      }
+    },
+    "canny_hud": {
+      "name": "Canny 구조물 엣지 & 3D Depth 거리 HUD",
+      "description": "주행 통로 및 캐비닛 핸들 인식을 위한 Canny Edge + Hough Line 기하학 오버레이",
+      "params": {
+        "canny_low": 60,
+        "canny_high": 160
+      }
+    },
+    "qr_rfid_inventory": {
+      "name": "자산 QR/바코드 & 고속 RFID 스캔 오버레이",
+      "description": "자산 실사(ASSET_CHECK) 시 U-슬롯별 QR 코드 바운딩 박스와 RFID 태그 매칭 결과 시각화",
+      "params": {
+        "scan_rate_fps": 30
+      }
+    }
+  }
+}

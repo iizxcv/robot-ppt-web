@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  robot-ppt-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: robot-ppt-backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      # 1:1 Host Master Directory Bind Mounts (Zero Data Loss on Container Restart)
+      - ./docker_master/config:/app/master/config
+      - ./docker_master/data:/app/master/data
+      - ./docker_master/logs:/app/master/logs
+    networks:
+      - robot-ppt-net
+
+  robot-ppt-web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: robot-ppt-web
+    restart: unless-stopped
+    depends_on:
+      - robot-ppt-backend
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    volumes:
+      # 1:1 Host Master Nginx & Static Assets Bind Mounts
+      - ./docker_master/nginx:/etc/nginx/conf.d
+      - ./docker_master/data:/usr/share/nginx/html/master_data:ro
+    networks:
+      - robot-ppt-net
+
+networks:
+  robot-ppt-net:
+    driver: bridge

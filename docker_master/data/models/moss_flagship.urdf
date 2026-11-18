@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<!-- Derived from MOSS Flagship (ult_diff) move_base_params.yaml & moss_navigation.launch -->
+<robot name="moss_flagship_v2_1">
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0.14" rpy="0 0 0"/>
+      <geometry><box size="0.54 0.44 0.28"/></geometry>
+    </visual>
+  </link>
+  <link name="laser">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><cylinder length="0.05" radius="0.035"/></geometry>
+    </visual>
+  </link>
+  <link name="upper_tower_link">
+    <visual>
+      <origin xyz="-0.04 0 0.65" rpy="0 0 0"/>
+      <geometry><box size="0.22 0.26 1.25"/></geometry>
+    </visual>
+  </link>
+  <link name="lift_carriage_link">
+    <visual>
+      <origin xyz="0.08 0 0" rpy="0 0 0"/>
+      <geometry><box size="0.14 0.22 0.18"/></geometry>
+    </visual>
+  </link>
+  <link name="ptz_head_link">
+    <visual>
+      <origin xyz="0 0 0.08" rpy="0 0 0"/>
+      <geometry><sphere radius="0.085"/></geometry>
+    </visual>
+  </link>
+
+  <joint name="base_link_to_laser" type="fixed">
+    <parent link="base_link"/>
+    <child link="laser"/>
+    <origin xyz="0.044 0.0 0.370" rpy="0 0 0"/>
+  </joint>
+  <joint name="base_to_tower" type="fixed">
+    <parent link="base_link"/>
+    <child link="upper_tower_link"/>
+    <origin xyz="0 0 0.28" rpy="0 0 0"/>
+  </joint>
+  <joint name="lift_prismatic_joint" type="prismatic">
+    <parent link="base_link"/>
+    <child link="lift_carriage_link"/>
+    <origin xyz="0.05 0 0.35" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="0.08" upper="2.10" effort="100" velocity="0.2"/>
+  </joint>
+  <joint name="ptz_pan_joint" type="revolute">
+    <parent link="upper_tower_link"/>
+    <child link="ptz_head_link"/>
+    <origin xyz="0 0 1.29" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.05" upper="3.05" effort="10" velocity="1.5"/>
+  </joint>
+</robot>

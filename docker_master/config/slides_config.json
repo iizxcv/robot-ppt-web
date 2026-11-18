@@ -1,0 +1,218 @@
+{
+  "deck_title": "MOSS Intelligent Robotics — API & AI Vision Live Showcase",
+  "slides": [
+    {
+      "id": "slide-01",
+      "number": "01",
+      "title": "멀티 로봇 라인업 & 물리 기구학 비교",
+      "subtitle": "Flagship V2.1 · Professional V3.5 · Power V3.0",
+      "focus_mode": "3d_lineup",
+      "target_tag": "#all",
+      "highlights": [
+        "DNS 네이밍 & 태그 레지스트리 기반 이기종 멀티 로봇 통합 식별 (flagship.robot.local 등)",
+        "로봇 내부 move_base_params.yaml 및 URDF 실측 치수 기반 1:1 파라메트릭 3D 디지털 트윈",
+        "데이터센터(Flagship), 복합 조작(Professional 6축 암), 고압 배전반(Power 25x PTZ) 특화 설계"
+      ],
+      "featured_apis": [
+        {
+          "label": "DNS 로봇 전체 조회 (#all)",
+          "method": "GET",
+          "endpoint": "/api/v1/registry/resolve?q=%23all",
+          "sample_body": {}
+        },
+        {
+          "label": "로봇 기본 제원 조회",
+          "method": "GET",
+          "endpoint": "/api/v1/robots/flagship.robot.local/base/robot/info",
+          "sample_body": {}
+        }
+      ]
+    },
+    {
+      "id": "slide-02",
+      "number": "02",
+      "title": "분산형 멀티 PC 하드웨어 & ROS 아키텍처",
+      "subtitle": "Upper-PC (두뇌 .100) · Chassis-PC (주행 .120) · Sensor/Arm-PC (말단 .105)",
+      "focus_mode": "architecture_xray",
+      "target_tag": "#professional",
+      "highlights": [
+        "Upper-PC: moss-dispatch (7대 멀티프로세스 FSM) + moss-analytics (AI 비전) + Redis/RabbitMQ/MySQL",
+        "Chassis-PC: ROS Master(:11311), Pavo2/YDLidar 듀얼 라이다, 4WD 조향/차동 구동, 초음파/낙하 안전 인터락",
+        "C++ /control_center 통합 노드: 6축 로봇암 + 힘센서(임계치 2.5N) + 그리퍼 + 3D 비전 서비스 동기화"
+      ],
+      "featured_apis": [
+        {
+          "label": "하드웨어 헬스 & Redis 상태 스냅샷",
+          "method": "GET",
+          "endpoint": "/api/v1/robots/pro.robot.local/telemetry",
+          "sample_body": {}
+        }
+      ]
+    },
+    {
+      "id": "slide-03",
+      "number": "03",
+      "title": "보안 API 인증 규격 & 실시간 WebSocket 스트림",
+      "subtitle": "SHA-512 3088-Round Key Stretching & JWT / WebSocket Push",
+      "focus_mode": "api_auth_live",
+      "target_tag": "#flagship",
+      "highlights": [
+        "로그인 보안: 평문 비밀번호를 UTF-8 바이트 단위로 SHA-512 3088회 연쇄 해싱 후 /api/v1/auth/login 전송",
+        "발급된 대문자 Token(JWT)을 백엔드 게이트웨이가 자동 캐싱 및 만료 전 갱신",
+        "ws://IP/platformSocket/timely/data/robotStatus 소켓으로 배터리·위치·센서·미션 상태 실시간 수신"
+      ],
+      "featured_apis": [
+        {
+          "label": "SHA-512 3088회 해싱 로그인 실행",
+          "method": "POST",
+          "endpoint": "/api/v1/robots/flagship.robot.local/auth/login",
+          "sample_body": {
+            "account": "super",
+            "password_plain": "QAZWSXmoon890@"
+          }
+        },
+        {
+          "label": "사전 데이터 조회 (/v1/dict/list)",
+          "method": "GET",
+          "endpoint": "/api/v1/robots/flagship.robot.local/proxy/v1/dict/list?dictType=sys_normal_disable&status=0",
+          "sample_body": {}
+        }
+      ]
+    },
+    {
+      "id": "slide-04",
+      "number": "04",
+      "title": "다중 로봇 map.pgm 3D 조감도 통합 & 좌표 정합",
+      "subtitle": "Cartographer pbstream 가우스/원점 오차 보정 (SE(2) Rigid Transform)",
+      "focus_mode": "map_3d_unified",
+      "target_tag": "#all",
+      "highlights": [
+        "로봇별 개별 매핑(pbstream -> map.pgm + map.yaml) 시 발생한 원점(origin) 및 회전각(Δθ) 차이를 SE(2) 변환 행렬로 단일 3D 월드에 정합",
+        "map.pgm의 점유 격자(Occupied Threshold >= 0.65)를 3D 벽면과 서버 랙으로 실시간 입체 돌출(Extrusion)",
+        "3D 조감도 위에서 클릭 시 역행렬(T^-1)을 자동 연산하여 각 로봇 고유의 로컬 좌표로 이동 명령 하달"
+      ],
+      "featured_apis": [
+        {
+          "label": "통합 3D 맵 & 정합 행렬 조회",
+          "method": "GET",
+          "endpoint": "/api/v1/maps/unified3d",
+          "sample_body": {}
+        },
+        {
+          "label": "월드 좌표 기반 지정 이동 (역변환 자동 적용)",
+          "method": "POST",
+          "endpoint": "/api/v1/robots/flagship.robot.local/navigate/world",
+          "sample_body": {
+            "world_x": 2.5,
+            "world_y": -1.2,
+            "world_yaw_deg": 90.0,
+            "move_mode": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "slide-05",
+      "number": "05",
+      "title": "OpenCV & 온보드 AI 실시간 비전 스튜디오",
+      "subtitle": "Rack ROI · 지시등/계기판 판독 · 열화상 히트맵 · Canny/ArUco 오버레이",
+      "focus_mode": "opencv_vision",
+      "target_tag": "#flagship",
+      "highlights": [
+        "로봇 카메라(광학/열화상/뎁스) 스트림 및 Base64 캡처 이미지를 OpenCV 파이프라인으로 실시간 합성",
+        "내장 알고리즘 서버(:8083 /algoritmic_server/pro_roi) 연동 42U 서버 랙 가이드라인 및 LED 상태등 검출",
+        "열화상(384x288 / 256x192) 컬러맵 변환 및 최고/최저 발열점(Hotspot) 자동 추적 오버레이"
+      ],
+      "featured_apis": [
+        {
+          "label": "OpenCV 비전 프레임 처리 요청 (Rack ROI + LED)",
+          "method": "POST",
+          "endpoint": "/api/v1/vision/process",
+          "sample_body": {
+            "target": "flagship.robot.local",
+            "mode": "rack_roi_led",
+            "start_u": 1,
+            "end_u": 42
+          }
+        },
+        {
+          "label": "OpenCV 열화상 핫스팟 분석",
+          "method": "POST",
+          "endpoint": "/api/v1/vision/process",
+          "sample_body": {
+            "target": "power.robot.local",
+            "mode": "thermal_hotspot"
+          }
+        }
+      ]
+    },
+    {
+      "id": "slide-06",
+      "number": "06",
+      "title": "정밀 하드웨어 제어 & 안전 인터락 시연",
+      "subtitle": "텔레스코픽 리프트 · 360° PTZ · 6축 로봇암 도어 개폐 시퀀스",
+      "focus_mode": "hardware_control",
+      "target_tag": "#professional",
+      "highlights": [
+        "리프트(/v1/control/lifter) 및 PTZ(/v1/control/ptzAction) 실시간 API 제어와 3D 로봇 관절 동기화",
+        "Pro 6축 로봇암 캐비닛 도어 개폐 시퀀스: 횡이동(0x0f) -> 리프트 상승 -> /control_center open_door",
+        "안전 인터락: 주행 전 리프트 0m 및 로봇암 Home 강제 복귀 검증, 장애물 30초 지속 시 자동 충전 귀환"
+      ],
+      "featured_apis": [
+        {
+          "label": "리프트 높이 제어 (120cm 상승)",
+          "method": "POST",
+          "endpoint": "/api/v1/robots/pro.robot.local/control/lifter",
+          "sample_body": {
+            "action": 1,
+            "targetHeight": 1200
+          }
+        },
+        {
+          "label": "PTZ 카메라 회전/줌 제어",
+          "method": "POST",
+          "endpoint": "/api/v1/robots/power.robot.local/control/ptzAction",
+          "sample_body": {
+            "ptzCommand": "TURN_LEFT",
+            "speed": 4,
+            "zoom": 10
+          }
+        },
+        {
+          "label": "6축 로봇암 도어 개방 시퀀스 하달",
+          "method": "POST",
+          "endpoint": "/api/v1/robots/pro.robot.local/control/armDoor",
+          "sample_body": {
+            "command": "open_door",
+            "door_type": 1,
+            "cabinet_height_m": 1.1
+          }
+        }
+      ]
+    },
+    {
+      "id": "slide-07",
+      "number": "07",
+      "title": "올인원 멀티 로봇 통합 관제 쇼케이스",
+      "subtitle": "3D Digital Twin + Multi-Vision OpenCV + Live API Console",
+      "focus_mode": "full_command_center",
+      "target_tag": "#all",
+      "highlights": [
+        "단일 3D 조감도 위에서 Flagship, Professional, Power 3대 로봇 동시 관제 및 태그(#all) 그룹 명령",
+        "실시간 OpenCV 멀티 뷰어 + 로봇 FSM 상태 전이 + API Request/Response 패킷 생중계 통합",
+        "현장 로봇 연결(Live) 및 오프라인 발표용 시뮬레이터(Hybrid/Mock) 무중단 전환"
+      ],
+      "featured_apis": [
+        {
+          "label": "전 로봇(#all) 동시 순찰 미션 시작",
+          "method": "POST",
+          "endpoint": "/api/v1/robots/%23all/mission/execute",
+          "sample_body": {
+            "missionTypeId": 1,
+            "missionName": "통합 쇼케이스 자율 순찰"
+          }
+        }
+      ]
+    }
+  ]
+}
