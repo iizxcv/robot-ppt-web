@@ -349,6 +349,12 @@ export const UnifiedMapViewer3D: React.FC<UnifiedMapViewer3DProps> = ({
   const wallHeight = mapData?.alignment?.wall_extrusion_height_m ?? 1.85;
   const center = [1.2, -1.4];
 
+  // Only render robots in the 3D scene if they are actively returning live data from API/Redis
+  const liveRobots = useMemo(
+    () => (robots || []).filter((r) => r.telemetry?.online_mode === "LIVE_WEBSOCKET_REDIS"),
+    [robots]
+  );
+
   return (
     <div
       style={{
@@ -422,7 +428,7 @@ export const UnifiedMapViewer3D: React.FC<UnifiedMapViewer3DProps> = ({
           corridor={masterMap?.patrol_corridor || []}
         />
 
-        {robots.map((robot) => (
+        {liveRobots.map((robot) => (
           <ParametricURDFRobot
             key={robot.id}
             robot={robot}
