@@ -126,49 +126,14 @@ const VirtualFacilityPOIs: React.FC<{ pois: any[]; corridor: number[][] }> = ({ 
       )}
 
       {(pois || []).map((poi) => {
-        const isRack = poi.kind === "rack";
         const isCharger = poi.kind === "charger";
+        if (!isCharger) return null;
         return (
-          <group key={poi.id} position={[poi.x, 0, -poi.y]}>
-            {isRack && (
-              <group position={[0, 1.0, 0]}>
-                <mesh>
-                  <boxGeometry args={[0.6, 2.0, 0.85]} />
-                  <meshStandardMaterial
-                    color="#18181b"
-                    emissive="#0284c7"
-                    emissiveIntensity={0.22}
-                    transparent
-                    opacity={0.86}
-                  />
-                </mesh>
-                <Html position={[0, 1.25, 0]} center distanceFactor={12}>
-                  <div
-                    style={{
-                      background: "rgba(9, 9, 11, 0.88)",
-                      border: "1px solid #0284c7",
-                      color: "#38bdf8",
-                      padding: "2px 7px",
-                      borderRadius: 6,
-                      fontSize: 10,
-                      fontWeight: 700,
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    🗄️ {poi.name}
-                  </div>
-                </Html>
-              </group>
-            )}
-
-            {isCharger && (
-              <group position={[0, 0.03, 0]}>
-                <mesh rotation={[-Math.PI / 2, 0, 0]}>
-                  <ringGeometry args={[0.25, 0.36, 24]} />
-                  <meshBasicMaterial color="#22c55e" side={THREE.DoubleSide} />
-                </mesh>
-              </group>
-            )}
+          <group key={poi.id} position={[poi.x, 0.03, -poi.y]}>
+            <mesh rotation={[-Math.PI / 2, 0, 0]}>
+              <ringGeometry args={[0.25, 0.36, 24]} />
+              <meshBasicMaterial color="#22c55e" side={THREE.DoubleSide} />
+            </mesh>
           </group>
         );
       })}
