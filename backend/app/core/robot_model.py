@@ -2,20 +2,34 @@
 Object-Oriented Domain Model for Autonomous Multi-Robot Fleet.
 Unifies:
   - BaseRobot abstract class with polymorphism
+  - 100% Sanctioned REST API Integration (/api/v1/auth/login, /api/v1/position/list, /api/v1/base/robot/info)
   - SE(2) Map Frame Coordinate Registration
   - Real-environment Redis/WebSocket telemetry parsing
   - Most frequent canonical patrol trajectory generation per robot model
 """
 from abc import ABC, abstractmethod
+import hashlib
+import json
 import math
 import time
 from typing import Any, Dict, List, Optional, Tuple
+
+import httpx
+
+
+def hash_password_3088(raw_password: str, rounds: int = 3088) -> str:
+    """Replicates MOSS SHA-512 3088 rounds password hashing for /api/v1/auth/login."""
+    data = raw_password.encode("utf-8")
+    for _ in range(rounds):
+        data = hashlib.sha512(data).digest()
+    return data.hex()
 
 
 class BaseRobot(ABC):
     """
     Abstract Base Class for all autonomous inspection robots.
-    Encapsulates state, kinematics, map alignment transformation, and patrol path generation.
+    Encapsulates state, kinematics, REST API synchronization, map alignment transformation,
+    and patrol path generation.
     """
 
     def __init__(self, record: Dict[str, Any], map_engine: Any) -> None:
@@ -55,7 +69,10 @@ class BaseRobot(ABC):
         self.temp_c: float = 30.0
         self.online_mode: str = "OFFLINE_STANDBY"
         self.last_sync_time: str = "-"
-        self.live_path_move_info: List[Dict[str, float]] = []
+        
+        # REST API cached tokens & authoritative positions
+        self.api_token: Optional[str] = None
+        self.api_positions: Dict[int, Dict[str, Any]] = {}
 
     @abstractmethod
     def _default_english_name(self) -> str:
@@ -63,15 +80,37 @@ class BaseRobot(ABC):
         pass
 
     @abstractmethod
+    def get_canonical_patrol_sequence_ids(self) -> List[int]:
+        """Returns sequence of position IDs from /api/v1/position/list that form the primary patrol route."""
+        pass
+
     def get_canonical_patrol_path_local(self) -> List[Dict[str, float]]:
         """
-        Returns the robot's most frequently executed patrol route in its local map coordinate frame.
+        Builds the local patrol route coordinates directly from the /api/v1/position/list REST API data.
+        Falls back to default calibrated points if API response is not yet populated.
         """
+        seq = self.get_canonical_patrol_sequence_ids()
+        pts: List[Dict[str, float]] = []
+
+        for pid in seq:
+            if pid in self.api_positions:
+                pos_info = self.api_positions[pid]
+                c = pos_info.get("position", {})
+                pts.append({"x": float(c.get("x", 0.0)), "y": float(c.get("y", 0.0)), "yaw": float(c.get("yaw", 0.0))})
+
+        if not pts:
+            pts = self._fallback_local_path()
+
+        return pts
+
+    @abstractmethod
+    def _fallback_local_path(self) -> List[Dict[str, float]]:
+        """Fallback coordinates before REST API connects."""
         pass
 
     def get_most_frequent_path_world(self) -> List[List[float]]:
         """
-        Transforms the robot's most frequent patrol route into the Unified 3D World frame [x, y].
+        Transforms the robot's authoritative REST API patrol route into Unified 3D World frame [x, y].
         """
         local_pts = self.get_canonical_patrol_path_local()
         world_pts: List[List[float]] = []
@@ -79,6 +118,51 @@ class BaseRobot(ABC):
             wp = self.map_engine.local_to_world(self.id, pt["x"], pt["y"], pt.get("yaw", 0.0))
             world_pts.append([wp["world_x"], wp["world_y"]])
         return world_pts
+
+    def sync_from_rest_api(self, password_plain: str = "QAZWSXmoon890@") -> bool:
+        """
+        Authoritative REST API client:
+        1. Authenticates via POST /api/v1/auth/login with SHA-512 3088 rounds
+        2. Retrieves official waypoints from GET /api/v1/position/list with Bearer token
+        3. Retrieves robot hardware & firmware info from GET /api/v1/base/robot/info
+        """
+        if not self.ip:
+            return False
+
+        try:
+            pw_hash = hash_password_3088(password_plain)
+            url_login = f"http://{self.ip}/api/v1/auth/login"
+            with httpx.Client(timeout=3.5) as client:
+                resp = client.post(url_login, json={"account": "super", "password": pw_hash})
+                if resp.status_code != 200:
+                    return False
+                res_data = resp.json()
+                token = res_data.get("data", {}).get("Token") or res_data.get("data", {}).get("token")
+                if not token:
+                    return False
+                self.api_token = token
+                headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+
+                # Query /api/v1/position/list
+                r_pos = client.get(f"http://{self.ip}/api/v1/position/list", headers=headers)
+                if r_pos.status_code == 200:
+                    pos_json = r_pos.json()
+                    if pos_json.get("code") == 0 and isinstance(pos_json.get("data"), list):
+                        self.api_positions = {
+                            p["robotPositionId"]: p for p in pos_json["data"] if "robotPositionId" in p
+                        }
+
+                # Query /api/v1/base/robot/info
+                r_info = client.get(f"http://{self.ip}/api/v1/base/robot/info", headers=headers)
+                if r_info.status_code == 200:
+                    info_json = r_info.json()
+                    if info_json.get("code") == 0 and isinstance(info_json.get("data"), dict):
+                        bot_data = info_json["data"]
+                        if bot_data.get("name"):
+                            self.display_name = bot_data["name"]
+                return True
+        except Exception:
+            return False
 
     def update_telemetry_from_redis(
         self,
@@ -123,9 +207,6 @@ class BaseRobot(ABC):
 
         self.online_mode = "LIVE_WEBSOCKET_REDIS"
         self.last_sync_time = time.strftime("%H:%M:%S")
-
-        if isinstance(path_move, list):
-            self.live_path_move_info = path_move
 
     def set_offline(self) -> None:
         self.online_mode = "OFFLINE_STANDBY"
@@ -176,27 +257,29 @@ class FlagshipRobot(BaseRobot):
     """
     Flagship Edition (IIR-01 / MR-I-Ult2408)
     IDC Server Rack & High-speed RFID continuous inspection robot.
-    Reference Coordinate Frame: Master Map Frame (dx=0, dy=0, dtheta=0).
     """
 
     def _default_english_name(self) -> str:
         return "Flagship"
 
-    def get_canonical_patrol_path_local(self) -> List[Dict[str, float]]:
-        # The primary datacenter RFID & rack inspection loop executed by Flagship
+    def get_canonical_patrol_sequence_ids(self) -> List[int]:
+        # Sequence of position IDs from /api/v1/position/list representing the primary RFID loop
+        return [68, 69, 70, 94, 78, 84, 83, 79, 89, 90, 93, 68]
+
+    def _fallback_local_path(self) -> List[Dict[str, float]]:
         return [
-            {"x": -0.05, "y": -0.05, "yaw": 0.0},     # 충전스테이션 (#68)
-            {"x": 0.65, "y": -0.01, "yaw": 0.0},      # 충전대기포인트 (#69)
-            {"x": 1.08, "y": -0.01, "yaw": -0.01},    # 복귀포인트 (#70)
-            {"x": 1.50, "y": -0.15, "yaw": 3.14},     # 복귀전 (#94)
-            {"x": 3.50, "y": 0.00, "yaw": -1.57},     # JM_Path_01 (#78)
-            {"x": 4.00, "y": -0.35, "yaw": 3.14},     # JM_Path_07_RT02 (#84)
-            {"x": 4.00, "y": -2.45, "yaw": -1.57},    # JM_Path_06_RT01 (#83)
-            {"x": 3.50, "y": -2.45, "yaw": -3.14},    # JM_Path_02 (#79)
-            {"x": 2.20, "y": -2.40, "yaw": 3.14},     # JM_Path_05-1_RFID_RACK3 (#89)
-            {"x": 1.60, "y": -2.40, "yaw": 3.14},     # JM_Path_04-1_Front_RFID_RACK2 (#90)
-            {"x": 0.80, "y": -2.70, "yaw": 1.57},     # JM_Path_05-2_Front (#93)
-            {"x": -0.05, "y": -0.05, "yaw": 0.0},     # 충전점 복귀
+            {"x": -0.05, "y": -0.05, "yaw": 0.0},
+            {"x": 0.65, "y": -0.01, "yaw": 0.0},
+            {"x": 1.08, "y": -0.01, "yaw": -0.01},
+            {"x": 1.50, "y": -0.15, "yaw": 3.14},
+            {"x": 3.50, "y": 0.00, "yaw": -1.57},
+            {"x": 4.00, "y": -0.35, "yaw": 3.14},
+            {"x": 4.00, "y": -2.45, "yaw": -1.57},
+            {"x": 3.50, "y": -2.45, "yaw": -3.14},
+            {"x": 2.20, "y": -2.40, "yaw": 3.14},
+            {"x": 1.60, "y": -2.40, "yaw": 3.14},
+            {"x": 0.80, "y": -2.70, "yaw": 1.57},
+            {"x": -0.05, "y": -0.05, "yaw": 0.0},
         ]
 
 
@@ -204,23 +287,29 @@ class PowerRobot(BaseRobot):
     """
     Power Edition (IIR-03 / MR-P-2307)
     High & Low Voltage Switchgear TEV/AE Partial Discharge and Gauge Reading Robot.
-    Coordinate Frame: Calibrated via SE(2) Matrix (dx=1.65m, dy=-5.875m, dtheta=+90.25deg).
     """
 
     def _default_english_name(self) -> str:
         return "Power"
 
-    def get_canonical_patrol_path_local(self) -> List[Dict[str, float]]:
-        # The primary switchgear inspection loop executed by Power in its local coordinate system
+    def get_canonical_patrol_sequence_ids(self) -> List[int]:
+        # Sequence of position IDs from /api/v1/position/list representing the primary switchgear loop
+        return [70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 70]
+
+    def _fallback_local_path(self) -> List[Dict[str, float]]:
         return [
-            {"x": -0.30, "y": -0.18, "yaw": 0.0},     # 충전포인트 (#70)
-            {"x": 0.80, "y": -0.18, "yaw": 0.0},      # 충전 복귀 포인트 (#71)
-            {"x": 1.99, "y": -0.18, "yaw": -1.55},    # 배전반 진입점
-            {"x": 2.88, "y": -1.72, "yaw": 1.53},     # 고압반 TEV/AE 부분방전 진단점
-            {"x": 2.87, "y": 0.40, "yaw": 1.52},      # check-rack2-eqp 계측기 판독점 1
-            {"x": 2.81, "y": 0.36, "yaw": 1.54},      # check-rack2-eqp 계측기 판독점 2
-            {"x": 0.80, "y": -0.18, "yaw": 0.0},      # 복귀 경로
-            {"x": -0.30, "y": -0.18, "yaw": 0.0},     # 충전포인트 (#70)
+            {"x": -0.30, "y": -0.18, "yaw": 0.0},
+            {"x": 0.80, "y": -0.18, "yaw": 0.0},
+            {"x": 1.25, "y": -0.18, "yaw": 0.0},
+            {"x": 1.99, "y": -0.18, "yaw": -1.55},
+            {"x": 1.99, "y": -2.37, "yaw": 0.0},
+            {"x": 5.18, "y": -2.37, "yaw": 1.51},
+            {"x": 5.18, "y": -1.72, "yaw": -3.14},
+            {"x": 3.96, "y": -1.72, "yaw": 3.14},
+            {"x": 2.88, "y": -1.72, "yaw": 1.53},
+            {"x": 2.81, "y": 0.36, "yaw": 1.54},
+            {"x": 2.42, "y": -0.18, "yaw": -3.13},
+            {"x": -0.30, "y": -0.18, "yaw": 0.0},
         ]
 
 
@@ -233,8 +322,10 @@ class ProfessionalRobot(BaseRobot):
     def _default_english_name(self) -> str:
         return "Professional"
 
-    def get_canonical_patrol_path_local(self) -> List[Dict[str, float]]:
-        # Physical manipulation corridor between server aisles
+    def get_canonical_patrol_sequence_ids(self) -> List[int]:
+        return []
+
+    def _fallback_local_path(self) -> List[Dict[str, float]]:
         return [
             {"x": 0.00, "y": -0.80, "yaw": 0.0},
             {"x": 1.20, "y": -0.80, "yaw": 0.0},

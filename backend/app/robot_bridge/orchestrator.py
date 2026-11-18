@@ -35,7 +35,7 @@ class MultiRobotOrchestrator:
         records = self.resolver.list_all()
         for rec in records:
             bot = RobotFactory.create_robot(rec, self.map_engine)
-            # Default positions until initial live Redis poll completes
+            # Default positions until initial live Redis/REST poll completes
             if bot.id == "flag-01":
                 bot.local_x = 0.02
                 bot.local_y = -0.05
@@ -67,6 +67,13 @@ class MultiRobotOrchestrator:
                 bot.charging = False
                 bot.online_mode = "OFFLINE_STANDBY"
                 bot.fsm_state = "OFFLINE (하드웨어 점검/대기)"
+            
+            # Initial synchronous REST API sync for authoritative waypoints
+            try:
+                bot.sync_from_rest_api()
+            except Exception:
+                pass
+
             self.robots[bot.id] = bot
 
     @property
@@ -91,8 +98,19 @@ class MultiRobotOrchestrator:
         return cli
 
     def _poll_real_robots_loop(self) -> None:
+        last_api_sync = time.time()
         while True:
             try:
+                now = time.time()
+                # Periodically re-sync authoritative waypoints and configs from REST API every 60s
+                if now - last_api_sync > 60.0:
+                    for bot in self.robots.values():
+                        try:
+                            bot.sync_from_rest_api()
+                        except Exception:
+                            pass
+                    last_api_sync = now
+
                 for r_id, bot in list(self.robots.items()):
                     sftp_cfg = bot.record.get("sftp", {})
                     host = bot.record.get("ip")
