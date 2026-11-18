@@ -3,8 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MOSS Intelligent Robotics — Live Seminar & API Showcase</title>
-    <!-- Pretendard (Daangn / Toss / Modern E-Commerce Standard Font) -->
+    <title>MOSS Spatial Digital Twin — Virtual Command Center</title>
     <link
       rel="stylesheet"
       as="style"
@@ -34,18 +33,50 @@
         font-family: inherit;
         letter-spacing: -0.02em;
       }
-      @keyframes fadeSlideUp {
-        from {
+
+      /* Dynamic Stage Slide-In + Scale-Up Reveal */
+      @keyframes stageReveal {
+        0% {
           opacity: 0;
-          transform: translateY(14px);
+          transform: translateX(38px) scale(0.975);
+          filter: blur(6px);
         }
-        to {
+        100% {
           opacity: 1;
-          transform: translateY(0);
+          transform: translateX(0) scale(1);
+          filter: blur(0px);
         }
       }
-      .slide-enter {
-        animation: fadeSlideUp 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      .stage-reveal {
+        animation: stageReveal 0.58s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+      /* Theatrical Curtain Call Sweep */
+      @keyframes curtainLeftSweep {
+        0% {
+          transform: scaleX(0);
+          transform-origin: left;
+        }
+        45% {
+          transform: scaleX(1);
+          transform-origin: left;
+        }
+        55% {
+          transform: scaleX(1);
+          transform-origin: right;
+        }
+        100% {
+          transform: scaleX(0);
+          transform-origin: right;
+        }
+      }
+      .curtain-sweep {
+        position: fixed;
+        inset: 0;
+        background: linear-gradient(135deg, #0a0a0c 0%, #1a0d10 50%, #ff3b30 100%);
+        z-index: 850;
+        pointer-events: none;
+        animation: curtainLeftSweep 0.62s cubic-bezier(0.77, 0, 0.175, 1) forwards;
       }
     </style>
   </head>
