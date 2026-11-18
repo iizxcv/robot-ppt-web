@@ -149,12 +149,7 @@ class MapAlignmentEngine:
             "wall_count": len(walls),
             "spatial_pois": [
                 {"id": 68, "name": "Flagship 충전스테이션 (#68)", "kind": "charger", "x": -0.05, "y": -0.05},
-                {"id": 700, "name": "Power 충전스테이션 (#70 보정)", "kind": "charger", "x": -1.59, "y": -0.66},
-                {"id": 73, "name": "Server Rack #1", "kind": "rack", "x": 1.40, "y": -2.85},
-                {"id": 74, "name": "Server Rack #2", "kind": "rack", "x": 2.08, "y": -2.85},
-                {"id": 75, "name": "Server Rack #3", "kind": "rack", "x": 2.70, "y": -2.85},
-                {"id": 71, "name": "Glasswall 코너 #1", "kind": "waypoint", "x": 3.89, "y": -0.01},
-                {"id": 72, "name": "Glasswall 코너 #2", "kind": "waypoint", "x": 3.89, "y": -2.85}
+                {"id": 700, "name": "Power 충전스테이션 (#70 보정)", "kind": "charger", "x": -1.59, "y": -0.66}
             ],
             "patrol_corridor": [
                 [-0.05, -0.05],
