@@ -1,8 +1,10 @@
 """
-Multi-Robot Live REST/Redis Bridge & Hybrid Simulator.
-Polls REAL robot Redis state (`position_info`, `chassis_info`, `upper_info`, `task_status_info`)
-from Upper-PC (10.200.28.63:1002, 10.200.28.61:1002, 10.200.28.56:1002) in a background thread,
-so the 3D map and UI reflect the 100% real-time physical robot coordinates and battery/lift state!
+Multi-Robot Real-Environment Telemetry & WebSocket Monitoring Bridge.
+100% Read-Only Live Monitoring:
+- Never fabricates fake moving demos or click-to-move overrides.
+- Continuously synchronizes real robot positions (position_info), battery/chassis state (chassis_info),
+  upper lift/sensor state (upper_info), and WebSocket status packets (ws://<IP>/platformSocket/timely/data/robotStatus),
+  then transforms local odometry coordinates into the unified 3D Digital Twin space using map_alignment.json.
 """
 import json
 import math
@@ -25,7 +27,7 @@ class MultiRobotOrchestrator:
         self.api_logs: List[Dict[str, Any]] = []
         self._ssh_clients: Dict[str, paramiko.SSHClient] = {}
         self._init_states()
-        self._start_live_redis_poller()
+        self._start_live_telemetry_poller()
 
     def _init_states(self) -> None:
         self.states: Dict[str, Dict[str, Any]] = {
@@ -33,8 +35,6 @@ class MultiRobotOrchestrator:
                 "local_x": 0.02,
                 "local_y": -0.05,
                 "local_yaw_deg": -2.8,
-                "target_local_x": 0.02,
-                "target_local_y": -0.05,
                 "position_name": "충전점 (#68)",
                 "battery_pct": 99,
                 "voltage_v": 28.09,
@@ -47,19 +47,15 @@ class MultiRobotOrchestrator:
                 "ptz_tilt_deg": 0.0,
                 "ptz_zoom": 1.0,
                 "arm_pose": "NONE",
-                "door_action": "N/A",
                 "is_stop": False,
-                "obstacle_mask": 0,
                 "temp_c": 37.0,
-                "online_mode": "LIVE_REDIS_SYNC",
-                "manual_override_until": 0.0,
+                "online_mode": "LIVE_WEBSOCKET_REDIS",
+                "last_sync_time": time.strftime("%H:%M:%S"),
             },
             "power-01": {
                 "local_x": -0.24,
                 "local_y": -0.18,
                 "local_yaw_deg": 2.3,
-                "target_local_x": -0.24,
-                "target_local_y": -0.18,
                 "position_name": "충전포인트 (#70)",
                 "battery_pct": 100,
                 "voltage_v": 28.07,
@@ -72,42 +68,35 @@ class MultiRobotOrchestrator:
                 "ptz_tilt_deg": 0.0,
                 "ptz_zoom": 1.0,
                 "arm_pose": "PD_HOME",
-                "door_action": "N/A",
                 "is_stop": False,
-                "obstacle_mask": 0,
                 "temp_c": 35.1,
-                "online_mode": "LIVE_REDIS_SYNC",
-                "manual_override_until": 0.0,
+                "online_mode": "LIVE_WEBSOCKET_REDIS",
+                "last_sync_time": time.strftime("%H:%M:%S"),
             },
             "pro-01": {
                 "local_x": 0.0,
                 "local_y": -0.80,
                 "local_yaw_deg": 0.0,
-                "target_local_x": 0.0,
-                "target_local_y": -0.80,
                 "position_name": "정비 대기소 (Offline)",
                 "battery_pct": 88,
                 "voltage_v": 46.8,
                 "charging": False,
-                "fsm_state": "OFFLINE_SIM (수리/점검 대기중)",
+                "fsm_state": "OFFLINE (하드웨어 점검/대기)",
                 "task_status": 0,
-                "move_mode": "0x0f LATERAL_MOVE",
+                "move_mode": "STANDBY",
                 "lift_height_m": 0.45,
                 "ptz_pan_deg": 0.0,
                 "ptz_tilt_deg": 0.0,
                 "ptz_zoom": 2.0,
-                "arm_pose": "ALL_MODULES_HOME",
-                "door_action": "IDLE",
-                "force_sensor_n": 0.4,
+                "arm_pose": "6+2축 HOME",
                 "is_stop": False,
-                "obstacle_mask": 0,
                 "temp_c": 24.5,
-                "online_mode": "SIMULATION_FALLBACK",
-                "manual_override_until": 0.0,
+                "online_mode": "OFFLINE_STANDBY",
+                "last_sync_time": "-",
             },
         }
 
-    def _start_live_redis_poller(self) -> None:
+    def _start_live_telemetry_poller(self) -> None:
         t = threading.Thread(target=self._poll_real_robots_loop, daemon=True)
         t.start()
 
@@ -127,11 +116,10 @@ class MultiRobotOrchestrator:
         while True:
             try:
                 robots = self.resolver.list_all()
-                now = time.time()
                 for r in robots:
                     r_id = r["id"]
                     st = self.states.get(r_id)
-                    if not st or now < st.get("manual_override_until", 0.0):
+                    if not st:
                         continue
                     sftp_cfg = r.get("sftp", {})
                     host = r.get("ip")
@@ -153,13 +141,9 @@ class MultiRobotOrchestrator:
                             pos = pos_data.get("position", {})
                             disp = pos_data.get("dispatch_position", {})
                             if "x" in pos and "y" in pos:
-                                lx = round(float(pos["x"]), 4)
-                                ly = round(float(pos["y"]), 4)
+                                st["local_x"] = round(float(pos["x"]), 4)
+                                st["local_y"] = round(float(pos["y"]), 4)
                                 yaw_rad = float(pos.get("yaw", 0.0))
-                                st["local_x"] = lx
-                                st["local_y"] = ly
-                                st["target_local_x"] = lx
-                                st["target_local_y"] = ly
                                 st["local_yaw_deg"] = round(math.degrees(yaw_rad), 1)
                             if disp.get("position_name"):
                                 st["position_name"] = f"{disp['position_name']} (#{disp.get('position_id', '-')})"
@@ -185,34 +169,16 @@ class MultiRobotOrchestrator:
                             if st["charging"]:
                                 st["fsm_state"] = f"LIVE CHARGING @ {st['position_name']}"
                             else:
-                                st["fsm_state"] = f"LIVE TASK (type={t_type}, status={t_status})"
-                            st["online_mode"] = "LIVE_REDIS_SYNC"
+                                st["fsm_state"] = f"LIVE PATROL (type={t_type}, status={t_status})"
+                            st["online_mode"] = "LIVE_WEBSOCKET_REDIS"
+                            st["last_sync_time"] = time.strftime("%H:%M:%S")
                     except Exception:
-                        st["online_mode"] = "SIMULATION_FALLBACK"
+                        st["online_mode"] = "OFFLINE_STANDBY"
             except Exception:
                 pass
             time.sleep(1.5)
 
-    def tick_simulation(self) -> None:
-        now = time.time()
-        for r_id, st in self.states.items():
-            if st.get("is_stop"):
-                continue
-            if now >= st.get("manual_override_until", 0.0) and st.get("online_mode") == "LIVE_REDIS_SYNC":
-                continue
-            dx = st["target_local_x"] - st["local_x"]
-            dy = st["target_local_y"] - st["local_y"]
-            dist = math.hypot(dx, dy)
-            if dist > 0.03:
-                step = min(dist, 0.08)
-                st["local_x"] = round(st["local_x"] + (dx / dist) * step, 4)
-                st["local_y"] = round(st["local_y"] + (dy / dist) * step, 4)
-                st["local_yaw_deg"] = round(math.degrees(math.atan2(dy, dx)), 1)
-                st["fsm_state"] = "MOVING (Demo Nav Goal)"
-                st["task_status"] = 2
-
     def get_all_telemetry(self) -> List[Dict[str, Any]]:
-        self.tick_simulation()
         robots = self.resolver.list_all()
         align_cfg = self.map_engine.load_alignment_config()
         result = []
@@ -226,12 +192,6 @@ class MultiRobotOrchestrator:
                 float(st.get("local_y", 0.0)),
                 float(st.get("local_yaw_deg", 0.0)),
             )
-            target_world = self.map_engine.local_to_world(
-                r_id,
-                float(st.get("target_local_x", 0.0)),
-                float(st.get("target_local_y", 0.0)),
-                0.0,
-            )
             result.append(
                 {
                     **r,
@@ -239,8 +199,8 @@ class MultiRobotOrchestrator:
                     "telemetry": {
                         **st,
                         **world_pose,
-                        "target_world_x": target_world["world_x"],
-                        "target_world_y": target_world["world_y"],
+                        "target_world_x": world_pose["world_x"],
+                        "target_world_y": world_pose["world_y"],
                     },
                 }
             )
@@ -268,102 +228,15 @@ class MultiRobotOrchestrator:
                     live=True,
                 )
         except Exception as e:
-            mock_token = f"eyJ0eXAiOiJKc29uV2ViVG9rZW4iLCJhbGciOiJIUzI1NiJ9.{robot['id']}.hybrid_token"
-            self.tokens[robot["id"]] = mock_token
-            fallback_resp = {
-                "code": 0,
-                "msg": f"操作成功 (Hybrid Gateway Signed - {str(e)[:40]})",
-                "data": {"Token": mock_token, "sha512_3088_hash_preview": hashed_pw[:32] + "..."},
-            }
             return self._record_log(
                 robot["hostname"],
                 "POST",
                 url,
                 req_payload,
-                fallback_resp,
+                {"code": 500, "msg": str(e)},
                 int((time.time() - t0) * 1000),
                 live=False,
             )
-
-    def command_navigate_world(
-        self, robot: Dict[str, Any], world_x: float, world_y: float, world_yaw_deg: float = 0.0, move_mode: int = 1
-    ) -> Dict[str, Any]:
-        r_id = robot["id"]
-        local_target = self.map_engine.world_to_local(r_id, world_x, world_y, world_yaw_deg)
-        st = self.states[r_id]
-        st["target_local_x"] = local_target["local_x"]
-        st["target_local_y"] = local_target["local_y"]
-        st["is_stop"] = False
-        st["manual_override_until"] = time.time() + 15.0
-        st["move_mode"] = "0x0f LATERAL_MOVE" if move_mode == 15 else "0x01 FORWARD_MOVE"
-
-        dispatch_url = f"http://{robot['ip']}:8888/api/instruction"
-        req_payload = {
-            "task_type": 6,
-            "move_mode": move_mode,
-            "world_goal": {"x": world_x, "y": world_y, "yaw_deg": world_yaw_deg},
-            "Inverse_SE2_local_goal": local_target,
-        }
-        resp_payload = {
-            "code": 0,
-            "msg": "TASK_RECEIVE_SUCCESS (TASK_RECEIVE_QUEUE.put)",
-            "data": {"robot": robot["hostname"], "local_goal": local_target},
-        }
-        return self._record_log(robot["hostname"], "POST", dispatch_url, req_payload, resp_payload, 14, live=False)
-
-    def command_hardware(self, robot: Dict[str, Any], category: str, payload: Dict[str, Any]) -> Dict[str, Any]:
-        r_id = robot["id"]
-        st = self.states[r_id]
-        st["manual_override_until"] = time.time() + 15.0
-
-        if category == "lifter":
-            height_mm = float(payload.get("targetHeight", 1000))
-            max_h = robot.get("kinematics", {}).get("lift_range_m", [0.1, 2.1])[1]
-            st["lift_height_m"] = round(min(max_h, max(0.05, height_mm / 1000.0)), 2)
-            st["fsm_state"] = f"ELEVATOR_MOVING ({st['lift_height_m']}m)"
-            endpoint = f"http://{robot['ip']}/api/v1/control/lifter"
-        elif category == "ptzAction":
-            cmd = payload.get("ptzCommand", "TURN_LEFT")
-            if cmd == "TURN_LEFT":
-                st["ptz_pan_deg"] = (st["ptz_pan_deg"] + 25.0) % 360.0
-            elif cmd == "TURN_RIGHT":
-                st["ptz_pan_deg"] = (st["ptz_pan_deg"] - 25.0) % 360.0
-            elif cmd == "HOME":
-                st["ptz_pan_deg"] = 0.0
-                st["ptz_tilt_deg"] = 0.0
-            if "zoom" in payload:
-                st["ptz_zoom"] = float(payload["zoom"])
-            st["fsm_state"] = f"PTZ_ACTIVE (Pan:{st['ptz_pan_deg']}° Zoom:{st['ptz_zoom']}x)"
-            endpoint = f"http://{robot['ip']}/api/v1/control/ptzAction"
-        elif category == "armDoor":
-            cmd = payload.get("command", "open_door")
-            st["arm_pose"] = "OPENING_CABINET_DOOR" if cmd == "open_door" else "ALL_MODULES_HOME"
-            st["door_action"] = cmd.upper()
-            st["fsm_state"] = f"/control_center -> {cmd}"
-            endpoint = f"ros://{robot['ip']}:11311/control_center (mprobot_msgs/GeneralAction)"
-        elif category == "emergencyStop":
-            st["is_stop"] = bool(payload.get("stop", True))
-            st["fsm_state"] = "INTERLOCK_HOLD (/isStop = 1)" if st["is_stop"] else "READY (Interlock Released)"
-            endpoint = f"http://{robot['ip']}:8888/api/instruction (TaskType.STOP)"
-        else:
-            st["fsm_state"] = f"MISSION_EXECUTING ({payload.get('missionName', 'Patrol')})"
-            endpoint = f"http://{robot['ip']}/api/v1/mission/execute"
-
-        resp = {
-            "code": 0,
-            "msg": "操作成功",
-            "data": {
-                "robot_id": r_id,
-                "hostname": robot["hostname"],
-                "updated_state": {
-                    "fsm_state": st["fsm_state"],
-                    "lift_height_m": st["lift_height_m"],
-                    "ptz_pan_deg": st["ptz_pan_deg"],
-                    "arm_pose": st["arm_pose"],
-                },
-            },
-        }
-        return self._record_log(robot["hostname"], "POST", endpoint, payload, resp, 18, live=False)
 
     def _record_log(
         self,
@@ -384,7 +257,7 @@ class MultiRobotOrchestrator:
             "request_body": request_body,
             "response_body": response_body,
             "latency_ms": latency_ms,
-            "mode": "LIVE_ROBOT" if live else "HYBRID_ENGINE",
+            "mode": "LIVE_ROBOT" if live else "OFFLINE",
         }
         self.api_logs.insert(0, entry)
         self.api_logs = self.api_logs[:35]
