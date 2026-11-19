@@ -203,56 +203,203 @@ const ParametricURDFRobot: React.FC<{
           <meshBasicMaterial color={color} transparent opacity={0.45} side={THREE.DoubleSide} />
         </mesh>
 
-        {/* Base Link Chassis */}
-        <mesh position={[0, 0.16, 0]}>
-          <boxGeometry args={[kinematics.length_m, 0.28, kinematics.width_m]} />
-          <meshStandardMaterial color="#18181b" metalness={0.85} roughness={0.2} />
-        </mesh>
+        {/* ==============================================================
+            Option A: Detailed High-Fidelity Parametric URDF Robot Mesh
+            Crafted from proposal_images 3-view blueprints (Front, Side, Back)
+           ============================================================== */}
 
-        <mesh position={[0, 0.12, 0]}>
-          <boxGeometry args={[kinematics.length_m + 0.02, 0.05, kinematics.width_m + 0.02]} />
-          <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.65} />
-        </mesh>
+        {/* 1. Base Link Chassis */}
+        {!isPower ? (
+          // Flagship & Professional Streamlined AGV Chassis
+          <group position={[0, 0, 0]}>
+            {/* Main Rounded Off-White ABS / Aluminum Housing */}
+            <mesh position={[0, 0.16, 0]}>
+              <boxGeometry args={[kinematics.length_m, 0.22, kinematics.width_m]} />
+              <meshStandardMaterial color="#f1f5f9" metalness={0.25} roughness={0.3} />
+            </mesh>
 
-        {/* Lift Mast */}
-        <mesh position={[-0.05, kinematics.height_m / 2, 0]}>
-          <boxGeometry args={[0.18, kinematics.height_m - 0.28, 0.22]} />
-          <meshStandardMaterial color="#27272a" metalness={0.7} roughness={0.3} />
-        </mesh>
+            {/* Dark Tech Inset Lower Skirt */}
+            <mesh position={[0, 0.06, 0]}>
+              <boxGeometry args={[kinematics.length_m - 0.04, 0.08, kinematics.width_m - 0.04]} />
+              <meshStandardMaterial color="#0f172a" metalness={0.8} roughness={0.2} />
+            </mesh>
 
-        {/* Dynamic Lift Carriage */}
-        <group position={[0.08, liftH, 0]}>
-          <mesh>
-            <boxGeometry args={[0.16, 0.16, 0.26]} />
-            <meshStandardMaterial color={color} metalness={0.6} roughness={0.2} />
+            {/* Front Bumper & Sensor Grill Inset */}
+            <mesh position={[kinematics.length_m / 2 + 0.005, 0.15, 0]}>
+              <boxGeometry args={[0.02, 0.12, kinematics.width_m * 0.72]} />
+              <meshStandardMaterial color="#020617" roughness={0.5} />
+            </mesh>
+
+            {/* Glowing Ambient Status Light Trim */}
+            <mesh position={[0, 0.08, 0]}>
+              <boxGeometry args={[kinematics.length_m + 0.015, 0.025, kinematics.width_m + 0.015]} />
+              <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.8} />
+            </mesh>
+
+            {/* Left & Right Drive Wheels */}
+            <mesh position={[0, 0.08, kinematics.width_m / 2 + 0.01]} rotation={[Math.PI / 2, 0, 0]}>
+              <cylinderGeometry args={[0.08, 0.08, 0.035, 24]} />
+              <meshStandardMaterial color="#18181b" roughness={0.8} />
+            </mesh>
+            <mesh position={[0, 0.08, -kinematics.width_m / 2 - 0.01]} rotation={[Math.PI / 2, 0, 0]}>
+              <cylinderGeometry args={[0.08, 0.08, 0.035, 24]} />
+              <meshStandardMaterial color="#18181b" roughness={0.8} />
+            </mesh>
+
+            {/* Front LIDAR Cylinder Assembly */}
+            <mesh position={[kinematics.laser_tf_xyz[0], kinematics.laser_tf_xyz[2] - 0.04, 0]}>
+              <cylinderGeometry args={[0.045, 0.045, 0.06, 20]} />
+              <meshStandardMaterial color="#09090b" metalness={0.9} roughness={0.1} />
+            </mesh>
+          </group>
+        ) : (
+          // Power Edition Rugged 4WD Industrial Chassis
+          <group position={[0, 0, 0]}>
+            {/* Rugged Industrial Heavy Body */}
+            <mesh position={[0, 0.20, 0]}>
+              <boxGeometry args={[kinematics.length_m, 0.26, kinematics.width_m - 0.06]} />
+              <meshStandardMaterial color="#1e293b" metalness={0.6} roughness={0.35} />
+            </mesh>
+
+            {/* Amber Heavy-Duty Protective Bumpers */}
+            <mesh position={[kinematics.length_m / 2 + 0.02, 0.18, 0]}>
+              <boxGeometry args={[0.04, 0.12, kinematics.width_m + 0.02]} />
+              <meshStandardMaterial color="#f59e0b" metalness={0.4} roughness={0.4} />
+            </mesh>
+            <mesh position={[-kinematics.length_m / 2 - 0.02, 0.18, 0]}>
+              <boxGeometry args={[0.04, 0.12, kinematics.width_m + 0.02]} />
+              <meshStandardMaterial color="#f59e0b" metalness={0.4} roughness={0.4} />
+            </mesh>
+
+            {/* 4 Independent Suspension Offroad Wheels */}
+            {[-kinematics.length_m * 0.32, kinematics.length_m * 0.32].map((x, xi) => (
+              <React.Fragment key={`pwr-axle-${xi}`}>
+                <mesh position={[x, 0.11, kinematics.width_m / 2 + 0.02]} rotation={[Math.PI / 2, 0, 0]}>
+                  <cylinderGeometry args={[0.11, 0.11, 0.06, 24]} />
+                  <meshStandardMaterial color="#09090b" roughness={0.9} />
+                </mesh>
+                <mesh position={[x, 0.11, -kinematics.width_m / 2 - 0.02]} rotation={[Math.PI / 2, 0, 0]}>
+                  <cylinderGeometry args={[0.11, 0.11, 0.06, 24]} />
+                  <meshStandardMaterial color="#09090b" roughness={0.9} />
+                </mesh>
+              </React.Fragment>
+            ))}
+          </group>
+        )}
+
+        {/* 2. Dual Aluminum Extrusion Lift Mast Tower */}
+        <group position={[-0.06, kinematics.height_m / 2 + 0.12, 0]}>
+          {/* Dual Guide Rails (Left / Right Column) */}
+          <mesh position={[0, 0, 0.08]}>
+            <boxGeometry args={[0.09, kinematics.height_m - 0.15, 0.06]} />
+            <meshStandardMaterial color="#cbd5e1" metalness={0.88} roughness={0.18} />
+          </mesh>
+          <mesh position={[0, 0, -0.08]}>
+            <boxGeometry args={[0.09, kinematics.height_m - 0.15, 0.06]} />
+            <meshStandardMaterial color="#cbd5e1" metalness={0.88} roughness={0.18} />
+          </mesh>
+          {/* Central Structural Stiffener Plate */}
+          <mesh position={[-0.03, 0, 0]}>
+            <boxGeometry args={[0.05, kinematics.height_m - 0.18, 0.22]} />
+            <meshStandardMaterial color="#1e293b" metalness={0.7} roughness={0.3} />
+          </mesh>
+        </group>
+
+        {/* 3. Real-Time Dynamic Lift Carriage (Moves with liftH) */}
+        <group position={[0.06, liftH, 0]}>
+          {/* Main Carriage Sliding Block */}
+          <mesh position={[0, 0, 0]}>
+            <boxGeometry args={[0.16, 0.22, 0.28]} />
+            <meshStandardMaterial color="#0f172a" metalness={0.7} roughness={0.25} />
           </mesh>
 
+          {/* Front Touchscreen Display Console (10-inch Bezel) */}
+          <mesh position={[0.085, 0.02, 0]}>
+            <boxGeometry args={[0.015, 0.16, 0.22]} />
+            <meshStandardMaterial color="#020617" roughness={0.1} metalness={0.9} />
+          </mesh>
+          {/* Glowing Active Display Surface */}
+          <mesh position={[0.094, 0.02, 0]}>
+            <planeGeometry args={[0.19, 0.13]} />
+            <meshBasicMaterial color="#0284c7" />
+          </mesh>
+
+          {/* Inspection Vision Camera Head */}
+          <mesh position={[0.08, 0.12, 0]}>
+            <cylinderGeometry args={[0.025, 0.025, 0.05, 16]} />
+            <meshStandardMaterial color="#18181b" metalness={0.9} roughness={0.1} />
+          </mesh>
+
+          {/* --- [Professional Edition]: 6-DOF Articulated Robotic Arm Assembly --- */}
           {isPro && (
-            <group position={[0.18, 0, 0]} rotation={[0, 0, -0.85]}>
-              <mesh position={[0.16, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-                <cylinderGeometry args={[0.035, 0.04, 0.36, 16]} />
-                <meshStandardMaterial color="#f4f4f5" metalness={0.85} />
+            <group position={[0.11, -0.02, 0]}>
+              {/* Shoulder Base Turntable */}
+              <mesh position={[0, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+                <cylinderGeometry args={[0.042, 0.042, 0.05, 16]} />
+                <meshStandardMaterial color="#3b82f6" metalness={0.7} />
               </mesh>
+              {/* Upper Arm Link */}
+              <group position={[0.05, 0.08, 0]} rotation={[0, 0, -0.65]}>
+                <mesh position={[0, 0.12, 0]}>
+                  <cylinderGeometry args={[0.028, 0.032, 0.24, 16]} />
+                  <meshStandardMaterial color="#f8fafc" metalness={0.8} />
+                </mesh>
+                {/* Forearm Joint */}
+                <group position={[0, 0.24, 0]} rotation={[0, 0, 1.2]}>
+                  <mesh position={[0, 0.10, 0]}>
+                    <cylinderGeometry args={[0.022, 0.026, 0.20, 16]} />
+                    <meshStandardMaterial color="#38bdf8" metalness={0.6} />
+                  </mesh>
+                  {/* Gripper Tool Tip */}
+                  <mesh position={[0.01, 0.21, 0.015]}>
+                    <boxGeometry args={[0.015, 0.045, 0.012]} />
+                    <meshStandardMaterial color="#18181b" metalness={0.9} />
+                  </mesh>
+                  <mesh position={[0.01, 0.21, -0.015]}>
+                    <boxGeometry args={[0.015, 0.045, 0.012]} />
+                    <meshStandardMaterial color="#18181b" metalness={0.9} />
+                  </mesh>
+                </group>
+              </group>
             </group>
           )}
 
+          {/* --- [Power Edition]: High-Voltage TEV/AE Partial Discharge Probe Horn --- */}
           {isPower && (
-            <mesh position={[0.16, 0, 0]}>
-              <boxGeometry args={[0.24, 0.06, 0.08]} />
-              <meshStandardMaterial color="#f59e0b" emissive="#f59e0b" emissiveIntensity={0.5} />
-            </mesh>
+            <group position={[0.10, 0.05, 0]}>
+              <mesh position={[0.06, 0, 0]}>
+                <boxGeometry args={[0.12, 0.07, 0.12]} />
+                <meshStandardMaterial color="#f59e0b" emissive="#f59e0b" emissiveIntensity={0.6} />
+              </mesh>
+              <mesh position={[0.13, 0, 0]} rotation={[0, 0, -Math.PI / 2]}>
+                <coneGeometry args={[0.05, 0.09, 16]} />
+                <meshStandardMaterial color="#d97706" metalness={0.8} />
+              </mesh>
+            </group>
           )}
         </group>
 
-        {/* Top 360° PTZ Camera Dome */}
-        <group position={[-0.05, kinematics.height_m, 0]} rotation={[0, ptzPanRad, 0]}>
-          <mesh>
-            <sphereGeometry args={[0.09, 20, 20]} />
-            <meshStandardMaterial color="#09090b" metalness={0.9} roughness={0.1} />
+        {/* 4. Top 360° PTZ Panoramic Camera Dome (Rotates with ptzPanRad) */}
+        <group position={[-0.06, kinematics.height_m + 0.06, 0]} rotation={[0, ptzPanRad, 0]}>
+          {/* Swivel Camera Base Neck */}
+          <mesh position={[0, 0, 0]}>
+            <cylinderGeometry args={[0.05, 0.06, 0.04, 20]} />
+            <meshStandardMaterial color="#1e293b" metalness={0.8} roughness={0.2} />
           </mesh>
-          <mesh position={[0.18, 0, 0]} rotation={[0, 0, -Math.PI / 2]}>
-            <coneGeometry args={[0.12, 0.32, 16, 1, true]} />
-            <meshBasicMaterial color={color} transparent opacity={0.28} side={THREE.DoubleSide} />
+          {/* Glossy Black Spherical Dome */}
+          <mesh position={[0, 0.05, 0]}>
+            <sphereGeometry args={[0.085, 24, 24]} />
+            <meshStandardMaterial color="#09090b" metalness={0.95} roughness={0.08} />
+          </mesh>
+          {/* Dual Optical Lens Hood */}
+          <mesh position={[0.07, 0.05, 0]} rotation={[0, 0, -Math.PI / 2]}>
+            <cylinderGeometry args={[0.028, 0.032, 0.04, 16]} />
+            <meshStandardMaterial color="#000000" roughness={0.1} metalness={0.95} />
+          </mesh>
+          {/* Forward View Frustum Laser Guide */}
+          <mesh position={[0.26, 0.05, 0]} rotation={[0, 0, -Math.PI / 2]}>
+            <coneGeometry args={[0.14, 0.42, 16, 1, true]} />
+            <meshBasicMaterial color={color} transparent opacity={0.24} side={THREE.DoubleSide} />
           </mesh>
         </group>
 
