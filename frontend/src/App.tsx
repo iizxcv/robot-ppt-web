@@ -619,15 +619,19 @@ export const App: React.FC = () => {
                   return (
                     <div
                       key={r.id}
+                      className={`robot-card ${isSel ? "robot-card-selected" : ""}`}
+                      data-selected={isSel ? "true" : "false"}
                       onClick={() => {
                         setSelectedRobotId(r.id);
                         setPopupRobot(r);
                       }}
                       style={{
                         background: isSel
-                          ? "linear-gradient(145deg, rgba(20, 32, 58, 0.95) 0%, rgba(12, 18, 34, 0.95) 100%)"
-                          : "linear-gradient(145deg, rgba(16, 24, 40, 0.8) 0%, rgba(10, 15, 28, 0.9) 100%)",
-                        border: `1.5px solid ${isSel ? themeCol : "rgba(255, 255, 255, 0.1)"}`,
+                          ? "linear-gradient(145deg, rgba(20, 32, 58, 0.98) 0%, rgba(12, 18, 34, 0.98) 100%)"
+                          : isDarkMode
+                          ? "linear-gradient(145deg, rgba(16, 24, 40, 0.8) 0%, rgba(10, 15, 28, 0.9) 100%)"
+                          : "#ffffff",
+                        border: `1.5px solid ${isSel ? themeCol : isDarkMode ? "rgba(255, 255, 255, 0.1)" : "#cbd5e1"}`,
                         borderRadius: 16,
                         padding: "13px 16px",
                         cursor: "pointer",
@@ -635,16 +639,20 @@ export const App: React.FC = () => {
                         display: "flex",
                         flexDirection: "column",
                         gap: 6,
-                        boxShadow: isSel ? `0 8px 24px ${themeCol}25` : "0 4px 16px rgba(0,0,0,0.3)",
+                        boxShadow: isSel
+                          ? `0 8px 24px ${themeCol}35`
+                          : isDarkMode
+                          ? "0 4px 16px rgba(0,0,0,0.3)"
+                          : "0 2px 8px rgba(15, 23, 42, 0.04)",
                       }}
                     >
                       {/* Badge Row */}
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <span
                           style={{
-                            background: `${themeCol}22`,
+                            background: isSel ? `${themeCol}33` : isDarkMode ? `${themeCol}22` : `${themeCol}18`,
                             color: themeCol,
-                            border: `1px solid ${themeCol}55`,
+                            border: `1px solid ${themeCol}66`,
                             padding: "2.5px 9px",
                             borderRadius: 99,
                             fontSize: 10.5,
@@ -653,17 +661,37 @@ export const App: React.FC = () => {
                         >
                           {r.edition_badge}
                         </span>
-                        <span style={{ fontSize: 10.5, color: "#4ade80", fontWeight: 700 }}>
+                        <span
+                          style={{
+                            fontSize: 10.5,
+                            color: isSel ? "#4ade80" : isDarkMode ? "#4ade80" : "#16a34a",
+                            fontWeight: 700,
+                          }}
+                        >
                           KC {r.rra_cert_no}
                         </span>
                       </div>
 
                       {/* Robot Name & Subtitle */}
                       <div>
-                        <div style={{ fontSize: 16, fontWeight: 900, color: "#ffffff" }}>
+                        <div
+                          style={{
+                            fontSize: 16,
+                            fontWeight: 900,
+                            color: isSel ? "#ffffff" : isDarkMode ? "#ffffff" : "#020617",
+                          }}
+                        >
                           {r.display_name}
                         </div>
-                        <div style={{ fontSize: 11.5, color: "#94a3b8", marginTop: 2, lineHeight: 1.4, wordBreak: "keep-all" }}>
+                        <div
+                          style={{
+                            fontSize: 11.5,
+                            color: isSel ? "#cbd5e1" : isDarkMode ? "#94a3b8" : "#475569",
+                            marginTop: 2,
+                            lineHeight: 1.4,
+                            wordBreak: "keep-all",
+                          }}
+                        >
                           {r.target_site}
                         </div>
                       </div>
@@ -674,12 +702,20 @@ export const App: React.FC = () => {
                           <span
                             key={c}
                             style={{
-                              background: "rgba(255, 255, 255, 0.05)",
-                              border: "1px solid rgba(255, 255, 255, 0.08)",
+                              background: isSel
+                                ? "rgba(255, 255, 255, 0.12)"
+                                : isDarkMode
+                                ? "rgba(255, 255, 255, 0.05)"
+                                : "#f1f5f9",
+                              border: isSel
+                                ? "1px solid rgba(255, 255, 255, 0.22)"
+                                : isDarkMode
+                                ? "1px solid rgba(255, 255, 255, 0.08)"
+                                : "1px solid #cbd5e1",
                               padding: "2.5px 7px",
                               borderRadius: 5,
                               fontSize: 10.5,
-                              color: "#cbd5e1",
+                              color: isSel ? "#ffffff" : isDarkMode ? "#cbd5e1" : "#0f172a",
                             }}
                           >
                             {c}
@@ -695,11 +731,22 @@ export const App: React.FC = () => {
                           alignItems: "center",
                           marginTop: 2,
                           paddingTop: 6,
-                          borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+                          borderTop: isSel
+                            ? "1px solid rgba(255, 255, 255, 0.18)"
+                            : isDarkMode
+                            ? "1px solid rgba(255, 255, 255, 0.08)"
+                            : "1px solid #e2e8f0",
                           fontSize: 11,
                         }}
                       >
-                        <span style={{ color: "#cbd5e1", display: "flex", alignItems: "center", gap: 6 }}>
+                        <span
+                          style={{
+                            color: isSel ? "#e2e8f0" : isDarkMode ? "#cbd5e1" : "#475569",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 6,
+                          }}
+                        >
                           <span
                             style={{
                               width: 6,
@@ -708,9 +755,19 @@ export const App: React.FC = () => {
                               background: r.telemetry?.online_mode === "LIVE_WEBSOCKET_REDIS" ? "#22c55e" : "#71717a",
                             }}
                           />
-                          <span>현위치: <b style={{ color: "#ffffff" }}>{r.telemetry?.position_name}</b></span>
+                          <span>
+                            현위치:{" "}
+                            <b style={{ color: isSel ? "#ffffff" : isDarkMode ? "#ffffff" : "#020617" }}>
+                              {r.telemetry?.position_name}
+                            </b>
+                          </span>
                         </span>
-                        <span style={{ color: "#4ade80", fontWeight: 800 }}>
+                        <span
+                          style={{
+                            color: isSel ? "#4ade80" : isDarkMode ? "#4ade80" : "#16a34a",
+                            fontWeight: 800,
+                          }}
+                        >
                           {r.telemetry?.battery_pct ?? 0}%
                         </span>
                       </div>
