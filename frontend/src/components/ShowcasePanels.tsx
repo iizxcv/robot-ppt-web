@@ -239,7 +239,7 @@ export const RobotDetailPopupModal: React.FC<{
             })}
           </div>
 
-          {/* Slide Arrow Steppers & Simplified Counter (1 / 4) */}
+          {/* Slide Simplified Counter (1 / 4) */}
           <div
             style={{
               display: "flex",
@@ -269,51 +269,6 @@ export const RobotDetailPopupModal: React.FC<{
               <span style={{ color: "#64748b" }}>/</span>
               <span>{MODAL_SLIDES.length}</span>
             </div>
-
-            <button
-              disabled={currentSlide === 0}
-              onClick={() => setCurrentSlide((prev) => Math.max(0, prev - 1))}
-              style={{
-                background: currentSlide === 0 ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.1)",
-                color: currentSlide === 0 ? "#475569" : "#ffffff",
-                border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: 8,
-                padding: "6px 12px",
-                fontSize: 12,
-                fontWeight: 800,
-                whiteSpace: "nowrap",
-                flexShrink: 0,
-                cursor: currentSlide === 0 ? "not-allowed" : "pointer",
-              }}
-            >
-              ← 이전
-            </button>
-            <button
-              disabled={currentSlide === MODAL_SLIDES.length - 1}
-              onClick={() => setCurrentSlide((prev) => Math.min(MODAL_SLIDES.length - 1, prev + 1))}
-              style={{
-                background:
-                  currentSlide === MODAL_SLIDES.length - 1
-                    ? "rgba(255,255,255,0.04)"
-                    : themeColor,
-                color:
-                  currentSlide === MODAL_SLIDES.length - 1
-                    ? "#475569"
-                    : isPower
-                    ? "#090e1a"
-                    : "#ffffff",
-                border: "none",
-                borderRadius: 8,
-                padding: "6px 14px",
-                fontSize: 12,
-                fontWeight: 800,
-                whiteSpace: "nowrap",
-                flexShrink: 0,
-                cursor: currentSlide === MODAL_SLIDES.length - 1 ? "not-allowed" : "pointer",
-              }}
-            >
-              다음 →
-            </button>
           </div>
         </div>
 
