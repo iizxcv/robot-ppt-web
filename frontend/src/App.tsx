@@ -162,31 +162,22 @@ export const App: React.FC = () => {
         }}
       >
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
-            <div
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 10,
-                background: "#3b82f6",
-                color: "#ffffff",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontWeight: 900,
-                fontSize: 16,
+          {/* Logo & Brand Header (Official SR ROBOTICS Brand Logo) */}
+          <div style={{ display: "flex", alignItems: "center", marginBottom: 6, paddingLeft: 2 }}>
+            <img
+              src={isDarkMode ? "/sr_logo_dark.png" : "/sr_logo_light.png"}
+              alt="SR ROBOTICS - SMART · RELIABLE · INNOVATIVE"
+              onError={(e) => {
+                // Fallback to raw uploaded logo if needed
+                (e.currentTarget as HTMLImageElement).src = "/sr_logo_raw.png";
               }}
-            >
-              SR
-            </div>
-            <div>
-              <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: "-0.03em", color: isDarkMode ? "#ffffff" : "#0f172a" }}>
-                SR ROBOTICS
-              </div>
-              <div style={{ fontSize: 11, color: isDarkMode ? "#71717a" : "#64748b", fontWeight: 600 }}>
-                SMART · RELIABLE · INNOVATIVE
-              </div>
-            </div>
+              style={{
+                height: 54,
+                maxWidth: "100%",
+                objectFit: "contain",
+                display: "block",
+              }}
+            />
           </div>
 
           <div style={{ height: 1, background: isDarkMode ? "#1f1f26" : "#e2e8f0", margin: "18px 0" }} />
