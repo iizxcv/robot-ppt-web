@@ -237,84 +237,85 @@ export const App: React.FC = () => {
           </nav>
         </div>
 
-        {/* Bottom Live Robot Status Mini Summary (Click opens detailed popup!) */}
-        <div
-          className="live-status-box"
-          style={{
-            background: isDarkMode ? "#141419" : "#f8fafc",
-            border: isDarkMode ? "1px solid #23232b" : "1px solid #e2e8f0",
-            borderRadius: 14,
-            padding: 14,
-            boxShadow: isDarkMode ? "none" : "0 2px 8px rgba(15, 23, 42, 0.04)",
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, flexWrap: "wrap", gap: 6 }}>
-            <span style={{ fontSize: "clamp(10.5px, 0.72vw, 11.5px)", fontWeight: 800, color: isDarkMode ? "#a1a1aa" : "#475569", whiteSpace: "nowrap" }}>
-              실환경 WebSocket 관제
-            </span>
-            <button
-              onClick={() => setShowCalibModal(true)}
-              style={{
-                background: isDarkMode ? "#27272a" : "#e2e8f0",
-                color: isDarkMode ? "#e4e4e7" : "#1e293b",
-                border: "none",
-                borderRadius: 6,
-                padding: "3px 8px",
-                fontSize: 10.5,
-                fontWeight: 700,
-                cursor: "pointer",
-                whiteSpace: "nowrap",
-              }}
-            >
-              오도메트리 보정
-            </button>
-          </div>
+        {/* Bottom Section: Pinned to Bottom (좌하단에 붙어서 차곡차곡 쌓이는 정렬) */}
+        <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: 10 }}>
+          {/* Bottom Live Robot Status Mini Summary (Click opens detailed popup!) */}
+          <div
+            className="live-status-box"
+            style={{
+              background: isDarkMode ? "#141419" : "#f8fafc",
+              border: isDarkMode ? "1px solid #23232b" : "1px solid #e2e8f0",
+              borderRadius: 14,
+              padding: 12,
+              boxShadow: isDarkMode ? "none" : "0 2px 8px rgba(15, 23, 42, 0.04)",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, flexWrap: "wrap", gap: 6 }}>
+              <span style={{ fontSize: "clamp(10.5px, 0.72vw, 11.5px)", fontWeight: 800, color: isDarkMode ? "#a1a1aa" : "#475569", whiteSpace: "nowrap" }}>
+                실환경 WebSocket 관제
+              </span>
+              <button
+                onClick={() => setShowCalibModal(true)}
+                style={{
+                  background: isDarkMode ? "#27272a" : "#e2e8f0",
+                  color: isDarkMode ? "#e4e4e7" : "#1e293b",
+                  border: "none",
+                  borderRadius: 6,
+                  padding: "3px 8px",
+                  fontSize: 10.5,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                오도메트리 보정
+              </button>
+            </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {robots
-              .filter((r) => r.telemetry?.online_mode === "LIVE_WEBSOCKET_REDIS")
-              .map((r) => {
-                const isLive = r.telemetry?.online_mode === "LIVE_WEBSOCKET_REDIS";
-                return (
-                  <div
-                    key={r.id}
-                    onClick={() => {
-                      setSelectedRobotId(r.id);
-                      setPopupRobot(r);
-                    }}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      fontSize: 12,
-                      cursor: "pointer",
-                      padding: "6px 8px",
-                      borderRadius: 8,
-                      background: r.id === selectedRobotId ? "rgba(255,255,255,0.06)" : "transparent",
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                      <span
-                        style={{
-                          width: 7,
-                          height: 7,
-                          borderRadius: "50%",
-                          background: isLive ? "#22c55e" : "#71717a",
-                        }}
-                      />
-                      <span style={{ fontWeight: 800, color: r.color }}>{r.display_name.split(" ")[0]}</span>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {robots
+                .filter((r) => r.telemetry?.online_mode === "LIVE_WEBSOCKET_REDIS")
+                .map((r) => {
+                  const isLive = r.telemetry?.online_mode === "LIVE_WEBSOCKET_REDIS";
+                  return (
+                    <div
+                      key={r.id}
+                      onClick={() => {
+                        setSelectedRobotId(r.id);
+                        setPopupRobot(r);
+                      }}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        fontSize: 12,
+                        cursor: "pointer",
+                        padding: "5px 8px",
+                        borderRadius: 8,
+                        background: r.id === selectedRobotId ? "rgba(255,255,255,0.06)" : "transparent",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                        <span
+                          style={{
+                            width: 7,
+                            height: 7,
+                            borderRadius: "50%",
+                            background: isLive ? "#22c55e" : "#71717a",
+                          }}
+                        />
+                        <span style={{ fontWeight: 800, color: r.color }}>{r.display_name.split(" ")[0]}</span>
+                      </div>
+                      <span style={{ fontSize: 11, color: isDarkMode ? "#e4e4e7" : "#0f172a", fontFamily: "monospace" }}>
+                        {r.telemetry?.position_name?.split(" ")[0]} ({r.telemetry?.battery_pct}%)
+                      </span>
                     </div>
-                    <span style={{ fontSize: 11, color: isDarkMode ? "#e4e4e7" : "#0f172a", fontFamily: "monospace" }}>
-                      {r.telemetry?.position_name?.split(" ")[0]} ({r.telemetry?.battery_pct}%)
-                    </span>
-                  </div>
-                );
-              })}
+                  );
+                })}
+            </div>
           </div>
-        </div>
 
-        {/* Sidebar Bottom Controls: Slide Navigation & Theme Toggle */}
-        <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+          {/* Sidebar Bottom Controls: Slide Navigation & Theme Toggle */}
           <div style={{ display: "flex", gap: 6 }}>
             <button
               disabled={currentSlideIdx === 0}
