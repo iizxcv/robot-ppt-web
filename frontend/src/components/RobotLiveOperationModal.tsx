@@ -216,11 +216,11 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
               className="live-modal-tab-bar"
               style={{
                 display: "flex",
-                background: "rgb(3, 7, 18)",
+                background: isDarkMode ? "rgb(3, 7, 18)" : "#ffffff",
                 borderRadius: 10,
                 padding: 4,
-                border: "1px solid rgba(255, 255, 255, 0.15)",
-                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.3)",
+                border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.15)" : "1px solid #cbd5e1",
+                boxShadow: isDarkMode ? "0 2px 8px rgba(0, 0, 0, 0.3)" : "0 2px 8px rgba(15, 23, 42, 0.06)",
               }}
             >
               {[
@@ -236,15 +236,15 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                     data-active={isSelected ? "true" : "false"}
                     style={{
                       background: isSelected ? "#bae6fd" : "transparent",
-                      color: isSelected ? "#020617" : "#ffffff",
+                      color: isSelected ? "#020617" : isDarkMode ? "#ffffff" : "#0f172a",
                       border: isSelected ? "1px solid #7dd3fc" : "1px solid transparent",
                       borderRadius: 8,
                       padding: "6px 14px",
                       fontSize: 12.5,
-                      fontWeight: isSelected ? 800 : 600,
+                      fontWeight: isSelected ? 800 : 700,
                       cursor: "pointer",
                       transition: "all 0.15s ease",
-                      boxShadow: isSelected ? "0 2px 8px rgba(186, 230, 253, 0.35)" : "none",
+                      boxShadow: isSelected ? "0 2px 8px rgba(186, 230, 253, 0.4)" : "none",
                     }}
                   >
                     {t.label}

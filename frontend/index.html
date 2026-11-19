@@ -588,27 +588,41 @@
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
       }
 
-      /* Live Modal Tab Bar (Part 6 Modal): Crisp Obsidian Container + Soft Light Sky Blue Active Tab */
-      .live-modal-tab-bar,
-      body.theme-light .live-modal-tab-bar,
-      body.theme-dark .live-modal-tab-bar {
-        background: rgb(3, 7, 18) !important;
-        border: 1px solid rgba(255, 255, 255, 0.15) !important;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+      /* Live Modal Tab Bar (Part 6 Modal) */
+      /* --- LIGHT MODE: Crisp White Container + Soft Light Sky Blue Active Tab + Black Text --- */
+      body.theme-light .live-modal-tab-bar {
+        background: #ffffff !important; /* 라이트 모드는 흰색 계열 */
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06) !important;
       }
-      .live-modal-tab-bar button[data-active="true"],
-      body.theme-light .live-modal-tab-bar button[data-active="true"],
-      body.theme-dark .live-modal-tab-bar button[data-active="true"] {
+      body.theme-light .live-modal-tab-bar button[data-active="true"] {
         background: #bae6fd !important; /* 연한 하늘색 */
         color: #020617 !important;       /* 검정색 계열 */
         border: 1px solid #7dd3fc !important;
         font-weight: 800 !important;
       }
-      .live-modal-tab-bar button[data-active="false"],
-      body.theme-light .live-modal-tab-bar button[data-active="false"],
+      body.theme-light .live-modal-tab-bar button[data-active="false"] {
+        background: transparent !important;
+        color: #0f172a !important;       /* 라이트 모드에서는 검정색 계열 글자 */
+        border: 1px solid transparent !important;
+        font-weight: 700 !important;
+      }
+
+      /* --- DARK MODE: Obsidian Black Container + Sky Blue Active Tab --- */
+      body.theme-dark .live-modal-tab-bar {
+        background: rgb(3, 7, 18) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+      }
+      body.theme-dark .live-modal-tab-bar button[data-active="true"] {
+        background: #bae6fd !important;
+        color: #020617 !important;
+        border: 1px solid #7dd3fc !important;
+        font-weight: 800 !important;
+      }
       body.theme-dark .live-modal-tab-bar button[data-active="false"] {
         background: transparent !important;
-        color: #ffffff !important;       /* 선명한 화이트 글자 */
+        color: #ffffff !important;
         border: 1px solid transparent !important;
       }
     </style>
