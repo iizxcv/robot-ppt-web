@@ -8,6 +8,37 @@ interface RobotLiveOperationModalProps {
   onActionExecute?: (actionType: string, params: any) => Promise<any>;
 }
 
+export const STREAM_CONFIG: Record<string, { streamName: string; label: string; tag: string; res: string; desc: string }> = {
+  optical: {
+    streamName: "DOWN_CAMERA",
+    label: "광학 HD 카메라",
+    tag: "OPTICAL HD",
+    res: "1080P@30fps (H.264)",
+    desc: "본체 하강형 가시광선 감시 카메라 (DOWN_CAMERA)",
+  },
+  thermal: {
+    streamName: "UP_HOT_CAMERA",
+    label: "열화상 센서",
+    tag: "THERMAL RADIOMETRIC",
+    res: "160×120 Radiometric (Hikmicro)",
+    desc: "발열 지점 및 랙 캐비닛 적외선 열분포 센서 (UP_HOT_CAMERA)",
+  },
+  ptz: {
+    streamName: "MAIN_CAMERA",
+    label: "PTZ 볼헤드",
+    tag: "PTZ DOME 4MP",
+    res: "2560×1440 @ 30fps (25x Zoom)",
+    desc: "360° 팬/틸트 원격 조작 스마트 돔 카메라 (MAIN_CAMERA)",
+  },
+  elevator: {
+    streamName: "UP_CAMERA",
+    label: "승강기 상부",
+    tag: "ELEVATOR UPPER",
+    res: "1080P@30fps",
+    desc: "2.1m 전동 리프트 마스트 상단 카메라 (UP_CAMERA)",
+  },
+};
+
 export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = ({
   robot,
   fleetData,
@@ -17,7 +48,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
   const [activeTab, setActiveTab] = useState<"camera" | "sensors" | "oneclick">("oneclick");
   const [selectedPath, setSelectedPath] = useState<string>("");
   const [selectedPosition, setSelectedPosition] = useState<string>("");
-  const [cameraMode, setCameraMode] = useState<"optical" | "thermal" | "ptz">("optical");
+  const [cameraMode, setCameraMode] = useState<"optical" | "thermal" | "ptz" | "elevator">("optical");
   const [ptzPan, setPtzPan] = useState<number>(0);
   const [ptzTilt, setPtzTilt] = useState<number>(0);
   const [ptzZoom, setPtzZoom] = useState<number>(1.0);
@@ -37,6 +68,10 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
   const positions: any[] = robotFleet.positions || [];
   const cabinets: any[] = robotFleet.cabinets || [];
   const cameras: any[] = robotFleet.cameras || [];
+
+  const currStream = STREAM_CONFIG[cameraMode] || STREAM_CONFIG.optical;
+  const robotIp = robot.ip || (rId.includes("power") ? "10.200.28.61" : "10.200.28.63");
+  const liveStreamPlayerUrl = `http://${robotIp}/videoStream/stream/player/${currStream.streamName}?autoplay=1&muted=1`;
 
   useEffect(() => {
     if (missions.length > 0 && !selectedPath) {
@@ -593,11 +628,24 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
               <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <div>
-                    <div style={{ fontSize: 15, fontWeight: 800, color: "#38bdf8" }}>
-                      📹 실시간 카메라 소켓 & 다채널 영상 피드 (Live Multi-Camera)
+                    <div style={{ fontSize: 15, fontWeight: 800, color: "#38bdf8", display: "flex", alignItems: "center", gap: 8 }}>
+                      <span>📹 실시간 미디어 서버 & 브라우저 영상 파이프라인 (Live MediaMTX Stream)</span>
+                      <span
+                        style={{
+                          background: "rgba(34, 197, 94, 0.2)",
+                          border: "1px solid #22c55e",
+                          color: "#4ade80",
+                          fontSize: 10,
+                          padding: "2px 8px",
+                          borderRadius: 4,
+                          fontWeight: 700,
+                        }}
+                      >
+                        ● NGINX PROXY ➔ MEDIAMTX WHEP
+                      </span>
                     </div>
-                    <div style={{ fontSize: 12, color: "#94a3b8" }}>
-                      소켓: <code>{robotFleet.ws_url || `ws://${robot.ip}/websocket/`}</code> · 스트림: <code>{robotFleet.video_stream_url || `http://${robot.ip}/videoStream/`}</code>
+                    <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 2 }}>
+                      소켓: <code>{robotFleet.ws_url || `ws://${robotIp}/websocket/`}</code> · 스트림 파이프라인: <code>http://{robotIp}/videoStream/stream/player/{currStream.streamName}</code>
                     </div>
                   </div>
 
@@ -606,6 +654,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                       { id: "optical", label: "광학 HD 카메라" },
                       { id: "thermal", label: "열화상 센서" },
                       { id: "ptz", label: "PTZ 볼헤드" },
+                      { id: "elevator", label: "승강기 상부" },
                     ].map((m) => (
                       <button
                         key={m.id}
@@ -613,12 +662,13 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                         style={{
                           background: cameraMode === m.id ? "#3b82f6" : "rgba(255, 255, 255, 0.08)",
                           color: "#fff",
-                          border: "none",
+                          border: cameraMode === m.id ? "1px solid #60a5fa" : "1px solid transparent",
                           borderRadius: 8,
                           padding: "6px 12px",
                           fontSize: 12,
                           fontWeight: 700,
                           cursor: "pointer",
+                          transition: "all 0.2s ease",
                         }}
                       >
                         {m.label}
@@ -629,40 +679,45 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
 
                 {/* Main View Area with PTZ Controls */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 240px", gap: 14 }}>
-                  {/* Video View Frame */}
+                  {/* Video View Frame - REAL LIVE WEBRTC STREAM IFRAME PIPELINE */}
                   <div
                     style={{
-                      height: 280,
+                      height: 310,
                       background: "#030712",
-                      border: "1px solid rgba(59, 130, 246, 0.3)",
+                      border: "1.5px solid rgba(59, 130, 246, 0.4)",
                       borderRadius: 14,
                       overflow: "hidden",
                       position: "relative",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
+                      boxShadow: "0 0 25px rgba(59, 130, 246, 0.15) inset",
                     }}
                   >
-                    <img
-                      src={
-                        cameraMode === "thermal"
-                          ? "/proposal_images/p20_img1_330x265.jpeg"
-                          : cameraMode === "ptz"
-                          ? "/proposal_images/p19_img4_390x403.jpeg"
-                          : "/proposal_images/parts_1.jpeg"
-                      }
-                      alt="Live Stream Feed"
-                      style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.85 }}
+                    <iframe
+                      key={`${robotIp}-${currStream.streamName}`}
+                      src={liveStreamPlayerUrl}
+                      title={`Live Stream - ${currStream.label}`}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        border: "none",
+                        background: "#000",
+                        display: "block",
+                      }}
+                      allow="autoplay; fullscreen"
                     />
 
-                    {/* Live OSD Overlay */}
+                    {/* Live OSD Overlay - Top Left */}
                     <div
                       style={{
                         position: "absolute",
                         top: 10,
                         left: 12,
-                        background: "rgba(0, 0, 0, 0.7)",
-                        padding: "4px 8px",
+                        background: "rgba(3, 7, 18, 0.85)",
+                        backdropFilter: "blur(4px)",
+                        border: "1px solid rgba(34, 197, 94, 0.5)",
+                        padding: "4px 10px",
                         borderRadius: 6,
                         fontSize: 11,
                         color: "#4ade80",
@@ -670,23 +725,79 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                         display: "flex",
                         alignItems: "center",
                         gap: 6,
+                        zIndex: 10,
+                        pointerEvents: "none",
                       }}
                     >
-                      <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e" }} />
-                      REC [LIVE 1080P@30fps] · {cameraMode.toUpperCase()}
+                      <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 8px #22c55e" }} />
+                      REC [LIVE WHEP WebRTC] · {currStream.tag} ({currStream.streamName})
                     </div>
 
+                    {/* Top Right Action - Popout / Fullscreen Stream */}
+                    <a
+                      href={liveStreamPlayerUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        position: "absolute",
+                        top: 10,
+                        right: 12,
+                        background: "rgba(15, 23, 42, 0.85)",
+                        backdropFilter: "blur(4px)",
+                        border: "1px solid rgba(59, 130, 246, 0.5)",
+                        padding: "4px 10px",
+                        borderRadius: 6,
+                        fontSize: 11,
+                        color: "#38bdf8",
+                        textDecoration: "none",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 5,
+                        fontWeight: 700,
+                        zIndex: 10,
+                        cursor: "pointer",
+                      }}
+                    >
+                      <span>전체화면 새 창 ↗</span>
+                    </a>
+
+                    {/* Bottom Left Stream Path Overlay */}
+                    <div
+                      style={{
+                        position: "absolute",
+                        bottom: 10,
+                        left: 12,
+                        background: "rgba(3, 7, 18, 0.85)",
+                        backdropFilter: "blur(4px)",
+                        border: "1px solid rgba(255, 255, 255, 0.1)",
+                        padding: "3px 8px",
+                        borderRadius: 4,
+                        fontSize: 10.5,
+                        color: "#94a3b8",
+                        fontFamily: "monospace",
+                        zIndex: 10,
+                        pointerEvents: "none",
+                      }}
+                    >
+                      Pipeline: <code>http://{robotIp}/videoStream/.../{currStream.streamName}</code>
+                    </div>
+
+                    {/* Bottom Right PTZ Coordinate Overlay */}
                     <div
                       style={{
                         position: "absolute",
                         bottom: 10,
                         right: 12,
-                        background: "rgba(0, 0, 0, 0.7)",
-                        padding: "4px 8px",
-                        borderRadius: 6,
-                        fontSize: 11,
+                        background: "rgba(3, 7, 18, 0.85)",
+                        backdropFilter: "blur(4px)",
+                        border: "1px solid rgba(59, 130, 246, 0.3)",
+                        padding: "3px 8px",
+                        borderRadius: 4,
+                        fontSize: 10.5,
                         color: "#38bdf8",
                         fontFamily: "monospace",
+                        zIndex: 10,
+                        pointerEvents: "none",
                       }}
                     >
                       PAN: {ptzPan}° | TILT: {ptzTilt}° | ZOOM: {ptzZoom}x
