@@ -44,9 +44,9 @@
     {
       "id": "slide-04",
       "number": "04",
-      "nav_label": "PLATFORM · 다중 로봇 실시간 관제",
-      "title": "실환경 WebSocket 기반 다중 로봇 통합 관리 플랫폼",
-      "subtitle": "ws://<IP>/platformSocket/timely/data/robotStatus · Redis 상태 버스 실시간 연동",
+      "nav_label": "PLATFORM · REST API 연동 지원",
+      "title": "REST API 기반 연동 지원 (아래 자료들은 API로 불러온 data를 시각화 & 문자화 한 데모입니다)",
+      "subtitle": "실제 로봇 IP(`10.200.28.63`, `10.200.28.61`)의 Webserver Bearer 토큰 인증 및 실시간 오도메트리 수신 데이터",
       "focus_mode": "live_platform_websocket",
       "highlights": [
         "가상 데모가 아닌 실제 로봇의 WebSocket 및 Redis 상태 버스에서 올라오는 실시간 좌표·배터리·리프트·센서 데이터를 직결 관제",

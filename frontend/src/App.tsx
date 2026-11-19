@@ -118,6 +118,33 @@ export const App: React.FC = () => {
   };
 
   const renderStyledTitle = (title: string) => {
+    if (!title) return null;
+    const parenMatch = title.match(/^(.*?)\s*(\(.*\))$/);
+    if (parenMatch) {
+      const mainTitle = parenMatch[1];
+      const subNote = parenMatch[2];
+      const words = mainTitle.split(" ");
+      const head = words.length > 2 ? words.slice(0, -2).join(" ") : words[0];
+      const tail = words.length > 2 ? words.slice(-2).join(" ") : words.slice(1).join(" ");
+      return (
+        <span style={{ display: "inline-flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
+          <span>
+            {head} <span style={{ color: "#3b82f6" }}>{tail}</span>
+          </span>
+          <span
+            style={{
+              fontSize: "0.58em",
+              color: isDarkMode ? "#94a3b8" : "#64748b",
+              fontWeight: 600,
+              letterSpacing: "normal",
+            }}
+          >
+            {subNote}
+          </span>
+        </span>
+      );
+    }
+
     const words = title.split(" ");
     if (words.length <= 2) return <span>{title}</span>;
     const head = words.slice(0, -2).join(" ");
