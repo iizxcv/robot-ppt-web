@@ -1090,36 +1090,41 @@ export const App: React.FC = () => {
 
               <div
                 style={{
-                  background: "linear-gradient(145deg, rgba(16, 24, 40, 0.85) 0%, rgba(10, 15, 28, 0.95) 100%)",
-                  border: "1px solid rgba(59, 130, 246, 0.25)",
+                  background: isDarkMode
+                    ? "linear-gradient(145deg, rgba(16, 24, 40, 0.85) 0%, rgba(10, 15, 28, 0.95) 100%)"
+                    : "#ffffff",
+                  border: isDarkMode ? "1px solid rgba(59, 130, 246, 0.25)" : "1px solid #cbd5e1",
                   borderRadius: 20,
                   padding: 20,
                   display: "flex",
                   flexDirection: "column",
                   overflow: "hidden",
-                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.4)",
+                  boxShadow: isDarkMode ? "0 8px 24px rgba(0, 0, 0, 0.4)" : "0 4px 16px rgba(15, 23, 42, 0.06)",
                 }}
               >
-                <div style={{ fontSize: 14, fontWeight: 800, color: "#4ade80", marginBottom: 6 }}>
+                <div style={{ fontSize: 14.5, fontWeight: 800, color: isDarkMode ? "#4ade80" : "#16a34a", marginBottom: 6 }}>
                   📡 실환경 WebSocket (`robotStatus`) & REST API 스트림 콘솔
                 </div>
-                <div style={{ fontSize: 11.5, color: "#94a3b8", marginBottom: 12 }}>
+                <div style={{ fontSize: 12, color: isDarkMode ? "#94a3b8" : "#64748b", marginBottom: 12 }}>
                   실제 로봇 IP(`10.200.28.63`, `10.200.28.61`)의 Webserver Bearer 토큰 인증 및 실시간 오도메트리 수신 데이터입니다.
                 </div>
 
                 <pre
                   style={{
                     flex: 1,
-                    background: "#080c16",
-                    padding: 14,
+                    background: "#030712",
+                    padding: "16px 18px",
                     borderRadius: 12,
-                    fontSize: 11,
-                    fontFamily: "monospace",
+                    fontSize: "clamp(12.5px, 0.85vw, 13.5px)",
+                    fontWeight: 700,
+                    fontFamily: "Consolas, 'Cascadia Code', 'Fira Code', 'Courier New', monospace",
                     color: "#4ade80",
                     overflowY: "auto",
                     margin: 0,
-                    lineHeight: 1.5,
-                    border: "1px solid rgba(255, 255, 255, 0.06)",
+                    lineHeight: 1.6,
+                    letterSpacing: "0.02em",
+                    border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid #1e293b",
+                    boxShadow: "inset 0 2px 8px rgba(0, 0, 0, 0.6)",
                   }}
                 >
                   {JSON.stringify(
