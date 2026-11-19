@@ -33,18 +33,22 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
   const rId = robot.id;
   const robotFleet = fleetData?.fleet?.[rId] || fleetData?.fleet?.["flag-01"] || {};
   const paths: any[] = robotFleet.paths || [];
+  const missions: any[] = robotFleet.missions || [];
   const positions: any[] = robotFleet.positions || [];
   const cabinets: any[] = robotFleet.cabinets || [];
   const cameras: any[] = robotFleet.cameras || [];
 
   useEffect(() => {
-    if (paths.length > 0 && !selectedPath) {
+    if (missions.length > 0 && !selectedPath) {
+      const m = missions[0];
+      setSelectedPath(String(m.missionId));
+    } else if (paths.length > 0 && !selectedPath) {
       setSelectedPath(paths[0].name || String(paths[0].robotPathId));
     }
     if (positions.length > 0 && !selectedPosition) {
       setSelectedPosition(positions[0].name || String(positions[0].robotPositionId));
     }
-  }, [paths, positions]);
+  }, [missions, paths, positions]);
 
   const addLog = (msg: string, type: "info" | "success" | "warn" = "info") => {
     setActionLogs((prev) => [{ time: new Date().toLocaleTimeString(), msg, type }, ...prev.slice(0, 15)]);
@@ -339,7 +343,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                         🚀 자동 순찰 (Auto Patrol)
                       </span>
                       <span style={{ fontSize: 11, color: "#38bdf8", fontWeight: 700 }}>
-                        {paths.length}개 정규 경로
+                        {missions.length || paths.length}개 정규 미션/경로
                       </span>
                     </div>
                     <div style={{ fontSize: 11.5, color: "#94a3b8", marginBottom: 10 }}>
@@ -359,14 +363,27 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                           fontSize: 12,
                         }}
                       >
-                        {paths.map((p) => (
-                          <option key={p.robotPathId} value={p.name}>
-                            {p.name} (ID: #{p.robotPathId})
-                          </option>
-                        ))}
+                        {missions.length > 0
+                          ? missions.map((m) => (
+                              <option key={m.missionId} value={String(m.missionId)}>
+                                {m.pathName || m.missionName} · [{m.missionTypeName || "순찰"}] (ID: #{m.missionId})
+                              </option>
+                            ))
+                          : paths.map((p) => (
+                              <option key={p.robotPathId} value={p.name}>
+                                {p.name} (ID: #{p.robotPathId})
+                              </option>
+                            ))}
                       </select>
                       <button
-                        onClick={() => handleRunAction("start_patrol", { path_name: selectedPath })}
+                        onClick={() => {
+                          const currMission = missions.find((m) => String(m.missionId) === selectedPath);
+                          handleRunAction("start_patrol", {
+                            mission_id: currMission?.missionId,
+                            mission_type_id: currMission?.missionTypeId || 1,
+                            path_name: currMission?.pathName || currMission?.missionName || selectedPath,
+                          });
+                        }}
                         disabled={isExecuting}
                         style={{
                           background: "#3b82f6",
@@ -420,13 +437,19 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                         }}
                       >
                         {positions.map((pos) => (
-                          <option key={pos.robotPositionId} value={pos.name}>
+                          <option key={pos.robotPositionId} value={String(pos.robotPositionId)}>
                             {pos.name} (#{pos.robotPositionId})
                           </option>
                         ))}
                       </select>
                       <button
-                        onClick={() => handleRunAction("goto_position", { position_name: selectedPosition })}
+                        onClick={() => {
+                          const currPos = positions.find((p) => String(p.robotPositionId) === selectedPosition || p.name === selectedPosition);
+                          handleRunAction("goto_position", {
+                            position_name: currPos?.name || selectedPosition,
+                            position_id: currPos?.robotPositionId,
+                          });
+                        }}
                         disabled={isExecuting}
                         style={{
                           background: "#a855f7",
