@@ -304,7 +304,7 @@ export const App: React.FC = () => {
                       />
                       <span style={{ fontWeight: 800, color: r.color }}>{r.display_name.split(" ")[0]}</span>
                     </div>
-                    <span style={{ fontSize: 11, color: "#e4e4e7", fontFamily: "monospace" }}>
+                    <span style={{ fontSize: 11, color: isDarkMode ? "#e4e4e7" : "#0f172a", fontFamily: "monospace" }}>
                       {r.telemetry?.position_name?.split(" ")[0]} ({r.telemetry?.battery_pct}%)
                     </span>
                   </div>
@@ -312,19 +312,103 @@ export const App: React.FC = () => {
               })}
           </div>
         </div>
+
+        {/* Sidebar Bottom Controls: Slide Navigation & Theme Toggle */}
+        <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ display: "flex", gap: 6 }}>
+            <button
+              disabled={currentSlideIdx === 0}
+              onClick={() => navigateToSlide(currentSlideIdx - 1)}
+              style={{
+                flex: 1,
+                background: isDarkMode ? "#18181b" : "#f1f5f9",
+                color: isDarkMode ? "#ffffff" : "#0f172a",
+                border: isDarkMode ? "1px solid #27272a" : "1px solid #cbd5e1",
+                borderRadius: 8,
+                padding: "8px 0",
+                fontWeight: 800,
+                fontSize: 12,
+                cursor: currentSlideIdx === 0 ? "not-allowed" : "pointer",
+                opacity: currentSlideIdx === 0 ? 0.35 : 1,
+                transition: "all 0.2s ease",
+              }}
+            >
+              ← 이전
+            </button>
+            <button
+              disabled={currentSlideIdx >= totalSlides - 1}
+              onClick={() => navigateToSlide(currentSlideIdx + 1)}
+              style={{
+                flex: 1,
+                background: "#2563eb",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: 8,
+                padding: "8px 0",
+                fontWeight: 800,
+                fontSize: 12,
+                cursor: currentSlideIdx >= totalSlides - 1 ? "not-allowed" : "pointer",
+                opacity: currentSlideIdx >= totalSlides - 1 ? 0.35 : 1,
+                boxShadow: "0 2px 8px rgba(37, 99, 235, 0.35)",
+                transition: "all 0.2s ease",
+              }}
+            >
+              다음 →
+            </button>
+            <button
+              onClick={() => setIsDarkMode((prev) => !prev)}
+              title={isDarkMode ? "라이트 모드로 전환 (기본 Light 폰트)" : "다크 모드로 전환"}
+              style={{
+                background: isDarkMode ? "#27272a" : "#f8fafc",
+                color: isDarkMode ? "#facc15" : "#0f172a",
+                border: isDarkMode ? "1px solid #3f3f46" : "1px solid #cbd5e1",
+                borderRadius: 8,
+                padding: "8px 10px",
+                fontWeight: 700,
+                fontSize: 12,
+                cursor: "pointer",
+                whiteSpace: "nowrap",
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+                transition: "all 0.2s ease",
+              }}
+            >
+              <span>{isDarkMode ? "☀️" : "🌙"}</span>
+              <span>{isDarkMode ? "Light" : "Dark"}</span>
+            </button>
+          </div>
+
+          {/* Sidebar Company Info Footer (Relocated from Main Stage) */}
+          <div
+            style={{
+              paddingTop: 8,
+              borderTop: isDarkMode ? "1px solid #1f1f26" : "1px solid #e2e8f0",
+              fontSize: 10.5,
+              lineHeight: 1.5,
+              color: isDarkMode ? "#71717a" : "#64748b",
+            }}
+          >
+            <div style={{ fontWeight: 800, color: isDarkMode ? "#cbd5e1" : "#0f172a", marginBottom: 1 }}>
+              SR ROBOTICS
+            </div>
+            <div style={{ fontSize: 9.5 }}>서울 강남구 대치동 944-25 KC빌딩 11층</div>
+            <div style={{ fontSize: 9.5 }}>TEL 02-558-8886 · sales@sr-robotics.co.kr</div>
+          </div>
+        </div>
       </aside>
 
-      {/* Main Dynamic Presentation Stage */}
+      {/* Main Dynamic Presentation Stage - Full Height Without Bottom Collision */}
       <main
         key={currentSlide.id || currentSlideIdx}
         className="stage-reveal"
         style={{
-          padding: "30px 44px 24px 44px",
+          padding: "clamp(18px, 2.2vh, 26px) clamp(24px, 2.2vw, 36px)",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "space-between",
           height: "100vh",
           overflow: "hidden",
+          gap: "clamp(10px, 1.4vh, 16px)",
         }}
       >
         {/* Top Stage Header */}
@@ -366,17 +450,17 @@ export const App: React.FC = () => {
           <div style={{ display: "flex", alignItems: "baseline", gap: 14, marginBottom: 14, flexWrap: "wrap" }}>
             <h1
               style={{
-                fontSize: "clamp(26px, 2vw, 34px)",
+                fontSize: "clamp(24px, 1.8vw, 32px)",
                 fontWeight: 800,
                 margin: 0,
                 letterSpacing: "-0.03em",
                 lineHeight: 1.15,
-                color: "#ffffff",
+                color: isDarkMode ? "#ffffff" : "#0f172a",
               }}
             >
               {renderStyledTitle(currentSlide.title)}
             </h1>
-            <span style={{ fontSize: "clamp(12px, 0.85vw, 13.5px)", color: "#94a3b8", fontWeight: 500 }}>
+            <span style={{ fontSize: "clamp(12px, 0.85vw, 13.5px)", color: isDarkMode ? "#94a3b8" : "#64748b", fontWeight: 500 }}>
               {currentSlide.subtitle}
             </span>
           </div>
@@ -1487,30 +1571,44 @@ export const App: React.FC = () => {
               Slide 06: PART 05 Live Robot Fleet Camera, Sensors & One-Click Operations
              ============================================================== */}
           {currentSlideIdx === 5 && (
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 14, minHeight: 0 }}>
+            <div
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                gap: "clamp(8px, 1.2vh, 14px)",
+                minHeight: 0,
+                height: "100%",
+                maxHeight: "100%",
+                overflow: "hidden",
+              }}
+            >
               {/* Top Fleet Information Hub Bar */}
               <div
                 style={{
-                  background: "linear-gradient(90deg, rgba(16, 24, 40, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%)",
-                  border: "1px solid rgba(59, 130, 246, 0.3)",
-                  borderRadius: 14,
-                  padding: "10px 18px",
+                  background: isDarkMode
+                    ? "linear-gradient(90deg, rgba(16, 24, 40, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%)"
+                    : "#ffffff",
+                  border: isDarkMode ? "1px solid rgba(59, 130, 246, 0.3)" : "1px solid #e2e8f0",
+                  borderRadius: 12,
+                  padding: "clamp(6px, 1vh, 10px) clamp(12px, 1.2vw, 18px)",
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
                   flexWrap: "wrap",
                   gap: 8,
+                  boxShadow: isDarkMode ? "0 4px 16px rgba(0, 0, 0, 0.3)" : "0 2px 8px rgba(0, 0, 0, 0.04)",
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <span
                     style={{
-                      background: "rgba(34, 197, 94, 0.18)",
-                      border: "1px solid #22c55e",
-                      color: "#4ade80",
+                      background: isDarkMode ? "rgba(34, 197, 94, 0.18)" : "rgba(34, 197, 94, 0.12)",
+                      border: isDarkMode ? "1px solid #22c55e" : "1px solid rgba(34, 197, 94, 0.4)",
+                      color: isDarkMode ? "#4ade80" : "#16a34a",
                       padding: "3px 10px",
                       borderRadius: 6,
-                      fontSize: 11,
+                      fontSize: "clamp(10px, 0.75vw, 11px)",
                       fontWeight: 800,
                       display: "flex",
                       alignItems: "center",
@@ -1520,26 +1618,70 @@ export const App: React.FC = () => {
                     <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e" }} />
                     LIVE TELEMETRY BUS CONNECTED
                   </span>
-                  <span style={{ fontSize: 13.5, fontWeight: 800, color: "#ffffff" }}>
+                  <span
+                    style={{
+                      fontSize: "clamp(12px, 0.9vw, 13.5px)",
+                      fontWeight: 800,
+                      color: isDarkMode ? "#ffffff" : "#0f172a",
+                    }}
+                  >
                     실환경 로봇 카메라 소켓 · 센서 텔레메트리 & 원클릭 작업 제어 허브
                   </span>
                 </div>
 
-                <div style={{ display: "flex", gap: 8, fontSize: 11, fontFamily: "monospace" }}>
-                  <span style={{ background: "rgba(2, 6, 23, 0.7)", border: "1px solid #334155", borderRadius: 6, padding: "3px 8px", color: "#38bdf8" }}>
+                <div style={{ display: "flex", gap: 8, fontSize: "clamp(10px, 0.75vw, 11px)", fontFamily: "monospace" }}>
+                  <span
+                    style={{
+                      background: isDarkMode ? "rgba(2, 6, 23, 0.7)" : "#f8fafc",
+                      border: isDarkMode ? "1px solid #334155" : "1px solid #e2e8f0",
+                      borderRadius: 6,
+                      padding: "3px 8px",
+                      color: isDarkMode ? "#38bdf8" : "#0284c7",
+                      fontWeight: 700,
+                    }}
+                  >
                     WS: ws://10.200.28.63/websocket/ (Flagship)
                   </span>
-                  <span style={{ background: "rgba(2, 6, 23, 0.7)", border: "1px solid #334155", borderRadius: 6, padding: "3px 8px", color: "#00f2fe" }}>
+                  <span
+                    style={{
+                      background: isDarkMode ? "rgba(2, 6, 23, 0.7)" : "#f8fafc",
+                      border: isDarkMode ? "1px solid #334155" : "1px solid #e2e8f0",
+                      borderRadius: 6,
+                      padding: "3px 8px",
+                      color: isDarkMode ? "#00f2fe" : "#0891b2",
+                      fontWeight: 700,
+                    }}
+                  >
                     WS: ws://10.200.28.61/websocket/ (Power)
                   </span>
-                  <span style={{ background: "rgba(2, 6, 23, 0.7)", border: "1px solid #334155", borderRadius: 6, padding: "3px 8px", color: "#a855f7" }}>
+                  <span
+                    style={{
+                      background: isDarkMode ? "rgba(2, 6, 23, 0.7)" : "#f8fafc",
+                      border: isDarkMode ? "1px solid #334155" : "1px solid #e2e8f0",
+                      borderRadius: 6,
+                      padding: "3px 8px",
+                      color: isDarkMode ? "#a855f7" : "#7c3aed",
+                      fontWeight: 700,
+                    }}
+                  >
                     11개 랙/캐비닛 자산 연동
                   </span>
                 </div>
               </div>
 
               {/* 3 Robot Cards Grid */}
-              <div style={{ flex: 1, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, minHeight: 0 }}>
+              <div
+                style={{
+                  flex: 1,
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3, 1fr)",
+                  gap: "clamp(10px, 1.2vw, 16px)",
+                  minHeight: 0,
+                  height: "100%",
+                  maxHeight: "100%",
+                  overflowY: "auto",
+                }}
+              >
                 {robots.map((r) => {
                   const isPower = r.id.includes("pwr") || r.id.includes("power");
                   const isPro = r.id.includes("pro");
@@ -1558,54 +1700,70 @@ export const App: React.FC = () => {
                       key={r.id}
                       onClick={() => setLiveOpRobot(r)}
                       style={{
-                        background: "linear-gradient(145deg, rgba(16, 24, 40, 0.92) 0%, rgba(10, 15, 28, 0.98) 100%)",
-                        border: "1.5px solid rgba(59, 130, 246, 0.28)",
-                        borderRadius: 18,
-                        padding: "16px 18px",
+                        background: isDarkMode
+                          ? "linear-gradient(145deg, rgba(16, 24, 40, 0.92) 0%, rgba(10, 15, 28, 0.98) 100%)"
+                          : "#ffffff",
+                        border: isDarkMode ? "1.5px solid rgba(59, 130, 246, 0.28)" : "1px solid #e2e8f0",
+                        borderRadius: 16,
+                        padding: "clamp(10px, 1.4vh, 16px) clamp(12px, 1.2vw, 18px)",
                         display: "flex",
                         flexDirection: "column",
                         justifyContent: "space-between",
                         cursor: "pointer",
                         transition: "all 0.25s ease",
-                        boxShadow: "0 8px 24px rgba(0, 0, 0, 0.45)",
+                        boxShadow: isDarkMode ? "0 8px 24px rgba(0, 0, 0, 0.45)" : "0 4px 16px rgba(0, 0, 0, 0.05)",
+                        minHeight: 0,
+                        height: "100%",
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.borderColor = "#3b82f6";
-                        e.currentTarget.style.transform = "translateY(-4px)";
+                        e.currentTarget.style.transform = "translateY(-3px)";
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = "rgba(59, 130, 246, 0.28)";
+                        e.currentTarget.style.borderColor = isDarkMode ? "rgba(59, 130, 246, 0.28)" : "#e2e8f0";
                         e.currentTarget.style.transform = "translateY(0px)";
                       }}
                     >
-                      <div>
+                      <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
                         {/* Card Header */}
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                          <div>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            marginBottom: "clamp(6px, 0.8vh, 10px)",
+                          }}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                             <span
                               style={{
-                                background: "rgba(59, 130, 246, 0.16)",
-                                border: "1px solid rgba(59, 130, 246, 0.4)",
-                                color: "#38bdf8",
-                                fontSize: 11,
+                                background: isDarkMode ? "rgba(59, 130, 246, 0.16)" : "rgba(37, 99, 235, 0.1)",
+                                border: isDarkMode ? "1px solid rgba(59, 130, 246, 0.4)" : "1px solid rgba(37, 99, 235, 0.25)",
+                                color: isDarkMode ? "#38bdf8" : "#2563eb",
+                                fontSize: "clamp(10px, 0.72vw, 11px)",
                                 fontWeight: 800,
                                 padding: "2px 8px",
                                 borderRadius: 5,
-                                marginRight: 6,
                               }}
                             >
                               {r.edition_badge || "EDITION"}
                             </span>
-                            <span style={{ fontSize: 15.5, fontWeight: 900, color: "#ffffff" }}>
+                            <span
+                              style={{
+                                fontSize: "clamp(13px, 1vw, 15px)",
+                                fontWeight: 900,
+                                color: isDarkMode ? "#ffffff" : "#0f172a",
+                              }}
+                            >
                               {r.display_name.split(" (")[0]}
                             </span>
                           </div>
 
                           <span
                             style={{
-                              fontSize: 11,
+                              fontSize: "clamp(10px, 0.72vw, 11px)",
                               fontWeight: 800,
-                              color: isLive ? "#4ade80" : "#a1a1aa",
+                              color: isLive ? (isDarkMode ? "#4ade80" : "#16a34a") : (isDarkMode ? "#a1a1aa" : "#64748b"),
                               display: "flex",
                               alignItems: "center",
                               gap: 5,
@@ -1626,50 +1784,124 @@ export const App: React.FC = () => {
                         {/* Large Front Photo Box */}
                         <div
                           style={{
-                            height: 220,
-                            background: "#030712",
-                            borderRadius: 14,
+                            flex: 1,
+                            minHeight: "clamp(130px, 20vh, 200px)",
+                            background: isDarkMode ? "#030712" : "#f8fafc",
+                            borderRadius: 12,
                             overflow: "hidden",
-                            border: "1px solid rgba(255, 255, 255, 0.08)",
+                            border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            marginBottom: 12,
+                            marginBottom: "clamp(6px, 0.9vh, 10px)",
                           }}
                         >
                           <img
                             src={frontImg}
                             alt={r.display_name}
-                            style={{ maxHeight: "95%", maxWidth: "90%", objectFit: "contain" }}
+                            style={{ maxHeight: "92%", maxWidth: "90%", objectFit: "contain" }}
                           />
                         </div>
 
                         {/* Quick 4-Grid Status Indicators */}
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 7, fontSize: 11.5 }}>
-                          <div style={{ background: "rgba(15, 23, 42, 0.75)", padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(255, 255, 255, 0.05)" }}>
-                            <div style={{ color: "#94a3b8", fontSize: 10 }}>동작 상태</div>
-                            <div style={{ color: "#4ade80", fontWeight: 800, marginTop: 2, textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns: "1fr 1fr",
+                            gap: "clamp(4px, 0.6vh, 6px)",
+                            fontSize: "clamp(10.5px, 0.75vw, 11.5px)",
+                          }}
+                        >
+                          <div
+                            style={{
+                              background: isDarkMode ? "rgba(15, 23, 42, 0.75)" : "#f8fafc",
+                              padding: "clamp(4px, 0.6vh, 6px) clamp(6px, 0.7vw, 9px)",
+                              borderRadius: 7,
+                              border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.05)" : "1px solid #e2e8f0",
+                            }}
+                          >
+                            <div style={{ color: isDarkMode ? "#94a3b8" : "#64748b", fontSize: "clamp(9px, 0.65vw, 10px)" }}>
+                              동작 상태
+                            </div>
+                            <div
+                              style={{
+                                color: isDarkMode ? "#4ade80" : "#16a34a",
+                                fontWeight: 800,
+                                marginTop: 1,
+                                textOverflow: "ellipsis",
+                                overflow: "hidden",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
                               {r.telemetry?.fsm_state || "READY (STANDBY)"}
                             </div>
                           </div>
 
-                          <div style={{ background: "rgba(15, 23, 42, 0.75)", padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(255, 255, 255, 0.05)" }}>
-                            <div style={{ color: "#94a3b8", fontSize: 10 }}>배터리 전원</div>
-                            <div style={{ color: "#38bdf8", fontWeight: 800, marginTop: 2 }}>
+                          <div
+                            style={{
+                              background: isDarkMode ? "rgba(15, 23, 42, 0.75)" : "#f8fafc",
+                              padding: "clamp(4px, 0.6vh, 6px) clamp(6px, 0.7vw, 9px)",
+                              borderRadius: 7,
+                              border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.05)" : "1px solid #e2e8f0",
+                            }}
+                          >
+                            <div style={{ color: isDarkMode ? "#94a3b8" : "#64748b", fontSize: "clamp(9px, 0.65vw, 10px)" }}>
+                              배터리 전원
+                            </div>
+                            <div
+                              style={{
+                                color: isDarkMode ? "#38bdf8" : "#0284c7",
+                                fontWeight: 800,
+                                marginTop: 1,
+                              }}
+                            >
                               {r.telemetry?.battery_pct ?? 100}% ({r.telemetry?.voltage_v ?? 28.09}V)
                             </div>
                           </div>
 
-                          <div style={{ background: "rgba(15, 23, 42, 0.75)", padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(255, 255, 255, 0.05)" }}>
-                            <div style={{ color: "#94a3b8", fontSize: 10 }}>현재 위치</div>
-                            <div style={{ color: "#ffffff", fontWeight: 700, marginTop: 2, textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
+                          <div
+                            style={{
+                              background: isDarkMode ? "rgba(15, 23, 42, 0.75)" : "#f8fafc",
+                              padding: "clamp(4px, 0.6vh, 6px) clamp(6px, 0.7vw, 9px)",
+                              borderRadius: 7,
+                              border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.05)" : "1px solid #e2e8f0",
+                            }}
+                          >
+                            <div style={{ color: isDarkMode ? "#94a3b8" : "#64748b", fontSize: "clamp(9px, 0.65vw, 10px)" }}>
+                              현재 위치
+                            </div>
+                            <div
+                              style={{
+                                color: isDarkMode ? "#ffffff" : "#0f172a",
+                                fontWeight: 700,
+                                marginTop: 1,
+                                textOverflow: "ellipsis",
+                                overflow: "hidden",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
                               {r.telemetry?.position_name || "충전 도크"}
                             </div>
                           </div>
 
-                          <div style={{ background: "rgba(15, 23, 42, 0.75)", padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(255, 255, 255, 0.05)" }}>
-                            <div style={{ color: "#94a3b8", fontSize: 10 }}>카메라 / 순찰경로</div>
-                            <div style={{ color: "#facc15", fontWeight: 800, marginTop: 2 }}>
+                          <div
+                            style={{
+                              background: isDarkMode ? "rgba(15, 23, 42, 0.75)" : "#f8fafc",
+                              padding: "clamp(4px, 0.6vh, 6px) clamp(6px, 0.7vw, 9px)",
+                              borderRadius: 7,
+                              border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.05)" : "1px solid #e2e8f0",
+                            }}
+                          >
+                            <div style={{ color: isDarkMode ? "#94a3b8" : "#64748b", fontSize: "clamp(9px, 0.65vw, 10px)" }}>
+                              카메라 / 순찰경로
+                            </div>
+                            <div
+                              style={{
+                                color: isDarkMode ? "#facc15" : "#b45309",
+                                fontWeight: 800,
+                                marginTop: 1,
+                              }}
+                            >
                               {camCount}대 카메라 · {pathCount}개 경로
                             </div>
                           </div>
@@ -1683,20 +1915,20 @@ export const App: React.FC = () => {
                           setLiveOpRobot(r);
                         }}
                         style={{
-                          marginTop: 12,
+                          marginTop: "clamp(8px, 1vh, 12px)",
                           background: "linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%)",
                           color: "#ffffff",
                           border: "none",
-                          borderRadius: 10,
-                          padding: "10px 0",
-                          fontSize: 12.5,
+                          borderRadius: 8,
+                          padding: "clamp(7px, 0.9vh, 10px) 0",
+                          fontSize: "clamp(11px, 0.8vw, 12.5px)",
                           fontWeight: 800,
                           cursor: "pointer",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
                           gap: 6,
-                          boxShadow: "0 4px 14px rgba(37, 99, 235, 0.4)",
+                          boxShadow: "0 4px 14px rgba(37, 99, 235, 0.35)",
                         }}
                       >
                         <span>⚡</span>
@@ -1708,66 +1940,6 @@ export const App: React.FC = () => {
               </div>
             </div>
           )}
-        </div>
-
-        {/* Bottom Footer with Contact Info from Page 30 */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            paddingTop: 12,
-            marginTop: 12,
-            borderTop: "1px solid #18181c",
-            fontSize: 12,
-            color: "#71717a",
-          }}
-        >
-          <div>
-            <b>SR ROBOTICS</b> · 서울특별시 강남구 대치동 944-25 KC빌딩 11층 · TEL 02-558-8886 · sales@sr-robotics.co.kr
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            {/* Bottom-Right Theme Toggle Button */}
-            <button
-              onClick={() => setIsDarkMode((prev) => !prev)}
-              className="theme-toggle-pill"
-              title={isDarkMode ? "라이트 모드로 전환 (기본 Light 폰트)" : "다크 모드로 전환"}
-              style={{ marginRight: 6 }}
-            >
-              <span>{isDarkMode ? "☀️ Light" : "🌙 Dark"}</span>
-            </button>
-
-            <button
-              disabled={currentSlideIdx === 0}
-              onClick={() => navigateToSlide(currentSlideIdx - 1)}
-              style={{
-                background: "#18181b",
-                color: "#fff",
-                border: "1px solid #27272a",
-                borderRadius: 8,
-                padding: "6px 14px",
-                fontWeight: 700,
-                cursor: "pointer",
-              }}
-            >
-              ← 이전 장표
-            </button>
-            <button
-              disabled={currentSlideIdx >= totalSlides - 1}
-              onClick={() => navigateToSlide(currentSlideIdx + 1)}
-              style={{
-                background: "#3b82f6",
-                color: "#fff",
-                border: "none",
-                borderRadius: 8,
-                padding: "6px 16px",
-                fontWeight: 800,
-                cursor: "pointer",
-              }}
-            >
-              다음 장표 →
-            </button>
-          </div>
         </div>
       </main>
 
