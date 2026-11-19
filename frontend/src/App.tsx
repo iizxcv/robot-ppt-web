@@ -581,6 +581,7 @@ export const App: React.FC = () => {
                     onSelectRobot={(id) => setSelectedRobotId(id)}
                     onOpenRobotPopup={(r) => setPopupRobot(r)}
                     showOdomVectors={false}
+                    isDarkMode={isDarkMode}
                   />
                 </div>
               </div>
@@ -747,6 +748,7 @@ export const App: React.FC = () => {
                   onSelectRobot={(id) => setSelectedRobotId(id)}
                   onOpenRobotPopup={(r) => setPopupRobot(r)}
                   showOdomVectors={false}
+                  isDarkMode={isDarkMode}
                 />
               </div>
             </div>
@@ -764,7 +766,7 @@ export const App: React.FC = () => {
                     {
                       num: "01 SLAM & MAP FUSION",
                       title: "듀얼 map.pgm 정합 & 위치 보정",
-                      color: "#00f2fe",
+                      color: isDarkMode ? "#00f2fe" : "#0284c7",
                       items: [
                         "Flagship(167×164) + Power(199×425) 병합",
                         "Power 맵 ΔΘ=+90.25°, ΔX=+1.65m, ΔY=-5.875m",
@@ -774,7 +776,7 @@ export const App: React.FC = () => {
                     {
                       num: "02 ROBOTIC ARM (Pro)",
                       title: "6+2축 로봇 팔 복합 물리 조작",
-                      color: "#a855f7",
+                      color: isDarkMode ? "#a855f7" : "#7e22ce",
                       items: [
                         "6축 메인(±0.05mm) + 2축 보조 암 상호 협동",
                         "캐비닛 도어 5단계 자동 개폐 및 버튼 조작",
@@ -784,7 +786,7 @@ export const App: React.FC = () => {
                     {
                       num: "03 VISION RECOGNITION",
                       title: "표시등 & 계측기 AI 비전 인식",
-                      color: "#38bdf8",
+                      color: isDarkMode ? "#38bdf8" : "#0369a1",
                       items: [
                         "서버 표시등(LED) 색상 감지 및 점멸 측정",
                         "아날로그/디지털 계측기 지침 실시간 자동 판독",
@@ -794,7 +796,7 @@ export const App: React.FC = () => {
                     {
                       num: "04 RFID READER",
                       title: "능동/수동형 RFID 무접촉 실사",
-                      color: "#f59e0b",
+                      color: isDarkMode ? "#f59e0b" : "#b45309",
                       items: [
                         "도어 폐쇄 상태 금속 메쉬 간섭 극복 인식",
                         "시간당 최대 200개 랙 자산 초고속 자동 실사",
@@ -805,19 +807,40 @@ export const App: React.FC = () => {
                     <div
                       key={tech.num}
                       style={{
-                        background: "linear-gradient(145deg, rgba(16, 24, 40, 0.8) 0%, rgba(10, 15, 28, 0.9) 100%)",
-                        border: "1px solid rgba(255, 255, 255, 0.08)",
-                        borderTop: `3px solid ${tech.color}`,
+                        background: isDarkMode
+                          ? "linear-gradient(145deg, rgba(16, 24, 40, 0.8) 0%, rgba(10, 15, 28, 0.9) 100%)"
+                          : "#ffffff",
+                        border: isDarkMode
+                          ? "1px solid rgba(255, 255, 255, 0.08)"
+                          : "1px solid #cbd5e1",
+                        borderTop: `3.5px solid ${tech.color}`,
                         borderRadius: 14,
                         padding: 14,
+                        boxShadow: isDarkMode ? "none" : "0 4px 16px rgba(15, 23, 42, 0.05)",
                       }}
                     >
                       <div style={{ fontSize: 10.5, fontWeight: 800, color: tech.color }}>{tech.num}</div>
-                      <div style={{ fontSize: 14.5, fontWeight: 800, margin: "4px 0 8px 0", color: "#ffffff" }}>
+                      <div
+                        style={{
+                          fontSize: 14.5,
+                          fontWeight: 800,
+                          margin: "4px 0 8px 0",
+                          color: isDarkMode ? "#ffffff" : "#020617",
+                        }}
+                      >
                         {tech.title}
                       </div>
                       {tech.items.map((it) => (
-                        <div key={it} style={{ fontSize: 11.5, color: "#cbd5e1", marginBottom: 3, lineHeight: 1.4 }}>
+                        <div
+                          key={it}
+                          style={{
+                            fontSize: 11.5,
+                            color: isDarkMode ? "#cbd5e1" : "#0f172a",
+                            fontWeight: isDarkMode ? 400 : 500,
+                            marginBottom: 3,
+                            lineHeight: 1.4,
+                          }}
+                        >
                           • {it}
                         </div>
                       ))}
@@ -828,14 +851,19 @@ export const App: React.FC = () => {
                 {/* 2D map.pgm Fusion Verification Card */}
                 <div
                   style={{
-                    background: "linear-gradient(145deg, rgba(16, 24, 40, 0.85) 0%, rgba(10, 15, 28, 0.95) 100%)",
-                    border: "1px solid rgba(59, 130, 246, 0.22)",
+                    background: isDarkMode
+                      ? "linear-gradient(145deg, rgba(16, 24, 40, 0.85) 0%, rgba(10, 15, 28, 0.95) 100%)"
+                      : "#ffffff",
+                    border: isDarkMode
+                      ? "1px solid rgba(59, 130, 246, 0.22)"
+                      : "1px solid #cbd5e1",
                     borderRadius: 16,
                     padding: 14,
                     display: "grid",
                     gridTemplateColumns: "140px 1fr",
                     gap: 14,
                     alignItems: "center",
+                    boxShadow: isDarkMode ? "none" : "0 4px 16px rgba(15, 23, 42, 0.05)",
                   }}
                 >
                   <div
@@ -844,7 +872,7 @@ export const App: React.FC = () => {
                       background: "#080c16",
                       borderRadius: 10,
                       overflow: "hidden",
-                      border: "1px solid rgba(255, 255, 255, 0.1)",
+                      border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid #cbd5e1",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -859,13 +887,28 @@ export const App: React.FC = () => {
                     )}
                   </div>
                   <div>
-                    <div style={{ fontSize: 12.5, fontWeight: 800, color: "#4ade80", marginBottom: 4 }}>
+                    <div
+                      style={{
+                        fontSize: 12.5,
+                        fontWeight: 800,
+                        color: isDarkMode ? "#4ade80" : "#15803d",
+                        marginBottom: 4,
+                      }}
+                    >
                       🧩 2개 로봇 `map.pgm` 실시간 정합 결과 (일치 블록: {mapData?.master_map?.overlap_count || 0}개)
                     </div>
-                    <div style={{ fontSize: 11, color: "#cbd5e1", lineHeight: 1.5, fontFamily: "monospace" }}>
-                      • <span style={{ color: "#38bdf8" }}>■ 청록 (80% 투명 불일치부)</span>: Flagship |{" "}
-                      <span style={{ color: "#fbbf24" }}>■ 주황 (80% 투명 불일치부)</span>: Power (+90.25° 보정) |{" "}
-                      <span style={{ color: "#4ade80" }}>■ 녹색</span>: 두 맵 완벽 일치 벽면
+                    <div
+                      style={{
+                        fontSize: 11,
+                        color: isDarkMode ? "#cbd5e1" : "#0f172a",
+                        fontWeight: isDarkMode ? 400 : 500,
+                        lineHeight: 1.5,
+                        fontFamily: "monospace",
+                      }}
+                    >
+                      • <span style={{ color: isDarkMode ? "#38bdf8" : "#0284c7", fontWeight: 700 }}>■ 청록 (80% 투명 불일치부)</span>: Flagship |{" "}
+                      <span style={{ color: isDarkMode ? "#fbbf24" : "#b45309", fontWeight: 700 }}>■ 주황 (80% 투명 불일치부)</span>: Power (+90.25° 보정) |{" "}
+                      <span style={{ color: isDarkMode ? "#4ade80" : "#15803d", fontWeight: 700 }}>■ 녹색</span>: 두 맵 완벽 일치 벽면
                       <br />• Flagship 현위치: Odom({robots[0]?.telemetry?.local_x}, {robots[0]?.telemetry?.local_y}) ➔ 3D({robots[0]?.telemetry?.world_x}, {robots[0]?.telemetry?.world_y})m
                       <br />• Power 현위치: Odom({robots[2]?.telemetry?.local_x}, {robots[2]?.telemetry?.local_y}) ➔ 3D({robots[2]?.telemetry?.world_x}, {robots[2]?.telemetry?.world_y})m
                     </div>

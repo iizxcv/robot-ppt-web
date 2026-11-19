@@ -56,72 +56,58 @@
       }
 
       /* ==========================================================================
-         LIGHT THEME (기본 모드 - 화이트 베이스 + 부드러운 10% 조도 + 슬렌더 라이트 폰트)
+         LIGHT THEME (기본 모드 - 화이트 베이스 + 확실한 200~255 조도 명암비 딥 블랙 폰트)
+         0~255 스케일에서 배경 245~255 대비 텍스트를 0~30 딥 블랙/딥 슬레이트로 렌더링
          ========================================================================== */
       body.theme-light,
       .theme-light {
         background: #f8fafc !important;
-        color: #1e293b !important;
+        color: #0f172a !important; /* 거의 완전한 블랙 (조도 0~30 수치, 극명한 대비) */
         font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif !important;
-        font-weight: 350 !important;
+        font-weight: 400 !important;
       }
 
-      /* Light Mode Typography Weights - Clean, Modern & Slender */
-      body.theme-light h1,
-      body.theme-light h2,
-      body.theme-light h3,
-      body.theme-light .slide-title {
-        font-weight: 600 !important;
-        color: #0f172a !important;
-        letter-spacing: -0.03em;
-      }
-      body.theme-light b,
-      body.theme-light strong {
-        font-weight: 600 !important;
-      }
-      body.theme-light p,
-      body.theme-light span,
-      body.theme-light div {
-        font-weight: 380;
-      }
-
-      /* Layout Backgrounds */
+      /* Base Containers */
       body.theme-light #app-root-container,
       body.theme-light .app-shell {
         background: #f1f5f9 !important;
-        color: #1e293b !important;
+        color: #0f172a !important;
       }
+
       body.theme-light aside.sidebar-toc {
         background: #ffffff !important;
-        border-right: 1px solid #e2e8f0 !important;
-        box-shadow: 2px 0 16px rgba(15, 23, 42, 0.04) !important;
+        border-right: 1px solid #cbd5e1 !important;
+        box-shadow: 2px 0 16px rgba(15, 23, 42, 0.05) !important;
       }
       body.theme-light aside.sidebar-toc .toc-divider {
-        background: #e2e8f0 !important;
+        background: #cbd5e1 !important;
       }
       body.theme-light aside.sidebar-toc .toc-subhead {
-        color: #64748b !important;
+        color: #475569 !important;
+        font-weight: 700 !important;
       }
       body.theme-light aside.sidebar-toc .live-status-box {
-        background: #f8fafc !important;
-        border: 1px solid #e2e8f0 !important;
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
       }
       body.theme-light main.stage-reveal {
         background: #f8fafc !important;
-        color: #1e293b !important;
+        color: #0f172a !important;
       }
 
-      /* Slide Cards and Glass Panels in Light Mode */
+      /* Slide Cards and Glass Panels in Light Mode -> Crisp White Cards with High-Contrast Borders */
       body.theme-light [style*="background: linear-gradient(145deg, rgba(16, 24, 40"],
       body.theme-light [style*="background: linear-gradient(145deg, #0b1120"],
+      body.theme-light [style*="background: linear-gradient(145deg, #0e1526"],
       body.theme-light [style*="background: rgba(16, 24, 40"],
       body.theme-light [style*="background: rgba(15, 23, 42"],
       body.theme-light [style*="background: #0c0d12"],
       body.theme-light [style*="background: #0f0f13"],
       body.theme-light [style*="background: #141419"] {
         background: #ffffff !important;
-        border-color: #e2e8f0 !important;
-        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.03) !important;
+        border-color: #cbd5e1 !important;
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
       }
 
       /* Inner Sub-boxes in Light Mode */
@@ -129,40 +115,151 @@
       body.theme-light [style*="background: #030712"],
       body.theme-light [style*="background: rgb(3, 7, 18)"],
       body.theme-light [style*="background: rgba(3, 7, 18"] {
-        background: #f8fafc !important;
-        border-color: #e2e8f0 !important;
+        background: #f1f5f9 !important;
+        border-color: #cbd5e1 !important;
       }
 
-      /* Text Colors in Light Mode */
-      body.theme-light [style*="color: #ffffff"],
-      body.theme-light [style*="color: #fff"] {
+      /* Headings & Titles in Light Mode - Deep Jet Black (#020617) */
+      body.theme-light h1,
+      body.theme-light h2,
+      body.theme-light h3,
+      body.theme-light h4,
+      body.theme-light h5,
+      body.theme-light .slide-title,
+      body.theme-light main.stage-reveal h1,
+      body.theme-light main.stage-reveal h2,
+      body.theme-light main.stage-reveal h3,
+      body.theme-light main.stage-reveal .slide-title {
+        font-weight: 700 !important;
+        color: #020617 !important;
+        letter-spacing: -0.03em;
+      }
+
+      /* Strong & Bold text -> Absolute Contrast Black */
+      body.theme-light b,
+      body.theme-light strong,
+      body.theme-light main.stage-reveal b,
+      body.theme-light main.stage-reveal strong {
+        font-weight: 700 !important;
+        color: #020617 !important;
+      }
+
+      /* Paragraphs & List Items -> Crisp Deep Dark Slate (#0f172a) */
+      body.theme-light main.stage-reveal p,
+      body.theme-light main.stage-reveal li {
+        color: #0f172a !important;
+        font-weight: 400 !important;
+      }
+
+      /* --------------------------------------------------------------------------
+         EXHAUSTIVE ATTRIBUTE OVERRIDES (Hex & Browser RGB serializations)
+         텍스트 조도 0~30 vs 배경 조도 245~255로 200 이상의 절대적 명암 대비 유지
+         -------------------------------------------------------------------------- */
+      /* Pure White / Near-White Text (#ffffff, #fff, white, #f8fafc, #f1f5f9) -> Deep Jet Black (#020617) */
+      body.theme-light [style*="#ffffff"]:not(button):not([class*="btn"]):not([class*="badge"]),
+      body.theme-light [style*="#fff"]:not(button):not([class*="btn"]):not([class*="badge"]),
+      body.theme-light [style*="white"]:not(button):not([class*="btn"]):not([class*="badge"]),
+      body.theme-light [style*="rgb(255, 255, 255)"]:not(button):not([class*="btn"]):not([class*="badge"]),
+      body.theme-light [style*="rgb(255,255,255)"]:not(button):not([class*="btn"]):not([class*="badge"]),
+      body.theme-light [style*="#f8fafc"]:not(button):not([class*="btn"]):not([class*="badge"]),
+      body.theme-light [style*="rgb(248, 250, 252)"]:not(button):not([class*="btn"]):not([class*="badge"]),
+      body.theme-light [style*="rgb(248,250,252)"]:not(button):not([class*="btn"]):not([class*="badge"]),
+      body.theme-light [style*="#f1f5f9"]:not(button):not([class*="btn"]):not([class*="badge"]),
+      body.theme-light [style*="rgb(241, 245, 249)"]:not(button):not([class*="btn"]):not([class*="badge"]),
+      body.theme-light [style*="rgb(241,245,249)"]:not(button):not([class*="btn"]):not([class*="badge"]) {
+        color: #020617 !important;
+      }
+
+      /* Light Slate & Gray Body Text (#cbd5e1, #e2e8f0, #e4e4e7) -> Solid Black/Dark Slate (#0f172a) */
+      body.theme-light [style*="#cbd5e1"],
+      body.theme-light [style*="rgb(203, 213, 225)"],
+      body.theme-light [style*="rgb(203,213,225)"],
+      body.theme-light [style*="#e2e8f0"],
+      body.theme-light [style*="rgb(226, 232, 240)"],
+      body.theme-light [style*="rgb(226,232,240)"],
+      body.theme-light [style*="#e4e4e7"],
+      body.theme-light [style*="rgb(228, 228, 231)"],
+      body.theme-light [style*="rgb(228,228,231)"] {
         color: #0f172a !important;
       }
-      body.theme-light [style*="color: #cbd5e1"],
-      body.theme-light [style*="color: #e2e8f0"],
-      body.theme-light [style*="color: #e4e4e7"] {
+
+      /* Muted / Secondary Caption Text (#94a3b8, #a1a1aa, #71717a, #64748b) -> High-Contrast Dark Slate (#334155 / #475569) */
+      body.theme-light [style*="#94a3b8"],
+      body.theme-light [style*="rgb(148, 163, 184)"],
+      body.theme-light [style*="rgb(148,163,184)"],
+      body.theme-light [style*="#a1a1aa"],
+      body.theme-light [style*="rgb(161, 161, 170)"],
+      body.theme-light [style*="rgb(161,161,170)"],
+      body.theme-light [style*="#71717a"],
+      body.theme-light [style*="rgb(113, 113, 122)"],
+      body.theme-light [style*="rgb(113,113,122)"],
+      body.theme-light [style*="#64748b"],
+      body.theme-light [style*="rgb(100, 116, 139)"],
+      body.theme-light [style*="rgb(100,116,139)"],
+      body.theme-light [style*="#52525b"],
+      body.theme-light [style*="rgb(82, 82, 91)"],
+      body.theme-light [style*="rgb(82,82,91)"] {
         color: #334155 !important;
       }
-      body.theme-light [style*="color: #94a3b8"],
-      body.theme-light [style*="color: #a1a1aa"] {
-        color: #64748b !important;
-      }
-      body.theme-light [style*="color: #71717a"] {
-        color: #64748b !important;
+
+      /* High-Contrast Colored Accents on White Backgrounds */
+      body.theme-light [style*="#00f2fe"],
+      body.theme-light [style*="rgb(0, 242, 254)"],
+      body.theme-light [style*="rgb(0,242,254)"],
+      body.theme-light [style*="#38bdf8"],
+      body.theme-light [style*="rgb(56, 189, 248)"],
+      body.theme-light [style*="rgb(56,189,248)"] {
+        color: #0284c7 !important; /* Deep Cyan/Blue (명확한 가독성) */
       }
 
-      /* Keep Colored Badges and Action Buttons Crisp & High-Contrast */
-      body.theme-light button[style*="background: #3b82f6"],
-      body.theme-light button[style*="background: #2563eb"],
-      body.theme-light button[style*="background: rgb(37, 99, 235)"],
-      body.theme-light button[style*="background: linear-gradient(90deg, #2563eb"],
-      body.theme-light [style*="background: #2563eb"],
-      body.theme-light [style*="background: #3b82f6"] {
+      body.theme-light [style*="#4ade80"],
+      body.theme-light [style*="rgb(74, 222, 128)"],
+      body.theme-light [style*="rgb(74,222,128)"],
+      body.theme-light [style*="#22c55e"],
+      body.theme-light [style*="rgb(34, 197, 94)"],
+      body.theme-light [style*="rgb(34,197,94)"],
+      body.theme-light [style*="#34d399"],
+      body.theme-light [style*="rgb(52, 211, 153)"],
+      body.theme-light [style*="rgb(52,211,153)"] {
+        color: #15803d !important; /* Rich Forest Green */
+      }
+
+      body.theme-light [style*="#fbbf24"],
+      body.theme-light [style*="rgb(251, 191, 36)"],
+      body.theme-light [style*="rgb(251,191,36)"],
+      body.theme-light [style*="#facc15"],
+      body.theme-light [style*="rgb(250, 204, 21)"],
+      body.theme-light [style*="rgb(250,204,21)"],
+      body.theme-light [style*="#f59e0b"],
+      body.theme-light [style*="rgb(245, 158, 11)"],
+      body.theme-light [style*="rgb(245,158,11)"] {
+        color: #b45309 !important; /* Deep Amber / Bronze */
+      }
+
+      body.theme-light [style*="#a855f7"],
+      body.theme-light [style*="rgb(168, 85, 247)"],
+      body.theme-light [style*="rgb(168,85,247)"],
+      body.theme-light [style*="#c084fc"],
+      body.theme-light [style*="rgb(192, 132, 252)"],
+      body.theme-light [style*="rgb(192,132,252)"] {
+        color: #6b21a8 !important; /* Deep Royal Purple */
+      }
+
+      /* Primary Blue action buttons & colored badges MUST KEEP crisp white text */
+      body.theme-light button[style*="#3b82f6"],
+      body.theme-light button[style*="rgb(59, 130, 246)"],
+      body.theme-light button[style*="#2563eb"],
+      body.theme-light button[style*="rgb(37, 99, 235)"],
+      body.theme-light button[style*="linear-gradient"],
+      body.theme-light .btn-primary,
+      body.theme-light .badge-blue {
         color: #ffffff !important;
       }
-      body.theme-light button[style*="background: #3b82f6"] *,
-      body.theme-light button[style*="background: #2563eb"] *,
-      body.theme-light button[style*="background: linear-gradient"] * {
+      body.theme-light button[style*="#3b82f6"] *,
+      body.theme-light button[style*="rgb(59, 130, 246)"] *,
+      body.theme-light button[style*="#2563eb"] *,
+      body.theme-light button[style*="rgb(37, 99, 235)"] *,
+      body.theme-light button[style*="linear-gradient"] * {
         color: #ffffff !important;
       }
 
@@ -175,11 +272,13 @@
       }
       body.theme-light code {
         background: rgba(15, 23, 42, 0.06) !important;
-        color: #1e293b !important;
-        border-color: #e2e8f0 !important;
+        color: #0f172a !important;
+        border-color: #cbd5e1 !important;
+        font-weight: 700 !important;
       }
 
       /* Modal Backgrounds in Light Mode */
+      body.theme-light [style*="background: rgba(4, 7, 16"],
       body.theme-light [style*="background: rgba(2, 6, 23"],
       body.theme-light [style*="background: rgba(0, 0, 0, 0.75"] {
         background: rgba(15, 23, 42, 0.45) !important;
@@ -187,30 +286,38 @@
 
       /* Secondary / Navigation Buttons in Light Mode */
       body.theme-light button[style*="background: #18181b"],
+      body.theme-light button[style*="background: rgb(24, 24, 27)"],
       body.theme-light button[style*="background: #27272a"],
+      body.theme-light button[style*="background: rgb(39, 39, 42)"],
       body.theme-light [style*="background: #18181b"] {
-        background: #f1f5f9 !important;
+        background: #e2e8f0 !important;
         border-color: #cbd5e1 !important;
-        color: #1e293b !important;
+        color: #0f172a !important;
+      }
+      body.theme-light button[style*="background: #18181b"] *,
+      body.theme-light button[style*="background: #27272a"] * {
+        color: #0f172a !important;
       }
 
       /* Bottom Footer Divider */
       body.theme-light [style*="border-top: 1px solid #18181c"] {
-        border-top: 1px solid #e2e8f0 !important;
-        color: #64748b !important;
+        border-top: 1px solid #cbd5e1 !important;
+        color: #475569 !important;
       }
 
       /* Table Styles in Light Mode */
       body.theme-light table {
-        color: #1e293b !important;
+        color: #0f172a !important;
       }
       body.theme-light table th {
         background: #f1f5f9 !important;
-        color: #334155 !important;
+        color: #0f172a !important;
+        font-weight: 700 !important;
         border-bottom: 1px solid #cbd5e1 !important;
       }
       body.theme-light table td {
         border-bottom: 1px solid #e2e8f0 !important;
+        color: #0f172a !important;
       }
 
       /* ==========================================================================

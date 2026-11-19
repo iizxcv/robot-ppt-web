@@ -470,22 +470,26 @@ export const UnifiedMapViewer3D: React.FC<UnifiedMapViewer3DProps> = ({
           position: "absolute",
           top: 16,
           left: 16,
-          background: "linear-gradient(145deg, rgba(16, 24, 40, 0.92) 0%, rgba(10, 15, 28, 0.95) 100%)",
-          border: "1px solid rgba(59, 130, 246, 0.25)",
+          background: isDarkMode
+            ? "linear-gradient(145deg, rgba(16, 24, 40, 0.92) 0%, rgba(10, 15, 28, 0.95) 100%)"
+            : "#ffffff",
+          border: isDarkMode
+            ? "1px solid rgba(59, 130, 246, 0.25)"
+            : "1px solid #cbd5e1",
           borderRadius: 14,
           padding: "10px 14px",
           fontSize: 12,
-          color: "#e4e4e7",
+          color: isDarkMode ? "#e4e4e7" : "#0f172a",
           pointerEvents: "none",
-          boxShadow: "0 8px 24px rgba(0, 0, 0, 0.5)",
+          boxShadow: isDarkMode ? "0 8px 24px rgba(0, 0, 0, 0.5)" : "0 4px 16px rgba(15, 23, 42, 0.08)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 800 }}>
-          <span style={{ color: "#22c55e" }}>● LIVE WEBSOCKET TWIN</span>
-          <span>실환경 WebSocket 기반 로봇 현위치 관제 시스템</span>
+          <span style={{ color: isDarkMode ? "#22c55e" : "#15803d" }}>● LIVE WEBSOCKET TWIN</span>
+          <span style={{ color: isDarkMode ? "#ffffff" : "#020617" }}>실환경 WebSocket 기반 로봇 현위치 관제 시스템</span>
         </div>
-        <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 4 }}>
-          💡 3D 공간 위의 <b>로봇 아바타 또는 이름표를 클릭</b>하면 해당 모델의 4-슬라이드 상세 팝업이 열립니다.
+        <div style={{ fontSize: 11, color: isDarkMode ? "#94a3b8" : "#334155", marginTop: 4 }}>
+          💡 3D 공간 위의 <b style={{ color: isDarkMode ? "#ffffff" : "#020617" }}>로봇 아바타 또는 이름표를 클릭</b>하면 해당 모델의 4-슬라이드 상세 팝업이 열립니다.
         </div>
       </div>
     </div>
