@@ -381,6 +381,7 @@ export const RobotDetailPopupModal: React.FC<{
 
                 {/* Dimensions Caption */}
                 <div
+                  className="modal-ivory-card modal-dimensions-box"
                   style={{
                     background: "rgba(2, 6, 23, 0.5)",
                     borderLeft: `3px solid ${themeColor}`,
@@ -401,6 +402,7 @@ export const RobotDetailPopupModal: React.FC<{
                   {(specs?.kpi_cards || []).map((kpi) => (
                     <div
                       key={kpi.label}
+                      className="modal-kpi-card"
                       style={{
                         background: "rgba(15, 23, 42, 0.7)",
                         borderLeft: `3.5px solid ${themeColor}`,
@@ -420,6 +422,7 @@ export const RobotDetailPopupModal: React.FC<{
 
                 {/* Technical Specifications Detail Table */}
                 <div
+                  className="modal-panel-box"
                   style={{
                     background: "rgba(15, 23, 42, 0.6)",
                     border: "1px solid rgba(255, 255, 255, 0.08)",
@@ -432,19 +435,19 @@ export const RobotDetailPopupModal: React.FC<{
                   </div>
 
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, fontSize: 12 }}>
-                    <div style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
+                    <div className="modal-ivory-card" style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
                       <span style={{ color: "#94a3b8" }}>주행 방식: </span>
                       <b style={{ color: "#f1f5f9" }}>{robot.kinematics.drive_type}</b>
                     </div>
-                    <div style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
+                    <div className="modal-ivory-card" style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
                       <span style={{ color: "#94a3b8" }}>리프트 높이: </span>
                       <b style={{ color: "#f1f5f9" }}>최대 {robot.kinematics.max_lift_height_m}m 승강</b>
                     </div>
-                    <div style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
+                    <div className="modal-ivory-card" style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
                       <span style={{ color: "#94a3b8" }}>장비 자체 중량: </span>
                       <b style={{ color: "#f1f5f9" }}>약 {robot.kinematics.weight_kg}kg</b>
                     </div>
-                    <div style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
+                    <div className="modal-ivory-card" style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
                       <span style={{ color: "#94a3b8" }}>라이다 위치: </span>
                       <b style={{ color: "#f1f5f9" }}>지상 {robot.kinematics.laser_tf_xyz[2]}m 전방 마운트</b>
                     </div>
@@ -676,6 +679,7 @@ export const RobotDetailPopupModal: React.FC<{
                     {(specs?.key_strengths || []).map((str, idx) => (
                       <div
                         key={idx}
+                        className="modal-ivory-card modal-strength-card"
                         style={{
                           background: "rgba(2, 6, 23, 0.5)",
                           borderLeft: `3.5px solid ${themeColor}`,
@@ -693,6 +697,7 @@ export const RobotDetailPopupModal: React.FC<{
                 </div>
 
                 <div
+                  className="modal-tip-box"
                   style={{
                     background: "rgba(59, 130, 246, 0.12)",
                     border: "1px solid rgba(59, 130, 246, 0.3)",
@@ -710,6 +715,7 @@ export const RobotDetailPopupModal: React.FC<{
               <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 {/* Basic Functions */}
                 <div
+                  className="modal-panel-box"
                   style={{
                     background: "rgba(15, 23, 42, 0.6)",
                     border: "1px solid rgba(255, 255, 255, 0.08)",
@@ -724,6 +730,7 @@ export const RobotDetailPopupModal: React.FC<{
                     {(specs?.basic_functions || []).map((fn) => (
                       <div
                         key={fn}
+                        className="modal-ivory-card modal-chip-card"
                         style={{
                           background: "rgba(2, 6, 23, 0.6)",
                           border: "1px solid rgba(255, 255, 255, 0.08)",
@@ -801,6 +808,7 @@ export const RobotDetailPopupModal: React.FC<{
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, height: "100%" }}>
               {/* Left: Live Spatial & Kinematic Telemetry */}
               <div
+                className="modal-panel-box"
                 style={{
                   background: "rgba(15, 23, 42, 0.6)",
                   border: "1px solid rgba(255, 255, 255, 0.08)",
@@ -817,38 +825,38 @@ export const RobotDetailPopupModal: React.FC<{
                   </div>
 
                   <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 12 }}>
-                    <div style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
+                    <div className="modal-ivory-card modal-telemetry-row" style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
                       <span style={{ color: "#94a3b8" }}>네트워크 호스트 / IP: </span>
                       <b style={{ color: "#ffffff" }}>{robot.hostname} ({robot.ip})</b>
                     </div>
 
-                    <div style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
+                    <div className="modal-ivory-card modal-telemetry-row" style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
                       <span style={{ color: "#94a3b8" }}>현재 관제 지점명: </span>
                       <b style={{ color: "#4ade80" }}>{tel?.position_name || "대기 상태"}</b>
                     </div>
 
-                    <div style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
+                    <div className="modal-ivory-card modal-telemetry-row" style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
                       <span style={{ color: "#94a3b8" }}>로컬 오도메트리 (Local X, Y, Yaw): </span>
                       <b style={{ color: "#f1f5f9" }}>
                         ({tel?.local_x ?? 0}m, {tel?.local_y ?? 0}m, {tel?.local_yaw_deg ?? 0}°)
                       </b>
                     </div>
 
-                    <div style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
+                    <div className="modal-ivory-card modal-telemetry-row" style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
                       <span style={{ color: "#94a3b8" }}>SE(2) 변환 오프셋 (ΔX, ΔY, ΔΘ): </span>
                       <b style={{ color: "#f59e0b" }}>
                         ({robot.calibration?.dx_m ?? 0}m, {robot.calibration?.dy_m ?? 0}m, {robot.calibration?.yaw_deg ?? 0}°)
                       </b>
                     </div>
 
-                    <div style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
+                    <div className="modal-ivory-card modal-telemetry-row" style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
                       <span style={{ color: "#94a3b8" }}>3D 디지털 트윈 통합 월드 좌표: </span>
                       <b style={{ color: "#00f2fe" }}>
                         ({tel?.world_x ?? 0}m, {tel?.world_y ?? 0}m)
                       </b>
                     </div>
 
-                    <div style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
+                    <div className="modal-ivory-card modal-telemetry-row" style={{ background: "rgba(2, 6, 23, 0.5)", padding: "8px 12px", borderRadius: 8 }}>
                       <span style={{ color: "#94a3b8" }}>배터리 / 전압 / 내부 온도: </span>
                       <b style={{ color: "#4ade80" }}>
                         {tel?.battery_pct ?? 0}% / {tel?.voltage_v ?? 0}V / {tel?.temp_c ?? 0}℃
@@ -858,6 +866,7 @@ export const RobotDetailPopupModal: React.FC<{
                 </div>
 
                 <div
+                  className="modal-sync-box"
                   style={{
                     background: isLive ? "rgba(34, 197, 94, 0.1)" : "rgba(113, 113, 122, 0.1)",
                     border: `1px solid ${isLive ? "rgba(34, 197, 94, 0.3)" : "rgba(113, 113, 122, 0.3)"}`,
@@ -873,6 +882,7 @@ export const RobotDetailPopupModal: React.FC<{
 
               {/* Right: Authoritative REST API & WebSocket Real-time Stream */}
               <div
+                className="modal-panel-box"
                 style={{
                   background: "rgba(15, 23, 42, 0.6)",
                   border: "1px solid rgba(255, 255, 255, 0.08)",
@@ -891,6 +901,7 @@ export const RobotDetailPopupModal: React.FC<{
                 </div>
 
                 <pre
+                  className="modal-code-block"
                   style={{
                     flex: 1,
                     margin: 0,
