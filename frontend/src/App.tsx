@@ -13,6 +13,20 @@ export const App: React.FC = () => {
   const [liveOpRobot, setLiveOpRobot] = useState<RobotRecord | null>(null);
   const [fleetData, setFleetData] = useState<any>(null);
   const [showCalibModal, setShowCalibModal] = useState<boolean>(false);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    return localStorage.getItem("robot_ppt_theme") === "dark"; // Default is false (Light Mode!)
+  });
+
+  useEffect(() => {
+    localStorage.setItem("robot_ppt_theme", isDarkMode ? "dark" : "light");
+    if (isDarkMode) {
+      document.body.classList.remove("theme-light");
+      document.body.classList.add("theme-dark");
+    } else {
+      document.body.classList.remove("theme-dark");
+      document.body.classList.add("theme-light");
+    }
+  }, [isDarkMode]);
 
   const fetchInitialData = async () => {
     try {
@@ -118,27 +132,33 @@ export const App: React.FC = () => {
 
   return (
     <div
+      id="app-root-container"
+      className={`app-shell ${isDarkMode ? "theme-dark" : "theme-light"}`}
       style={{
         width: "100vw",
         height: "100vh",
-        background: "#0a0a0c",
-        color: "#ffffff",
+        background: isDarkMode ? "#0a0a0c" : "#f1f5f9",
+        color: isDarkMode ? "#ffffff" : "#0f172a",
         display: "grid",
         gridTemplateColumns: "clamp(300px, 19vw, 340px) 1fr",
         overflow: "hidden",
         userSelect: "none",
+        transition: "background 0.25s ease, color 0.25s ease",
       }}
     >
       {/* Left Sidebar TOC */}
       <aside
+        className="sidebar-toc"
         style={{
-          background: "#0f0f13",
-          borderRight: "1px solid #1f1f26",
+          background: isDarkMode ? "#0f0f13" : "#ffffff",
+          borderRight: isDarkMode ? "1px solid #1f1f26" : "1px solid #e2e8f0",
           padding: "26px 18px",
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
           zIndex: 20,
+          boxShadow: isDarkMode ? "none" : "2px 0 16px rgba(15, 23, 42, 0.04)",
+          transition: "background 0.25s ease, border-color 0.25s ease",
         }}
       >
         <div>
@@ -149,6 +169,7 @@ export const App: React.FC = () => {
                 height: 36,
                 borderRadius: 10,
                 background: "#3b82f6",
+                color: "#ffffff",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -159,14 +180,18 @@ export const App: React.FC = () => {
               SR
             </div>
             <div>
-              <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: "-0.03em" }}>SR ROBOTICS</div>
-              <div style={{ fontSize: 11, color: "#71717a", fontWeight: 600 }}>SMART · RELIABLE · INNOVATIVE</div>
+              <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: "-0.03em", color: isDarkMode ? "#ffffff" : "#0f172a" }}>
+                SR ROBOTICS
+              </div>
+              <div style={{ fontSize: 11, color: isDarkMode ? "#71717a" : "#64748b", fontWeight: 600 }}>
+                SMART · RELIABLE · INNOVATIVE
+              </div>
             </div>
           </div>
 
-          <div style={{ height: 1, background: "#1f1f26", margin: "18px 0" }} />
+          <div style={{ height: 1, background: isDarkMode ? "#1f1f26" : "#e2e8f0", margin: "18px 0" }} />
 
-          <div style={{ fontSize: 11, fontWeight: 700, color: "#71717a", marginBottom: 10, paddingLeft: 6 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: isDarkMode ? "#71717a" : "#64748b", marginBottom: 10, paddingLeft: 6 }}>
             PROPOSAL CHAPTERS (목차 클릭)
           </div>
 
@@ -178,12 +203,14 @@ export const App: React.FC = () => {
                   key={s.id}
                   onClick={() => navigateToSlide(idx)}
                   style={{
-                    background: active ? "rgba(59, 130, 246, 0.14)" : "transparent",
+                    background: active
+                      ? (isDarkMode ? "rgba(59, 130, 246, 0.14)" : "rgba(37, 99, 235, 0.09)")
+                      : "transparent",
                     border: `1.5px solid ${active ? "#3b82f6" : "transparent"}`,
                     borderRadius: 12,
                     padding: "10px 12px",
                     textAlign: "left",
-                    color: active ? "#ffffff" : "#a1a1aa",
+                    color: active ? (isDarkMode ? "#ffffff" : "#1d4ed8") : (isDarkMode ? "#a1a1aa" : "#475569"),
                     cursor: "pointer",
                     display: "flex",
                     alignItems: "center",
@@ -195,7 +222,7 @@ export const App: React.FC = () => {
                     style={{
                       fontSize: 12,
                       fontWeight: 800,
-                      color: active ? "#3b82f6" : "#52525b",
+                      color: active ? "#3b82f6" : (isDarkMode ? "#52525b" : "#94a3b8"),
                       fontFamily: "monospace",
                     }}
                   >
@@ -205,7 +232,7 @@ export const App: React.FC = () => {
                     <div
                       style={{
                         fontSize: "clamp(12px, 0.82vw, 13px)",
-                        fontWeight: active ? 800 : 600,
+                        fontWeight: active ? (isDarkMode ? 800 : 600) : (isDarkMode ? 600 : 450),
                         wordBreak: "keep-all",
                         lineHeight: 1.35,
                       }}
@@ -221,22 +248,24 @@ export const App: React.FC = () => {
 
         {/* Bottom Live Robot Status Mini Summary (Click opens detailed popup!) */}
         <div
+          className="live-status-box"
           style={{
-            background: "#141419",
-            border: "1px solid #23232b",
+            background: isDarkMode ? "#141419" : "#f8fafc",
+            border: isDarkMode ? "1px solid #23232b" : "1px solid #e2e8f0",
             borderRadius: 14,
             padding: 14,
+            boxShadow: isDarkMode ? "none" : "0 2px 8px rgba(15, 23, 42, 0.04)",
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, flexWrap: "wrap", gap: 6 }}>
-            <span style={{ fontSize: "clamp(10.5px, 0.72vw, 11.5px)", fontWeight: 800, color: "#a1a1aa", whiteSpace: "nowrap" }}>
+            <span style={{ fontSize: "clamp(10.5px, 0.72vw, 11.5px)", fontWeight: 800, color: isDarkMode ? "#a1a1aa" : "#475569", whiteSpace: "nowrap" }}>
               실환경 WebSocket 관제
             </span>
             <button
               onClick={() => setShowCalibModal(true)}
               style={{
-                background: "#27272a",
-                color: "#e4e4e7",
+                background: isDarkMode ? "#27272a" : "#e2e8f0",
+                color: isDarkMode ? "#e4e4e7" : "#1e293b",
                 border: "none",
                 borderRadius: 6,
                 padding: "3px 8px",
@@ -327,8 +356,19 @@ export const App: React.FC = () => {
               <span style={{ fontSize: 13, color: "#a1a1aa", fontWeight: 600 }}>{currentSlide.subtitle}</span>
             </div>
 
-            <div style={{ fontSize: 12, color: "#71717a" }}>
-              SR 로보틱스 로봇솔루션 제안서 v1.6 × 실환경 API 연동
+            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <div style={{ fontSize: 12, color: isDarkMode ? "#71717a" : "#64748b" }}>
+                SR 로보틱스 로봇솔루션 제안서 v1.6 × 실환경 API 연동
+              </div>
+              {/* Top-Right Theme Toggle Button */}
+              <button
+                onClick={() => setIsDarkMode((prev) => !prev)}
+                className="theme-toggle-pill"
+                title={isDarkMode ? "라이트 모드로 전환 (기본 Light 폰트)" : "다크 모드로 전환"}
+              >
+                <span>{isDarkMode ? "☀️" : "🌙"}</span>
+                <span>{isDarkMode ? "Light Mode" : "Dark Mode"}</span>
+              </button>
             </div>
           </div>
 
@@ -848,6 +888,7 @@ export const App: React.FC = () => {
                   onSelectRobot={(id) => setSelectedRobotId(id)}
                   onOpenRobotPopup={(r) => setPopupRobot(r)}
                   showOdomVectors={true}
+                  isDarkMode={isDarkMode}
                 />
               </div>
             </div>
@@ -872,6 +913,7 @@ export const App: React.FC = () => {
                   onSelectRobot={(id) => setSelectedRobotId(id)}
                   onOpenRobotPopup={(r) => setPopupRobot(r)}
                   showOdomVectors={true}
+                  isDarkMode={isDarkMode}
                 />
               </div>
 
@@ -1437,6 +1479,16 @@ export const App: React.FC = () => {
             <b>SR ROBOTICS</b> · 서울특별시 강남구 대치동 944-25 KC빌딩 11층 · TEL 02-558-8886 · sales@sr-robotics.co.kr
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {/* Bottom-Right Theme Toggle Button */}
+            <button
+              onClick={() => setIsDarkMode((prev) => !prev)}
+              className="theme-toggle-pill"
+              title={isDarkMode ? "라이트 모드로 전환 (기본 Light 폰트)" : "다크 모드로 전환"}
+              style={{ marginRight: 6 }}
+            >
+              <span>{isDarkMode ? "☀️ Light" : "🌙 Dark"}</span>
+            </button>
+
             <button
               disabled={currentSlideIdx === 0}
               onClick={() => navigateToSlide(currentSlideIdx - 1)}

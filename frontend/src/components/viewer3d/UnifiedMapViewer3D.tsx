@@ -80,6 +80,7 @@ interface UnifiedMapViewer3DProps {
   onSelectRobot: (id: string) => void;
   onOpenRobotPopup?: (robot: RobotRecord) => void;
   showOdomVectors?: boolean;
+  isDarkMode?: boolean;
 }
 
 const ExtrudedWalls: React.FC<{
@@ -308,6 +309,7 @@ export const UnifiedMapViewer3D: React.FC<UnifiedMapViewer3DProps> = ({
   onSelectRobot,
   onOpenRobotPopup,
   showOdomVectors = false,
+  isDarkMode = false,
 }) => {
   const masterMap = mapData?.master_map;
   const wallHeight = mapData?.alignment?.wall_extrusion_height_m ?? 1.85;
@@ -325,16 +327,16 @@ export const UnifiedMapViewer3D: React.FC<UnifiedMapViewer3DProps> = ({
         width: "100%",
         height: "100%",
         position: "relative",
-        background: "#0d0d10",
+        background: isDarkMode ? "#0d0d10" : "#f8fafc",
         borderRadius: 20,
         overflow: "hidden",
-        border: "1.5px solid #222226",
+        border: isDarkMode ? "1.5px solid #222226" : "1.5px solid #e2e8f0",
       }}
     >
       <Canvas camera={{ position: [center[0] + 5.6, 6.0, -center[1] + 5.6], fov: 40 }}>
-        <color attach="background" args={["#080a14"]} />
-        <ambientLight intensity={0.9} />
-        <directionalLight position={[8, 16, 10]} intensity={1.4} />
+        <color attach="background" args={[isDarkMode ? "#080a14" : "#f8fafc"]} />
+        <ambientLight intensity={isDarkMode ? 0.9 : 1.3} />
+        <directionalLight position={[8, 16, 10]} intensity={isDarkMode ? 1.4 : 1.8} />
         <pointLight position={[1.5, 4, 1.5]} intensity={0.8} color="#3b82f6" />
 
         <OrbitControls target={[center[0], 0.4, -center[1]]} maxPolarAngle={Math.PI / 2.08} />
@@ -344,16 +346,16 @@ export const UnifiedMapViewer3D: React.FC<UnifiedMapViewer3DProps> = ({
           args={[26, 26]}
           cellSize={0.5}
           cellThickness={0.6}
-          cellColor="#1e293b"
+          cellColor={isDarkMode ? "#1e293b" : "#cbd5e1"}
           sectionSize={2.5}
           sectionThickness={1.2}
-          sectionColor="#2563eb"
+          sectionColor={isDarkMode ? "#2563eb" : "#3b82f6"}
           fadeDistance={24}
         />
 
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[center[0], 0, -center[1]]}>
           <planeGeometry args={[26, 26]} />
-          <meshStandardMaterial color="#080a14" transparent opacity={0.9} />
+          <meshStandardMaterial color={isDarkMode ? "#080a14" : "#f1f5f9"} transparent opacity={0.9} />
         </mesh>
 
         {masterMap?.overlap_blocks ? (
