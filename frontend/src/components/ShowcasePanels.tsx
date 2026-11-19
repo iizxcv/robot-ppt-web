@@ -17,7 +17,8 @@ const MODAL_SLIDES: ModalSlideMeta[] = [
 export const RobotDetailPopupModal: React.FC<{
   robot: RobotRecord;
   onClose: () => void;
-}> = ({ robot, onClose }) => {
+  isDarkMode?: boolean;
+}> = ({ robot, onClose, isDarkMode = false }) => {
   const [currentSlide, setCurrentSlide] = useState<number>(0);
   const specs = robot.proposal_specs;
   const tel = robot.telemetry;
@@ -58,7 +59,7 @@ export const RobotDetailPopupModal: React.FC<{
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(4, 7, 16, 0.88)",
+        background: isDarkMode ? "rgba(4, 7, 16, 0.88)" : "rgba(15, 23, 42, 0.45)",
         backdropFilter: "blur(10px)",
         display: "flex",
         alignItems: "center",
@@ -69,18 +70,22 @@ export const RobotDetailPopupModal: React.FC<{
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="stage-reveal"
+        className="stage-reveal modal-ivory-frame"
         style={{
           width: "min(1180px, 94vw)",
           height: "min(780px, 90vh)",
-          background: "linear-gradient(145deg, #0e1526 0%, #090e1a 100%)",
-          border: `1.5px solid ${themeColor}55`,
+          background: isDarkMode
+            ? "linear-gradient(145deg, #0e1526 0%, #090e1a 100%)"
+            : "#f7f5f0",
+          border: isDarkMode ? `1.5px solid ${themeColor}55` : "1.5px solid #cbd5e1",
           borderRadius: 22,
           padding: "24px 30px",
-          color: "#ffffff",
+          color: isDarkMode ? "#ffffff" : "#020617",
           display: "flex",
           flexDirection: "column",
-          boxShadow: `0 24px 64px rgba(0, 0, 0, 0.9), 0 0 40px ${themeColor}25`,
+          boxShadow: isDarkMode
+            ? `0 24px 64px rgba(0, 0, 0, 0.9), 0 0 40px ${themeColor}25`
+            : "0 24px 64px rgba(15, 23, 42, 0.18)",
           overflow: "hidden",
         }}
       >
@@ -91,16 +96,16 @@ export const RobotDetailPopupModal: React.FC<{
             justifyContent: "space-between",
             alignItems: "center",
             paddingBottom: 14,
-            borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+            borderBottom: isDarkMode ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid #cbd5e1",
           }}
         >
           {/* Robot Title & Badges */}
           <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
             <span
               style={{
-                background: `${themeColor}22`,
+                background: isDarkMode ? `${themeColor}22` : `${themeColor}18`,
                 color: themeColor,
-                border: `1px solid ${themeColor}`,
+                border: `1.5px solid ${themeColor}`,
                 padding: "4px 12px",
                 borderRadius: 99,
                 fontSize: 12,
@@ -116,7 +121,7 @@ export const RobotDetailPopupModal: React.FC<{
                 fontSize: 22,
                 fontWeight: 900,
                 letterSpacing: "-0.5px",
-                color: "#ffffff",
+                color: isDarkMode ? "#ffffff" : "#020617",
               }}
             >
               {robot.display_name}
@@ -124,9 +129,11 @@ export const RobotDetailPopupModal: React.FC<{
 
             <span
               style={{
-                background: isLive ? "rgba(34, 197, 94, 0.15)" : "rgba(113, 113, 122, 0.2)",
-                color: isLive ? "#4ade80" : "#a1a1aa",
-                border: `1px solid ${isLive ? "rgba(34, 197, 94, 0.4)" : "#3f3f46"}`,
+                background: isLive
+                  ? (isDarkMode ? "rgba(34, 197, 94, 0.15)" : "#e8f5e9")
+                  : (isDarkMode ? "rgba(113, 113, 122, 0.2)" : "#ffffff"),
+                color: isLive ? (isDarkMode ? "#4ade80" : "#16a34a") : (isDarkMode ? "#a1a1aa" : "#475569"),
+                border: `1px solid ${isLive ? (isDarkMode ? "rgba(34, 197, 94, 0.4)" : "#a7f3d0") : (isDarkMode ? "#3f3f46" : "#cbd5e1")}`,
                 padding: "4px 10px",
                 borderRadius: 99,
                 fontSize: 11.5,
@@ -151,14 +158,14 @@ export const RobotDetailPopupModal: React.FC<{
               <span
                 style={{
                   fontSize: 11.5,
-                  color: "#cbd5e1",
-                  background: "rgba(255, 255, 255, 0.05)",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  color: isDarkMode ? "#cbd5e1" : "#334155",
+                  background: isDarkMode ? "rgba(255, 255, 255, 0.05)" : "#ffffff",
+                  border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid #cbd5e1",
                   padding: "4px 10px",
                   borderRadius: 99,
                 }}
               >
-                🇰🇷 KC인증: <b>{robot.rra_cert_no}</b>
+                🇰🇷 KC인증: <b style={{ color: isDarkMode ? "#ffffff" : "#020617" }}>{robot.rra_cert_no}</b>
               </span>
             )}
           </div>
@@ -168,9 +175,9 @@ export const RobotDetailPopupModal: React.FC<{
             onClick={onClose}
             aria-label="닫기"
             style={{
-              background: "rgba(255, 255, 255, 0.08)",
-              color: "#e2e8f0",
-              border: "1px solid rgba(255, 255, 255, 0.15)",
+              background: isDarkMode ? "rgba(255, 255, 255, 0.08)" : "#ffffff",
+              color: isDarkMode ? "#e2e8f0" : "#020617",
+              border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.15)" : "1px solid #cbd5e1",
               borderRadius: 10,
               width: 36,
               height: 36,
@@ -206,9 +213,9 @@ export const RobotDetailPopupModal: React.FC<{
                   key={s.id}
                   onClick={() => setCurrentSlide(s.id)}
                   style={{
-                    background: isActive ? themeColor : "rgba(15, 23, 42, 0.7)",
-                    color: isActive ? (isPower ? "#090e1a" : "#ffffff") : "#94a3b8",
-                    border: `1px solid ${isActive ? themeColor : "rgba(255, 255, 255, 0.1)"}`,
+                    background: isActive ? themeColor : (isDarkMode ? "rgba(15, 23, 42, 0.7)" : "#ffffff"),
+                    color: isActive ? (isPower ? "#090e1a" : "#ffffff") : (isDarkMode ? "#94a3b8" : "#334155"),
+                    border: `1px solid ${isActive ? themeColor : (isDarkMode ? "rgba(255, 255, 255, 0.1)" : "#cbd5e1")}`,
                     borderRadius: 9,
                     padding: "6px 12px",
                     fontSize: 12,
@@ -227,7 +234,7 @@ export const RobotDetailPopupModal: React.FC<{
                     style={{
                       fontSize: 10,
                       opacity: isActive ? 0.9 : 0.6,
-                      background: isActive ? "rgba(0,0,0,0.2)" : "rgba(255,255,255,0.06)",
+                      background: isActive ? "rgba(0,0,0,0.2)" : (isDarkMode ? "rgba(255,255,255,0.06)" : "#f1f5f9"),
                       padding: "2px 5px",
                       borderRadius: 4,
                     }}
@@ -253,11 +260,11 @@ export const RobotDetailPopupModal: React.FC<{
               style={{
                 fontSize: 13,
                 fontWeight: 800,
-                color: "#cbd5e1",
+                color: isDarkMode ? "#cbd5e1" : "#475569",
                 whiteSpace: "nowrap",
                 letterSpacing: "0.5px",
-                background: "rgba(255, 255, 255, 0.05)",
-                border: "1px solid rgba(255, 255, 255, 0.1)",
+                background: isDarkMode ? "rgba(255, 255, 255, 0.05)" : "#ffffff",
+                border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid #cbd5e1",
                 borderRadius: 8,
                 padding: "4px 10px",
                 display: "inline-flex",
@@ -265,7 +272,7 @@ export const RobotDetailPopupModal: React.FC<{
                 gap: 4,
               }}
             >
-              <b style={{ color: "#ffffff", fontSize: 14 }}>{currentSlide + 1}</b>
+              <b style={{ color: isDarkMode ? "#ffffff" : "#020617", fontSize: 14 }}>{currentSlide + 1}</b>
               <span style={{ color: "#64748b" }}>/</span>
               <span>{MODAL_SLIDES.length}</span>
             </div>

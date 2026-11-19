@@ -321,16 +321,21 @@
       }
 
       /* ==========================================================================
-         SELECTED / ACTIVE CARDBOX EXCEPTION (선택된 카드박스 다크 포커스 홀드)
-         선택된 카드박스는 사이버 테크 다크 배경을 홀드하므로 글씨를 선명한 순백(White) 계열로 명확히 표시
+         SELECTED / ACTIVE CARDBOX IN LIGHT MODE (상아색 / 화이트 톤 베이스)
+         선택/눌림 상태도 화이트/상아색(#fbf9f5) 베이스 + 2px 하이라이트 보더 + 선명한 딥 블랙 텍스트로 렌더링
          ========================================================================== */
       body.theme-light .robot-card-selected,
       body.theme-light [data-selected="true"],
       body.theme-light .card-selected {
-        background: linear-gradient(145deg, rgba(20, 32, 58, 0.98) 0%, rgba(12, 18, 34, 0.98) 100%) !important;
+        background: #fbf9f5 !important; /* 상아색 화이트톤 베이스 */
+        border: 2px solid #2563eb !important;
+        box-shadow: 0 8px 24px rgba(37, 99, 235, 0.16), 0 2px 8px rgba(15, 23, 42, 0.06) !important;
       }
 
-      /* Selected Card Title & All General Text -> Crisp Pure White */
+      /* Selected Card Title & General Text in Light Mode -> Crisp Deep Black */
+      body.theme-light .robot-card-selected h1,
+      body.theme-light .robot-card-selected h2,
+      body.theme-light .robot-card-selected h3,
       body.theme-light .robot-card-selected div,
       body.theme-light .robot-card-selected span,
       body.theme-light .robot-card-selected p,
@@ -341,40 +346,82 @@
       body.theme-light [data-selected="true"] p,
       body.theme-light [data-selected="true"] b,
       body.theme-light [data-selected="true"] strong {
-        color: #ffffff !important;
+        color: #020617 !important;
       }
 
-      /* Selected Card Subtitle & Soft Captions -> Soft White Slate (#cbd5e1 / #e2e8f0) */
+      /* Selected Card Subtitle */
       body.theme-light .robot-card-selected .card-subtitle,
-      body.theme-light .robot-card-selected [style*="#94a3b8"],
-      body.theme-light .robot-card-selected [style*="rgb(148, 163, 184)"],
-      body.theme-light [data-selected="true"] [style*="#94a3b8"],
-      body.theme-light [data-selected="true"] [style*="rgb(148, 163, 184)"] {
-        color: #cbd5e1 !important;
+      body.theme-light [data-selected="true"] .card-subtitle {
+        color: #475569 !important;
       }
 
-      /* Selected Card Spec Chips & Borders */
-      body.theme-light .robot-card-selected [style*="#cbd5e1"],
-      body.theme-light .robot-card-selected [style*="rgb(203, 213, 225)"],
-      body.theme-light [data-selected="true"] [style*="#cbd5e1"],
-      body.theme-light [data-selected="true"] [style*="rgb(203, 213, 225)"] {
-        color: #ffffff !important;
-      }
-      body.theme-light .robot-card-selected [style*="rgba(255, 255, 255, 0.05)"],
-      body.theme-light .robot-card-selected [style*="rgba(255, 255, 255, 0.12)"],
-      body.theme-light [data-selected="true"] [style*="rgba(255, 255, 255, 0.05)"],
-      body.theme-light [data-selected="true"] [style*="rgba(255, 255, 255, 0.12)"] {
-        background: rgba(255, 255, 255, 0.12) !important;
-        border-color: rgba(255, 255, 255, 0.25) !important;
-        color: #ffffff !important;
+      /* Selected Card Spec Chips & Borders in Light Mode */
+      body.theme-light .robot-card-selected .spec-chip,
+      body.theme-light .robot-card-selected [style*="border: 1px solid rgba(255, 255, 255"],
+      body.theme-light [data-selected="true"] [style*="border: 1px solid rgba(255, 255, 255"] {
+        background: #ffffff !important;
+        border-color: #cbd5e1 !important;
+        color: #0f172a !important;
       }
 
-      /* Selected Card Accents: KC Green & Battery -> Bright Neon Green */
+      /* Selected Card Accents: Green Status in Light Mode */
       body.theme-light .robot-card-selected [style*="#4ade80"],
       body.theme-light .robot-card-selected [style*="rgb(74, 222, 128)"],
       body.theme-light [data-selected="true"] [style*="#4ade80"],
       body.theme-light [data-selected="true"] [style*="rgb(74, 222, 128)"] {
-        color: #4ade80 !important;
+        color: #16a34a !important;
+      }
+
+      /* ==========================================================================
+         MODAL DIALOG POPUP IN LIGHT MODE (상아색 프레임 + 순백색 내부 카드)
+         완전한 0,0,0 흰색이 아닌 약간의 상아색(#f7f5f0)으로 프레임과 내부 카드를 명확히 분별
+         ========================================================================== */
+      /* Outer Backdrop Blur */
+      body.theme-light [style*="position: fixed"][style*="inset: 0"] {
+        background: rgba(15, 23, 42, 0.45) !important;
+        backdrop-filter: blur(10px) !important;
+      }
+
+      /* Modal Frame Dialog Box -> Warm Ivory Base (#f7f5f0) */
+      body.theme-light .stage-reveal[style*="width: min(1180px"],
+      body.theme-light [style*="max-width: 1220"],
+      body.theme-light [style*="linear-gradient(145deg, #0e1526"],
+      body.theme-light [style*="linear-gradient(145deg, #0b1120"] {
+        background: #f7f5f0 !important; /* 상아색 베이스 (Warm Ivory) */
+        border: 1.5px solid #cbd5e1 !important;
+        box-shadow: 0 24px 64px rgba(15, 23, 42, 0.18), 0 4px 16px rgba(15, 23, 42, 0.08) !important;
+        color: #020617 !important;
+      }
+
+      /* Modal Top Header Divider & Title */
+      body.theme-light [style*="border-bottom: 1px solid rgba(255, 255, 255, 0.1)"] {
+        border-bottom: 1px solid #cbd5e1 !important;
+      }
+
+      /* Modal Tabs in Light Mode */
+      body.theme-light [style*="rgba(15, 23, 42, 0.7)"] {
+        background: #ffffff !important;
+        border-color: #cbd5e1 !important;
+        color: #334155 !important;
+      }
+
+      /* Modal Close Button & Badges in Light Mode */
+      body.theme-light button[aria-label="닫기"],
+      body.theme-light button[style*="rgba(255, 255, 255, 0.08)"] {
+        background: #ffffff !important;
+        border-color: #cbd5e1 !important;
+        color: #020617 !important;
+      }
+
+      /* Inner Cards inside Modal -> Pure White (#ffffff) to cleanly contrast with Ivory (#f7f5f0) Frame */
+      body.theme-light .stage-reveal[style*="width: min(1180px"] [style*="background: linear-gradient(145deg, rgba(16, 24, 40"],
+      body.theme-light .stage-reveal[style*="width: min(1180px"] [style*="background: rgba(16, 24, 40"],
+      body.theme-light .stage-reveal[style*="width: min(1180px"] [style*="background: #0c0d12"],
+      body.theme-light .stage-reveal[style*="width: min(1180px"] [style*="background: #0f0f13"],
+      body.theme-light .stage-reveal[style*="width: min(1180px"] [style*="background: #141419"] {
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
       }
 
       /* ==========================================================================

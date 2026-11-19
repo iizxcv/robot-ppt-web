@@ -618,11 +618,15 @@ export const App: React.FC = () => {
                       }}
                       style={{
                         background: isSel
-                          ? "linear-gradient(145deg, rgba(20, 32, 58, 0.98) 0%, rgba(12, 18, 34, 0.98) 100%)"
-                          : isDarkMode
-                          ? "linear-gradient(145deg, rgba(16, 24, 40, 0.8) 0%, rgba(10, 15, 28, 0.9) 100%)"
-                          : "#ffffff",
-                        border: `1.5px solid ${isSel ? themeCol : isDarkMode ? "rgba(255, 255, 255, 0.1)" : "#cbd5e1"}`,
+                          ? (isDarkMode
+                              ? "linear-gradient(145deg, rgba(20, 32, 58, 0.98) 0%, rgba(12, 18, 34, 0.98) 100%)"
+                              : "#fbf9f5")
+                          : (isDarkMode
+                              ? "linear-gradient(145deg, rgba(16, 24, 40, 0.8) 0%, rgba(10, 15, 28, 0.9) 100%)"
+                              : "#ffffff"),
+                        border: isSel
+                          ? `2px solid ${isDarkMode ? themeCol : "#2563eb"}`
+                          : `1.5px solid ${isDarkMode ? "rgba(255, 255, 255, 0.1)" : "#cbd5e1"}`,
                         borderRadius: 16,
                         padding: "13px 16px",
                         cursor: "pointer",
@@ -631,10 +635,8 @@ export const App: React.FC = () => {
                         flexDirection: "column",
                         gap: 6,
                         boxShadow: isSel
-                          ? `0 8px 24px ${themeCol}35`
-                          : isDarkMode
-                          ? "0 4px 16px rgba(0,0,0,0.3)"
-                          : "0 2px 8px rgba(15, 23, 42, 0.04)",
+                          ? (isDarkMode ? `0 8px 24px ${themeCol}35` : "0 8px 24px rgba(37, 99, 235, 0.16)")
+                          : (isDarkMode ? "0 4px 16px rgba(0,0,0,0.3)" : "0 2px 8px rgba(15, 23, 42, 0.04)"),
                       }}
                     >
                       {/* Badge Row */}
@@ -655,7 +657,7 @@ export const App: React.FC = () => {
                         <span
                           style={{
                             fontSize: 10.5,
-                            color: isSel ? "#4ade80" : isDarkMode ? "#4ade80" : "#16a34a",
+                            color: isDarkMode ? "#4ade80" : "#16a34a",
                             fontWeight: 700,
                           }}
                         >
@@ -669,7 +671,7 @@ export const App: React.FC = () => {
                           style={{
                             fontSize: 16,
                             fontWeight: 900,
-                            color: isSel ? "#ffffff" : isDarkMode ? "#ffffff" : "#020617",
+                            color: isDarkMode ? "#ffffff" : "#020617",
                           }}
                         >
                           {r.display_name}
@@ -677,7 +679,7 @@ export const App: React.FC = () => {
                         <div
                           style={{
                             fontSize: 11.5,
-                            color: isSel ? "#cbd5e1" : isDarkMode ? "#94a3b8" : "#475569",
+                            color: isDarkMode ? (isSel ? "#cbd5e1" : "#94a3b8") : "#475569",
                             marginTop: 2,
                             lineHeight: 1.4,
                             wordBreak: "keep-all",
@@ -693,20 +695,16 @@ export const App: React.FC = () => {
                           <span
                             key={c}
                             style={{
-                              background: isSel
-                                ? "rgba(255, 255, 255, 0.12)"
-                                : isDarkMode
-                                ? "rgba(255, 255, 255, 0.05)"
-                                : "#f1f5f9",
-                              border: isSel
-                                ? "1px solid rgba(255, 255, 255, 0.22)"
-                                : isDarkMode
-                                ? "1px solid rgba(255, 255, 255, 0.08)"
-                                : "1px solid #cbd5e1",
+                              background: isDarkMode
+                                ? (isSel ? "rgba(255, 255, 255, 0.12)" : "rgba(255, 255, 255, 0.05)")
+                                : (isSel ? "#ffffff" : "#f1f5f9"),
+                              border: isDarkMode
+                                ? (isSel ? "1px solid rgba(255, 255, 255, 0.22)" : "1px solid rgba(255, 255, 255, 0.08)")
+                                : (isSel ? "1.5px solid #cbd5e1" : "1px solid #cbd5e1"),
                               padding: "2.5px 7px",
                               borderRadius: 5,
                               fontSize: 10.5,
-                              color: isSel ? "#ffffff" : isDarkMode ? "#cbd5e1" : "#0f172a",
+                              color: isDarkMode ? (isSel ? "#ffffff" : "#cbd5e1") : "#0f172a",
                             }}
                           >
                             {c}
@@ -722,17 +720,15 @@ export const App: React.FC = () => {
                           alignItems: "center",
                           marginTop: 2,
                           paddingTop: 6,
-                          borderTop: isSel
-                            ? "1px solid rgba(255, 255, 255, 0.18)"
-                            : isDarkMode
-                            ? "1px solid rgba(255, 255, 255, 0.08)"
+                          borderTop: isDarkMode
+                            ? (isSel ? "1px solid rgba(255, 255, 255, 0.18)" : "1px solid rgba(255, 255, 255, 0.08)")
                             : "1px solid #e2e8f0",
                           fontSize: 11,
                         }}
                       >
                         <span
                           style={{
-                            color: isSel ? "#e2e8f0" : isDarkMode ? "#cbd5e1" : "#475569",
+                            color: isDarkMode ? (isSel ? "#e2e8f0" : "#cbd5e1") : "#475569",
                             display: "flex",
                             alignItems: "center",
                             gap: 6,
@@ -748,14 +744,14 @@ export const App: React.FC = () => {
                           />
                           <span>
                             현위치:{" "}
-                            <b style={{ color: isSel ? "#ffffff" : isDarkMode ? "#ffffff" : "#020617" }}>
+                            <b style={{ color: isDarkMode ? "#ffffff" : "#020617" }}>
                               {r.telemetry?.position_name}
                             </b>
                           </span>
                         </span>
                         <span
                           style={{
-                            color: isSel ? "#4ade80" : isDarkMode ? "#4ade80" : "#16a34a",
+                            color: isDarkMode ? "#4ade80" : "#16a34a",
                             fontWeight: 800,
                           }}
                         >
@@ -1619,6 +1615,7 @@ export const App: React.FC = () => {
         <RobotDetailPopupModal
           robot={robots.find((r) => r.id === popupRobot.id) || popupRobot}
           onClose={() => setPopupRobot(null)}
+          isDarkMode={isDarkMode}
         />
       )}
 
@@ -1629,6 +1626,7 @@ export const App: React.FC = () => {
           fleetData={fleetData}
           onClose={() => setLiveOpRobot(null)}
           onActionExecute={handleExecuteAction}
+          isDarkMode={isDarkMode}
         />
       )}
 

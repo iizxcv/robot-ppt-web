@@ -6,6 +6,7 @@ interface RobotLiveOperationModalProps {
   fleetData?: any;
   onClose: () => void;
   onActionExecute?: (actionType: string, params: any) => Promise<any>;
+  isDarkMode?: boolean;
 }
 
 export const STREAM_CONFIG: Record<string, { streamName: string; label: string; tag: string; res: string; desc: string }> = {
@@ -44,6 +45,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
   fleetData,
   onClose,
   onActionExecute,
+  isDarkMode = false,
 }) => {
   const [activeTab, setActiveTab] = useState<"camera" | "sensors" | "oneclick">("oneclick");
   const [selectedPath, setSelectedPath] = useState<string>("");
@@ -143,7 +145,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(2, 6, 23, 0.82)",
+        background: isDarkMode ? "rgba(2, 6, 23, 0.82)" : "rgba(15, 23, 42, 0.45)",
         backdropFilter: "blur(8px)",
         display: "flex",
         alignItems: "center",
@@ -158,10 +160,14 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
           width: "92vw",
           maxWidth: 1220,
           maxHeight: "92vh",
-          background: "linear-gradient(145deg, #0b1120 0%, #030712 100%)",
-          border: "1.5px solid rgba(59, 130, 246, 0.45)",
+          background: isDarkMode
+            ? "linear-gradient(145deg, #0b1120 0%, #030712 100%)"
+            : "#f7f5f0",
+          border: isDarkMode ? "1.5px solid rgba(59, 130, 246, 0.45)" : "1.5px solid #cbd5e1",
           borderRadius: 22,
-          boxShadow: "0 25px 60px rgba(0, 0, 0, 0.75), 0 0 40px rgba(59, 130, 246, 0.2)",
+          boxShadow: isDarkMode
+            ? "0 25px 60px rgba(0, 0, 0, 0.75), 0 0 40px rgba(59, 130, 246, 0.2)"
+            : "0 24px 64px rgba(15, 23, 42, 0.18)",
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
@@ -171,11 +177,11 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
         <div
           style={{
             padding: "16px 24px",
-            borderBottom: "1px solid rgba(59, 130, 246, 0.2)",
+            borderBottom: isDarkMode ? "1px solid rgba(59, 130, 246, 0.2)" : "1px solid #cbd5e1",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            background: "rgba(15, 23, 42, 0.75)",
+            background: isDarkMode ? "rgba(15, 23, 42, 0.75)" : "#ffffff",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
