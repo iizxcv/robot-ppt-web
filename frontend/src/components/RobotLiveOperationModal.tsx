@@ -211,31 +211,46 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            {/* Tab switch */}
-            <div style={{ display: "flex", background: "rgba(2, 6, 23, 0.8)", borderRadius: 10, padding: 3, border: "1px solid #1e293b" }}>
+            {/* Tab switch bar */}
+            <div
+              className="live-modal-tab-bar"
+              style={{
+                display: "flex",
+                background: "rgb(3, 7, 18)",
+                borderRadius: 10,
+                padding: 4,
+                border: "1px solid rgba(255, 255, 255, 0.15)",
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.3)",
+              }}
+            >
               {[
                 { id: "oneclick", label: "⚡ 원클릭 작업 제어" },
                 { id: "camera", label: "📹 실시간 카메라 & 소켓" },
                 { id: "sensors", label: "📊 정밀 센서 & 자산 현황" },
-              ].map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => setActiveTab(t.id as any)}
-                  style={{
-                    background: activeTab === t.id ? "#3b82f6" : "transparent",
-                    color: activeTab === t.id ? "#ffffff" : "#94a3b8",
-                    border: "none",
-                    borderRadius: 8,
-                    padding: "6px 14px",
-                    fontSize: 12.5,
-                    fontWeight: 700,
-                    cursor: "pointer",
-                    transition: "all 0.15s ease",
-                  }}
-                >
-                  {t.label}
-                </button>
-              ))}
+              ].map((t) => {
+                const isSelected = activeTab === t.id;
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => setActiveTab(t.id as any)}
+                    data-active={isSelected ? "true" : "false"}
+                    style={{
+                      background: isSelected ? "#bae6fd" : "transparent",
+                      color: isSelected ? "#020617" : "#ffffff",
+                      border: isSelected ? "1px solid #7dd3fc" : "1px solid transparent",
+                      borderRadius: 8,
+                      padding: "6px 14px",
+                      fontSize: 12.5,
+                      fontWeight: isSelected ? 800 : 600,
+                      cursor: "pointer",
+                      transition: "all 0.15s ease",
+                      boxShadow: isSelected ? "0 2px 8px rgba(186, 230, 253, 0.35)" : "none",
+                    }}
+                  >
+                    {t.label}
+                  </button>
+                );
+              })}
             </div>
 
             <button
