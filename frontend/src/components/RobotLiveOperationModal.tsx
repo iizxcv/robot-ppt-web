@@ -90,7 +90,8 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
 
   const currStream = STREAM_CONFIG[cameraMode] || STREAM_CONFIG.optical;
   const robotIp = robot.ip || (rId.includes("power") ? "10.200.28.61" : "10.200.28.63");
-  const liveStreamPlayerUrl = `http://${robotIp}/videoStream/stream/player/${currStream.streamName}?autoplay=1&muted=1`;
+  // Use Web Server Media Relay endpoint (/videoStream/...) instead of direct internal robot/media IP
+  const liveStreamPlayerUrl = `/videoStream/stream/player/${currStream.streamName}/?autoplay=1&muted=1`;
 
   useEffect(() => {
     if (missions.length > 0 && !selectedPath) {
@@ -867,11 +868,11 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                           fontWeight: 700,
                         }}
                       >
-                        ● NGINX PROXY ➔ MEDIAMTX WHEP
+                        ● MEDIA RELAY ➔ MEDIAMTX (10.200.30.110)
                       </span>
                     </div>
                     <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 2 }}>
-                      소켓: <code>{robotFleet.ws_url || `ws://${robotIp}/websocket/`}</code> · 스트림 파이프라인: <code>http://{robotIp}/videoStream/stream/player/{currStream.streamName}</code>
+                      소켓: <code>{robotFleet.ws_url || `ws://${robotIp}/websocket/`}</code> · 미디어 중계: <code>/videoStream/stream/player/{currStream.streamName}/</code>
                     </div>
                   </div>
 
@@ -1005,7 +1006,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                         pointerEvents: "none",
                       }}
                     >
-                      Pipeline: <code>http://{robotIp}/videoStream/.../{currStream.streamName}</code>
+                      Pipeline: <code>/videoStream/.../{currStream.streamName}/ ➔ 10.200.30.110:8889</code>
                     </div>
 
                     {/* Bottom Right PTZ Coordinate Overlay */}

@@ -25,8 +25,23 @@ services:
     network_mode: host
     depends_on:
       - robot-ppt-backend
+      - robot-ppt-media-relay
     volumes:
       # 1:1 Host Master Nginx & Static Assets Bind Mounts
       - ./docker_master/nginx:/etc/nginx/conf.d
       - ./docker_master/data:/usr/share/nginx/html/master_data:ro
+
+  robot-ppt-media-relay:
+    build:
+      context: ./media_relay
+      dockerfile: Dockerfile
+    container_name: robot-ppt-media-relay
+    restart: unless-stopped
+    privileged: true
+    network_mode: host
+    environment:
+      - UPSTREAM_MEDIA_SERVER=http://10.200.30.110:8889
+      - RELAY_PORT=8088
+    volumes:
+      - ./media_relay:/app
 
