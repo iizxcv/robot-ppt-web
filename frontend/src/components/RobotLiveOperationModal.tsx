@@ -83,7 +83,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
       setSelectedPath(paths[0].name || String(paths[0].robotPathId));
     }
     if (positions.length > 0 && !selectedPosition) {
-      setSelectedPosition(positions[0].name || String(positions[0].robotPositionId));
+      setSelectedPosition(String(positions[0].robotPositionId));
     }
   }, [missions, paths, positions]);
 
@@ -98,9 +98,10 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
       if (onActionExecute) {
         const res = await onActionExecute(actionType, extraParams);
         if (res && res.result) {
-          addLog(`✓ ${res.result.message || "Executed successfully"}`, "success");
+          const isSuccess = res.code === 0 && res.result.status === "SUCCESS";
+          addLog(`${isSuccess ? "✓" : "⚠️"} ${res.result.message || "Executed"}`, isSuccess ? "success" : "warn");
           if (res.result.details) {
-            addLog(`↳ ${res.result.details}`, "info");
+            addLog(`↳ ${res.result.details}`, isSuccess ? "info" : "warn");
           }
         } else {
           addLog(`✓ Action [${actionType}] processed successfully.`, "success");
@@ -112,7 +113,8 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ action_type: actionType, ...extraParams }),
         }).then((r) => r.json());
-        addLog(`✓ ${res.msg || "Executed successfully"}`, "success");
+        const isSuccess = res.code === 0;
+        addLog(`${isSuccess ? "✓" : "⚠️"} ${res.msg || "Executed"}`, isSuccess ? "success" : "warn");
       }
     } catch (e: any) {
       addLog(`⚠️ Operation failed: ${e.message}`, "warn");
@@ -539,10 +541,10 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                       </select>
                       <button
                         onClick={() => {
-                          const currPos = positions.find((p) => String(p.robotPositionId) === selectedPosition || p.name === selectedPosition);
+                          const currPos = positions.find((p) => String(p.robotPositionId) === selectedPosition);
                           handleRunAction("goto_position", {
-                            position_name: currPos?.name || selectedPosition,
-                            position_id: currPos?.robotPositionId,
+                            position_name: currPos?.name || "Selected Point",
+                            position_id: currPos?.robotPositionId ? Number(currPos.robotPositionId) : (selectedPosition ? Number(selectedPosition) : undefined),
                           });
                         }}
                         disabled={isExecuting}

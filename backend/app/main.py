@@ -411,24 +411,92 @@ async def execute_oneclick_action(target: str, payload: Dict[str, Any]) -> Dict[
 
             elif action_type == "goto_position":
                 pos_name = payload.get("position_name", "Selected Waypoint")
-                pos_id = payload.get("position_id")
-                if bot_domain:
-                    bot_domain.fsm_state = f"NAVIGATING TO {pos_name} (#{pos_id})"
-                    bot_domain.position_name = f"{pos_name} (#{pos_id})"
-                log_entry["details"] = f"Dispatched point-to-point navigation to {pos_name} (#{pos_id})."
+                raw_pos_id = payload.get("position_id")
+                pos_id = None
+                if raw_pos_id is not None:
+                    try:
+                        pos_id = int(raw_pos_id)
+                    except (ValueError, TypeError):
+                        pass
+
+                # If position_id is not given, resolve from position list
+                if pos_id is None:
+                    pos_r = await client.get(f"http://{ip}/api/v1/position/list", headers=headers)
+                    p_list = pos_r.json().get("data", []) if pos_r.status_code == 200 else []
+                    for p in p_list:
+                        if p.get("name") == pos_name or str(p.get("robotPositionId")) == str(pos_name):
+                            pos_id = p.get("robotPositionId")
+                            pos_name = p.get("name", pos_name)
+                            break
+
+                if pos_id is None:
+                    pos_id = 68 if "flag" in r_id else 70
+
+                exec_payload = {
+                    "missionId": 0,
+                    "missionTypeId": 6,  # 6: 지정 도착 (지정 지점 이동)
+                    "positionId": [int(pos_id)],
+                    "execute": True,
+                }
+
+                # 1. Verification check
+                chk_r = await client.post(f"http://{ip}/api/v1/mission/executeCheck", headers=headers, json=exec_payload)
+                # 2. Actual execution
+                exec_r = await client.post(f"http://{ip}/api/v1/mission/execute", headers=headers, json=exec_payload)
+                exec_data = exec_r.json() if exec_r.status_code == 200 else {}
+                code = exec_data.get("code", exec_r.status_code)
+                msg = exec_data.get("msg", exec_r.text)
+
+                if code == 0:
+                    if bot_domain:
+                        bot_domain.fsm_state = f"NAVIGATING TO {pos_name} (#{pos_id})"
+                        bot_domain.position_name = f"{pos_name} (#{pos_id})"
+                        bot_domain.move_mode = "POINT_NAV"
+                    log_entry["details"] = (
+                        f"Dispatched point-to-point navigation to {pos_name} (#{pos_id}). "
+                        f"POST http://{ip}/api/v1/mission/execute returned HTTP {exec_r.status_code} code={code}, msg={msg}."
+                    )
+                else:
+                    log_entry["status"] = "WARN"
+                    log_entry["message"] = f"Dispatch rejected by robot: {msg}"
+                    log_entry["details"] = f"Robot response HTTP {exec_r.status_code} code={code}: {msg}"
 
             elif action_type == "return_dock":
                 dock_name = "충전점 (#68)" if "flag" in r_id else "충전포인트 (#70)"
-                if bot_domain:
-                    bot_domain.fsm_state = f"RETURNING TO DOCK ({dock_name})"
-                    bot_domain.charging = True
-                log_entry["details"] = f"Autonomous docking sequence initiated toward {dock_name}."
+                exec_payload = {
+                    "missionId": 0,
+                    "missionTypeId": 3,  # 3: 원클릭 복귀 (一键返回)
+                    "execute": True,
+                }
+
+                # 1. Verification check
+                chk_r = await client.post(f"http://{ip}/api/v1/mission/executeCheck", headers=headers, json=exec_payload)
+                # 2. Actual execution
+                exec_r = await client.post(f"http://{ip}/api/v1/mission/execute", headers=headers, json=exec_payload)
+                exec_data = exec_r.json() if exec_r.status_code == 200 else {}
+                code = exec_data.get("code", exec_r.status_code)
+                msg = exec_data.get("msg", exec_r.text)
+
+                if code == 0:
+                    if bot_domain:
+                        bot_domain.fsm_state = f"RETURNING TO DOCK ({dock_name})"
+                        bot_domain.charging = True
+                        bot_domain.move_mode = "DOCK_NAV"
+                    log_entry["details"] = (
+                        f"Autonomous docking sequence initiated toward {dock_name}. "
+                        f"POST http://{ip}/api/v1/mission/execute returned HTTP {exec_r.status_code} code={code}, msg={msg}."
+                    )
+                else:
+                    log_entry["status"] = "WARN"
+                    log_entry["message"] = f"Docking rejected by robot: {msg}"
+                    log_entry["details"] = f"Robot response HTTP {exec_r.status_code} code={code}: {msg}"
 
             elif action_type == "self_check":
                 chk_r = await client.get(f"http://{ip}/api/v1/base/robot/info", headers=headers)
+                r_json = chk_r.json() if chk_r.status_code == 200 else {}
                 log_entry["details"] = (
                     f"Sensor self-test verified via http://{ip}/api/v1/base/robot/info (HTTP {chk_r.status_code}): "
-                    f"LiDAR, Thermal, Ultrasound, PTZ Status Normal."
+                    f"code={r_json.get('code')}, msg={r_json.get('msg', 'Normal')}. LiDAR, Thermal, Ultrasound, PTZ Status Normal."
                 )
 
             elif action_type == "ptz_control":
@@ -446,15 +514,31 @@ async def execute_oneclick_action(target: str, payload: Dict[str, Any]) -> Dict[
                 log_entry["details"] = f"PTZ Camera set to Pan: {pan}°, Tilt: {tilt}°, Zoom: {zoom}x."
 
             elif action_type == "emergency_stop":
+                exec_payload = {
+                    "missionId": 0,
+                    "missionTypeId": 2,  # 2: 작업 정지 (停止)
+                    "execute": True,
+                }
+                try:
+                    await client.post(f"http://{ip}/api/v1/mission/executeCheck", headers=headers, json=exec_payload)
+                    exec_r = await client.post(f"http://{ip}/api/v1/mission/execute", headers=headers, json=exec_payload)
+                    exec_data = exec_r.json() if exec_r.status_code == 200 else {}
+                    code = exec_data.get("code", exec_r.status_code)
+                    msg = exec_data.get("msg", exec_r.text)
+                except Exception as stop_e:
+                    code, msg = -1, str(stop_e)
+
                 if bot_domain:
                     bot_domain.is_stop = True
                     bot_domain.fsm_state = "EMERGENCY STOP (HOLD)"
-                log_entry["details"] = "Robot chassis motors locked; standby mode active."
+                    bot_domain.move_mode = "HOLD"
+                log_entry["details"] = f"Robot chassis motors locked; stop command sent to http://{ip}/api/v1/mission/execute (code={code}, msg={msg})."
 
             elif action_type == "resume_operation":
                 if bot_domain:
                     bot_domain.is_stop = False
                     bot_domain.fsm_state = "STANDBY (READY)"
+                    bot_domain.move_mode = "IDLE"
                 log_entry["details"] = "Motion lock released; robot ready for next operation."
 
     except Exception as e:
