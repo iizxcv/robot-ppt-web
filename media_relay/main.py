@@ -99,12 +99,29 @@ async def proxy_to_upstream(request: Request, upstream_path: str) -> Response:
             # If location is relative like /stream/player/..., keep it or ensure accessible
             logger.info(f"WHEP session created with Location: {loc}")
 
+        content = upstream_resp.content
+
+        # If this is a WHEP SDP answer, inject public IP candidate for external WAN clients
+        if upstream_resp.status_code == 201 and "application/sdp" in upstream_resp.headers.get("content-type", ""):
+            try:
+                sdp_text = upstream_resp.text
+                new_sdp_lines = []
+                for line in sdp_text.splitlines():
+                    new_sdp_lines.append(line)
+                    if "10.200.30.110 8189" in line:
+                        # Append dual candidate with public gateway IP (220.75.211.116)
+                        new_sdp_lines.append(line.replace("10.200.30.110 8189", "220.75.211.116 8189"))
+                content = "\r\n".join(new_sdp_lines).encode("utf-8")
+                logger.info("Injected public WAN ICE candidates (220.75.211.116:8189) into SDP answer")
+            except Exception as e:
+                logger.warning(f"Failed to adapt SDP answer: {e}")
+
         # Drop hop-by-hop headers
         for h in ["content-encoding", "transfer-encoding", "connection"]:
             resp_headers.pop(h, None)
 
         return Response(
-            content=upstream_resp.content,
+            content=content,
             status_code=upstream_resp.status_code,
             headers=resp_headers,
             media_type=upstream_resp.headers.get("content-type"),
