@@ -133,6 +133,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
 
   const isPower = robot.id.includes("pwr") || robot.id.includes("power");
   const isPro = robot.id.includes("pro");
+  const isLive = robot.telemetry?.online_mode === "LIVE_WEBSOCKET_REDIS";
   const frontImg = isPower
     ? "/proposal_images/power_front.jpeg"
     : isPro
@@ -187,9 +188,11 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <span
               style={{
-                background: "rgba(34, 197, 94, 0.16)",
-                border: "1px solid #22c55e",
-                color: "#4ade80",
+                background: isLive
+                  ? "rgba(34, 197, 94, 0.16)"
+                  : (isDarkMode ? "rgba(239, 68, 68, 0.16)" : "#fee2e2"),
+                border: `1px solid ${isLive ? "#22c55e" : "#ef4444"}`,
+                color: isLive ? (isDarkMode ? "#4ade80" : "#16a34a") : (isDarkMode ? "#ef4444" : "#dc2626"),
                 fontSize: 11,
                 fontWeight: 800,
                 padding: "3px 10px",
@@ -199,10 +202,18 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                 gap: 6,
               }}
             >
-              <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e" }} />
-              LIVE REST API & WEBSOCKET
+              <span
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  background: isLive ? "#22c55e" : "#ef4444",
+                  boxShadow: isLive ? "0 0 8px #22c55e" : "0 0 6px #ef4444",
+                }}
+              />
+              {isLive ? "LIVE REST API & WEBSOCKET" : "OFFLINE (통신 단절 / N/A)"}
             </span>
-            <span style={{ fontSize: 18, fontWeight: 900, color: "#ffffff" }}>
+            <span style={{ fontSize: 18, fontWeight: 900, color: isDarkMode ? "#ffffff" : "#0f172a" }}>
               {robot.display_name} 실시간 종합 제어 및 센서 모니터링
             </span>
             <span style={{ fontSize: 13, color: "#94a3b8", fontFamily: "monospace" }}>
@@ -311,21 +322,27 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
               <div style={{ display: "flex", flexDirection: "column", gap: 7, fontSize: 12 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", background: isDarkMode ? "rgba(15, 23, 42, 0.8)" : "#ffffff", border: isDarkMode ? "none" : "1px solid #e2e8f0", borderRadius: 8 }}>
                   <span style={{ color: isDarkMode ? "#94a3b8" : "#475569" }}>상태 머신 (FSM)</span>
-                  <span style={{ color: "#4ade80", fontWeight: 800 }}>{robot.telemetry?.fsm_state || "READY (STANDBY)"}</span>
+                  <span style={{ color: isLive ? (isDarkMode ? "#4ade80" : "#16a34a") : (isDarkMode ? "#ef4444" : "#dc2626"), fontWeight: 800 }}>
+                    {isLive ? (robot.telemetry?.fsm_state || "READY (STANDBY)") : "OFFLINE (하드웨어 점검/대기)"}
+                  </span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", background: isDarkMode ? "rgba(15, 23, 42, 0.8)" : "#ffffff", border: isDarkMode ? "none" : "1px solid #e2e8f0", borderRadius: 8 }}>
                   <span style={{ color: isDarkMode ? "#94a3b8" : "#475569" }}>현재 위치</span>
-                  <span style={{ color: isDarkMode ? "#ffffff" : "#0f172a", fontWeight: 800 }}>{robot.telemetry?.position_name || "충전점 (#68)"}</span>
+                  <span style={{ color: isLive ? (isDarkMode ? "#ffffff" : "#0f172a") : (isDarkMode ? "#ef4444" : "#dc2626"), fontWeight: 800 }}>
+                    {isLive ? (robot.telemetry?.position_name || "충전점 (#68)") : "N/A (위치 수신 불가)"}
+                  </span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", background: isDarkMode ? "rgba(15, 23, 42, 0.8)" : "#ffffff", border: isDarkMode ? "none" : "1px solid #e2e8f0", borderRadius: 8 }}>
                   <span style={{ color: isDarkMode ? "#94a3b8" : "#475569" }}>배터리 전압</span>
-                  <span style={{ color: isDarkMode ? "#38bdf8" : "#0284c7", fontWeight: 800 }}>
-                    {robot.telemetry?.battery_pct ?? 100}% ({robot.telemetry?.voltage_v ?? 28.09}V)
+                  <span style={{ color: isLive ? (isDarkMode ? "#38bdf8" : "#0284c7") : (isDarkMode ? "#ef4444" : "#dc2626"), fontWeight: 800 }}>
+                    {isLive ? `${robot.telemetry?.battery_pct ?? 100}% (${robot.telemetry?.voltage_v ?? 28.09}V)` : "N/A"}
                   </span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", background: isDarkMode ? "rgba(15, 23, 42, 0.8)" : "#ffffff", border: isDarkMode ? "none" : "1px solid #e2e8f0", borderRadius: 8 }}>
                   <span style={{ color: isDarkMode ? "#94a3b8" : "#475569" }}>리프트 승강 높이</span>
-                  <span style={{ color: "#facc15", fontWeight: 800 }}>{robot.telemetry?.lift_height_m ?? 0.17} m</span>
+                  <span style={{ color: isLive ? "#facc15" : (isDarkMode ? "#ef4444" : "#dc2626"), fontWeight: 800 }}>
+                    {isLive ? `${robot.telemetry?.lift_height_m ?? 0.17} m` : "N/A"}
+                  </span>
                 </div>
               </div>
             </div>
@@ -382,6 +399,26 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                     실제 로봇 플랫폼의 <code>/api/robot/path</code>, <code>/api/v1/position</code> 엔드포인트와 직결되어 즉시 동작을 수행합니다.
                   </div>
                 </div>
+
+                {!isLive && (
+                  <div
+                    style={{
+                      background: isDarkMode ? "rgba(239, 68, 68, 0.12)" : "#fef2f2",
+                      border: "1px solid #ef4444",
+                      borderRadius: 10,
+                      padding: "10px 14px",
+                      color: isDarkMode ? "#fca5a5" : "#b91c1c",
+                      fontSize: 12,
+                      fontWeight: 700,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
+                  >
+                    <span>⚠️</span>
+                    <span>현재 로봇이 <b>OFFLINE (통신 단절 / 점검 대기)</b> 상태입니다. 실시간 데이터 수신이 불가하여 텔레메트리가 N/A로 표시되며, 원격 명령이 실행되지 않습니다.</span>
+                  </div>
+                )}
 
                 {/* 4 Action Cards Grid */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
@@ -936,12 +973,12 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                 {/* 6 Sensor Data Boxes */}
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
                   {[
-                    { label: "온습도 센서", val: "23.4 ℃ / 46.2 %", status: "정상", sub: "서버실 적정 범위 내", color: "#38bdf8" },
-                    { label: "라이다 SLAM", val: "±2cm 정밀도", status: "정상 추정", sub: "지상 0.37m 마운트", color: "#00f2fe" },
-                    { label: "초음파 & 낙하방지", val: "전방 0.0m 무간섭", status: "안전", sub: "장애물 자동 감속", color: "#4ade80" },
-                    { label: "BMS 배터리 전원", val: `${robot.telemetry?.voltage_v ?? 28.09} V`, status: "완충 도크", sub: "리튬인산철 패키지", color: "#facc15" },
-                    { label: "리프터 승강 모터", val: `${robot.telemetry?.lift_height_m ?? 0.17} m`, status: "최대 2.1m", sub: "2~48U 높이 대응", color: "#a855f7" },
-                    { label: "열화상 카메라", val: "최고 28.5 ℃", status: "핫스팟 무", sub: "화재 발화 조기 감시", color: "#f87171" },
+                    { label: "온습도 센서", val: isLive ? "23.4 ℃ / 46.2 %" : "N/A", status: isLive ? "정상" : "OFFLINE", sub: isLive ? "서버실 적정 범위 내" : "수신 불가", color: isLive ? "#38bdf8" : "#ef4444" },
+                    { label: "라이다 SLAM", val: isLive ? "±2cm 정밀도" : "N/A", status: isLive ? "정상 추정" : "OFFLINE", sub: isLive ? "지상 0.37m 마운트" : "수신 불가", color: isLive ? "#00f2fe" : "#ef4444" },
+                    { label: "초음파 & 낙하방지", val: isLive ? "전방 0.0m 무간섭" : "N/A", status: isLive ? "안전" : "OFFLINE", sub: isLive ? "장애물 자동 감속" : "수신 불가", color: isLive ? "#4ade80" : "#ef4444" },
+                    { label: "BMS 배터리 전원", val: isLive ? `${robot.telemetry?.voltage_v ?? 28.09} V` : "N/A", status: isLive ? "완충 도크" : "OFFLINE", sub: isLive ? "리튬인산철 패키지" : "수신 불가", color: isLive ? "#facc15" : "#ef4444" },
+                    { label: "리프터 승강 모터", val: isLive ? `${robot.telemetry?.lift_height_m ?? 0.17} m` : "N/A", status: isLive ? "최대 2.1m" : "OFFLINE", sub: isLive ? "2~48U 높이 대응" : "수신 불가", color: isLive ? "#a855f7" : "#ef4444" },
+                    { label: "열화상 카메라", val: isLive ? "최고 28.5 ℃" : "N/A", status: isLive ? "핫스팟 무" : "OFFLINE", sub: isLive ? "화재 발화 조기 감시" : "수신 불가", color: isLive ? "#f87171" : "#ef4444" },
                   ].map((s) => (
                     <div
                       key={s.label}

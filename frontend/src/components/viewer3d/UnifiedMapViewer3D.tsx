@@ -446,10 +446,10 @@ const ParametricURDFRobot: React.FC<{
                 borderRadius: "50%",
                 background: telemetry?.online_mode === "LIVE_WEBSOCKET_REDIS"
                   ? (isDarkMode ? "#22c55e" : "#16a34a")
-                  : (isDarkMode ? "#64748b" : "#94a3b8"),
+                  : (isDarkMode ? "#ef4444" : "#dc2626"),
                 boxShadow: telemetry?.online_mode === "LIVE_WEBSOCKET_REDIS"
                   ? `0 0 8px ${isDarkMode ? "#22c55e" : "#16a34a"}`
-                  : "none",
+                  : `0 0 6px ${isDarkMode ? "#ef4444" : "#dc2626"}`,
               }}
             />
             <span style={{ color: isSelected ? (isDarkMode ? "#38bdf8" : "#2563eb") : (isDarkMode ? "#ffffff" : "#0f172a") }}>

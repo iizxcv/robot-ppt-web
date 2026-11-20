@@ -1802,7 +1802,7 @@ export const App: React.FC = () => {
                             style={{
                               fontSize: "clamp(10px, 0.72vw, 11px)",
                               fontWeight: 800,
-                              color: isLive ? (isDarkMode ? "#4ade80" : "#16a34a") : (isDarkMode ? "#a1a1aa" : "#64748b"),
+                              color: isLive ? (isDarkMode ? "#4ade80" : "#16a34a") : (isDarkMode ? "#ef4444" : "#dc2626"),
                               display: "flex",
                               alignItems: "center",
                               gap: 5,
@@ -1813,10 +1813,11 @@ export const App: React.FC = () => {
                                 width: 6,
                                 height: 6,
                                 borderRadius: "50%",
-                                background: isLive ? "#22c55e" : "#71717a",
+                                background: isLive ? "#22c55e" : "#ef4444",
+                                boxShadow: isLive ? "0 0 6px #22c55e" : "0 0 6px #ef4444",
                               }}
                             />
-                            {isLive ? `${r.ip}:80` : "STANDBY"}
+                            {isLive ? `${r.ip}:80` : "OFFLINE (N/A)"}
                           </span>
                         </div>
 

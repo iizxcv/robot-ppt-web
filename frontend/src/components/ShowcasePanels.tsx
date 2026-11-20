@@ -156,14 +156,14 @@ export const RobotDetailPopupModal: React.FC<{
                 gap: 6,
                 fontSize: 11.5,
                 fontWeight: 800,
-                color: isLive ? (isDark ? "#4ade80" : "#16a34a") : (isDark ? "#a1a1aa" : "#475569"),
+                color: isLive ? (isDark ? "#4ade80" : "#16a34a") : (isDark ? "#ef4444" : "#dc2626"),
                 background: isLive
                   ? (isDark ? "rgba(34, 197, 94, 0.12)" : "#dcfce7")
-                  : (isDark ? "rgba(255, 255, 255, 0.05)" : "#f1f5f9"),
+                  : (isDark ? "rgba(239, 68, 68, 0.12)" : "#fee2e2"),
                 border: `1px solid ${
                   isLive
                     ? (isDark ? "rgba(34, 197, 94, 0.35)" : "#86efac")
-                    : (isDark ? "rgba(255, 255, 255, 0.1)" : "#cbd5e1")
+                    : (isDark ? "rgba(239, 68, 68, 0.35)" : "#fca5a5")
                 }`,
                 padding: "3px 10px",
                 borderRadius: 99,
@@ -174,11 +174,11 @@ export const RobotDetailPopupModal: React.FC<{
                   width: 7,
                   height: 7,
                   borderRadius: "50%",
-                  background: isLive ? "#22c55e" : "#71717a",
-                  boxShadow: isLive ? "0 0 8px #22c55e" : "none",
+                  background: isLive ? "#22c55e" : "#ef4444",
+                  boxShadow: isLive ? "0 0 8px #22c55e" : "0 0 6px #ef4444",
                 }}
               />
-              {isLive ? `LIVE REDIS · ${robot.ip}` : `STANDBY · ${robot.ip}`}
+              {isLive ? `LIVE REDIS · ${robot.ip}` : `OFFLINE (N/A) · ${robot.ip}`}
             </span>
           </div>
 
@@ -877,34 +877,36 @@ export const RobotDetailPopupModal: React.FC<{
 
                     <div style={{ background: cardBg, border: cardBorder, padding: "8px 12px", borderRadius: 8, boxShadow: isDark ? "none" : "0 1px 2px rgba(15, 23, 42, 0.03)" }}>
                       <span style={{ color: textLabel }}>현재 관제 지점명: </span>
-                      <b style={{ color: isDark ? "#4ade80" : "#16a34a" }}>{tel?.position_name || "대기 상태"}</b>
+                      <b style={{ color: isLive ? (isDark ? "#4ade80" : "#16a34a") : (isDark ? "#ef4444" : "#dc2626") }}>
+                        {isLive ? (tel?.position_name || "대기 상태") : "N/A (오프라인)"}
+                      </b>
                     </div>
 
                     <div style={{ background: cardBg, border: cardBorder, padding: "8px 12px", borderRadius: 8, boxShadow: isDark ? "none" : "0 1px 2px rgba(15, 23, 42, 0.03)" }}>
                       <span style={{ color: textLabel }}>로컬 오도메트리 (Local X, Y, Yaw): </span>
-                      <b style={{ color: textBody }}>
-                        ({tel?.local_x ?? 0}m, {tel?.local_y ?? 0}m, {tel?.local_yaw_deg ?? 0}°)
+                      <b style={{ color: isLive ? textBody : (isDark ? "#ef4444" : "#dc2626") }}>
+                        {isLive ? `(${tel?.local_x ?? 0}m, ${tel?.local_y ?? 0}m, ${tel?.local_yaw_deg ?? 0}°)` : "N/A"}
                       </b>
                     </div>
 
                     <div style={{ background: cardBg, border: cardBorder, padding: "8px 12px", borderRadius: 8, boxShadow: isDark ? "none" : "0 1px 2px rgba(15, 23, 42, 0.03)" }}>
                       <span style={{ color: textLabel }}>SE(2) 변환 오프셋 (ΔX, ΔY, ΔΘ): </span>
-                      <b style={{ color: isDark ? "#f59e0b" : "#d97706" }}>
-                        ({robot.calibration?.dx_m ?? 0}m, {robot.calibration?.dy_m ?? 0}m, {robot.calibration?.yaw_deg ?? 0}°)
+                      <b style={{ color: isLive ? (isDark ? "#f59e0b" : "#d97706") : (isDark ? "#ef4444" : "#dc2626") }}>
+                        {isLive ? `(${robot.calibration?.dx_m ?? 0}m, ${robot.calibration?.dy_m ?? 0}m, ${robot.calibration?.yaw_deg ?? 0}°)` : "N/A"}
                       </b>
                     </div>
 
                     <div style={{ background: cardBg, border: cardBorder, padding: "8px 12px", borderRadius: 8, boxShadow: isDark ? "none" : "0 1px 2px rgba(15, 23, 42, 0.03)" }}>
                       <span style={{ color: textLabel }}>3D 디지털 트윈 통합 월드 좌표: </span>
-                      <b style={{ color: isDark ? "#00f2fe" : "#0284c7" }}>
-                        ({tel?.world_x ?? 0}m, {tel?.world_y ?? 0}m)
+                      <b style={{ color: isLive ? (isDark ? "#00f2fe" : "#0284c7") : (isDark ? "#ef4444" : "#dc2626") }}>
+                        {isLive ? `(${tel?.world_x ?? 0}m, ${tel?.world_y ?? 0}m)` : "N/A"}
                       </b>
                     </div>
 
                     <div style={{ background: cardBg, border: cardBorder, padding: "8px 12px", borderRadius: 8, boxShadow: isDark ? "none" : "0 1px 2px rgba(15, 23, 42, 0.03)" }}>
                       <span style={{ color: textLabel }}>배터리 / 전압 / 내부 온도: </span>
-                      <b style={{ color: isDark ? "#4ade80" : "#16a34a" }}>
-                        {tel?.battery_pct ?? 0}% / {tel?.voltage_v ?? 0}V / {tel?.temp_c ?? 0}℃
+                      <b style={{ color: isLive ? (isDark ? "#4ade80" : "#16a34a") : (isDark ? "#ef4444" : "#dc2626") }}>
+                        {isLive ? `${tel?.battery_pct ?? 0}% / ${tel?.voltage_v ?? 0}V / ${tel?.temp_c ?? 0}℃` : "N/A"}
                       </b>
                     </div>
                   </div>
@@ -914,19 +916,22 @@ export const RobotDetailPopupModal: React.FC<{
                   style={{
                     background: isLive
                       ? (isDark ? "rgba(34, 197, 94, 0.1)" : "#f0fdf4")
-                      : (isDark ? "rgba(113, 113, 122, 0.1)" : "#f8fafc"),
+                      : (isDark ? "rgba(239, 68, 68, 0.1)" : "#fef2f2"),
                     border: `1px solid ${
                       isLive
                         ? (isDark ? "rgba(34, 197, 94, 0.3)" : "#bbf7d0")
-                        : (isDark ? "rgba(113, 113, 122, 0.3)" : "#e2e8f0")
+                        : (isDark ? "rgba(239, 68, 68, 0.3)" : "#fecaca")
                     }`,
                     borderRadius: 10,
                     padding: "10px 14px",
                     fontSize: 11.5,
-                    color: isLive ? (isDark ? "#86efac" : "#16a34a") : (isDark ? "#94a3b8" : "#475569"),
+                    color: isLive ? (isDark ? "#86efac" : "#16a34a") : (isDark ? "#fca5a5" : "#dc2626"),
                   }}
                 >
-                  최근 텔레메트리 수신 동기화 시각: <b style={{ color: textTitle }}>{tel?.last_sync_time || "연결 대기 중"}</b>
+                  최근 텔레메트리 수신 동기화 시각:{" "}
+                  <b style={{ color: isLive ? textTitle : (isDark ? "#ef4444" : "#dc2626") }}>
+                    {isLive ? (tel?.last_sync_time || "연결 대기 중") : "N/A (수신 불가 - 오프라인)"}
+                  </b>
                 </div>
               </div>
 
