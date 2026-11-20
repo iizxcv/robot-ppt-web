@@ -3,9 +3,634 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MOSS Intelligent Robotics — 3D & OpenCV API Live Showcase</title>
+    <title>SR 로보틱스 솔루션 제안서 — 가상 관제 센터</title>
+    <!-- Pretendard Modern Light Typography CDN -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+      * {
+        box-sizing: border-box;
+        word-break: keep-all;
+        overflow-wrap: break-word;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100vw;
+        height: 100vh;
+        letter-spacing: -0.015em;
+        -webkit-font-smoothing: antialiased;
+        overflow: hidden;
+      }
+      button,
+      input,
+      select {
+        font-family: inherit;
+        letter-spacing: -0.02em;
+      }
+
+      /* Hide scrollbar */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+
+      /* Dynamic Stage Slide-In + Scale-Up Reveal */
+      @keyframes stageReveal {
+        0% {
+          opacity: 0;
+          transform: translateX(38px) scale(0.975);
+          filter: blur(6px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateX(0) scale(1);
+          filter: blur(0px);
+        }
+      }
+      .stage-reveal {
+        animation: stageReveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+      /* ==========================================================================
+         LIGHT THEME (기본 모드 - 화이트 베이스 + 확실한 200~255 조도 명암비 딥 블랙 폰트)
+         0~255 스케일에서 배경 245~255 대비 텍스트를 0~30 딥 블랙/딥 슬레이트로 렌더링
+         ========================================================================== */
+      body.theme-light,
+      .theme-light {
+        background: #f8fafc !important;
+        color: #0f172a !important; /* 거의 완전한 블랙 (조도 0~30 수치, 극명한 대비) */
+        font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif !important;
+        font-weight: 400 !important;
+      }
+
+      /* Base Containers */
+      body.theme-light #app-root-container,
+      body.theme-light .app-shell {
+        background: #f1f5f9 !important;
+        color: #0f172a !important;
+      }
+
+      body.theme-light aside.sidebar-toc {
+        background: #ffffff !important;
+        border-right: 1px solid #cbd5e1 !important;
+        box-shadow: 2px 0 16px rgba(15, 23, 42, 0.05) !important;
+      }
+      body.theme-light aside.sidebar-toc .toc-divider {
+        background: #cbd5e1 !important;
+      }
+      body.theme-light aside.sidebar-toc .toc-subhead {
+        color: #475569 !important;
+        font-weight: 700 !important;
+      }
+      body.theme-light aside.sidebar-toc .live-status-box {
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+      }
+      body.theme-light main.stage-reveal {
+        background: #f8fafc !important;
+        color: #0f172a !important;
+      }
+
+      /* Slide Cards and Glass Panels in Light Mode -> Crisp White Cards with High-Contrast Borders */
+      body.theme-light [style*="background: linear-gradient(145deg, rgba(16, 24, 40"],
+      body.theme-light [style*="background: linear-gradient(145deg, #0b1120"],
+      body.theme-light [style*="background: linear-gradient(145deg, #0e1526"],
+      body.theme-light [style*="background: rgba(16, 24, 40"],
+      body.theme-light [style*="background: rgba(15, 23, 42"],
+      body.theme-light [style*="background: #0c0d12"],
+      body.theme-light [style*="background: #0f0f13"],
+      body.theme-light [style*="background: #141419"] {
+        background: #ffffff !important;
+        border-color: #cbd5e1 !important;
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+      }
+
+      /* Inner Sub-boxes in Light Mode */
+      body.theme-light [style*="background: rgba(8, 12, 22"],
+      body.theme-light [style*="background: #030712"],
+      body.theme-light [style*="background: rgb(3, 7, 18)"],
+      body.theme-light [style*="background: rgba(3, 7, 18"] {
+        background: #f1f5f9 !important;
+        border-color: #cbd5e1 !important;
+      }
+
+      /* Headings & Titles in Light Mode - Deep Jet Black (#020617) */
+      body.theme-light h1,
+      body.theme-light h2,
+      body.theme-light h3,
+      body.theme-light h4,
+      body.theme-light h5,
+      body.theme-light .slide-title,
+      body.theme-light main.stage-reveal h1,
+      body.theme-light main.stage-reveal h2,
+      body.theme-light main.stage-reveal h3,
+      body.theme-light main.stage-reveal .slide-title {
+        font-weight: 700 !important;
+        color: #020617 !important;
+        letter-spacing: -0.03em;
+      }
+
+      /* Strong & Bold text -> Absolute Contrast Black (except inside selected dark cards) */
+      body.theme-light b:not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light strong:not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light main.stage-reveal b:not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light main.stage-reveal strong:not([data-selected="true"] *):not(.robot-card-selected *) {
+        font-weight: 700 !important;
+        color: #020617 !important;
+      }
+
+      /* Paragraphs & List Items -> Crisp Deep Dark Slate (#0f172a) */
+      body.theme-light main.stage-reveal p:not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light main.stage-reveal li:not([data-selected="true"] *):not(.robot-card-selected *) {
+        color: #0f172a !important;
+        font-weight: 400 !important;
+      }
+
+      /* --------------------------------------------------------------------------
+         EXHAUSTIVE ATTRIBUTE OVERRIDES (Hex & Browser RGB serializations)
+         텍스트 조도 0~30 vs 배경 조도 245~255로 200 이상의 절대적 명암 대비 유지
+         -------------------------------------------------------------------------- */
+      /* Pure White / Near-White Text (#ffffff, #fff, white, #f8fafc, #f1f5f9) -> Deep Jet Black (#020617) */
+      body.theme-light [style*="#ffffff"]:not(button):not([class*="btn"]):not([class*="badge"]):not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="#fff"]:not(button):not([class*="btn"]):not([class*="badge"]):not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="white"]:not(button):not([class*="btn"]):not([class*="badge"]):not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="rgb(255, 255, 255)"]:not(button):not([class*="btn"]):not([class*="badge"]):not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="rgb(255,255,255)"]:not(button):not([class*="btn"]):not([class*="badge"]):not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="#f8fafc"]:not(button):not([class*="btn"]):not([class*="badge"]):not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="rgb(248, 250, 252)"]:not(button):not([class*="btn"]):not([class*="badge"]):not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="rgb(248,250,252)"]:not(button):not([class*="btn"]):not([class*="badge"]):not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="#f1f5f9"]:not(button):not([class*="btn"]):not([class*="badge"]):not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="rgb(241, 245, 249)"]:not(button):not([class*="btn"]):not([class*="badge"]):not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="rgb(241,245,249)"]:not(button):not([class*="btn"]):not([class*="badge"]):not([data-selected="true"] *):not(.robot-card-selected *) {
+        color: #020617 !important;
+      }
+
+      /* Light Slate & Gray Body Text (#cbd5e1, #e2e8f0, #e4e4e7) -> Solid Black/Dark Slate (#0f172a) */
+      body.theme-light [style*="#cbd5e1"]:not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="rgb(203, 213, 225)"]:not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="rgb(203,213,225)"]:not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="#e2e8f0"]:not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="rgb(226, 232, 240)"]:not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="rgb(226,232,240)"]:not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="#e4e4e7"]:not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="rgb(228, 228, 231)"]:not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="rgb(228,228,231)"]:not([data-selected="true"] *):not(.robot-card-selected *) {
+        color: #0f172a !important;
+      }
+
+      /* Muted / Secondary Caption Text (#94a3b8, #a1a1aa, #71717a, #64748b) -> High-Contrast Dark Slate (#334155 / #475569) */
+      body.theme-light [style*="#94a3b8"]:not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="rgb(148, 163, 184)"]:not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="rgb(148,163,184)"]:not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="#a1a1aa"]:not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="rgb(161, 161, 170)"]:not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="rgb(161,161,170)"]:not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="#71717a"]:not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="rgb(113, 113, 122)"]:not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="rgb(113,113,122)"]:not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="#64748b"]:not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="rgb(100, 116, 139)"]:not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="rgb(100,116,139)"]:not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="#52525b"]:not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="rgb(82, 82, 91)"]:not([data-selected="true"] *):not(.robot-card-selected *),
+      body.theme-light [style*="rgb(82,82,91)"]:not([data-selected="true"] *):not(.robot-card-selected *) {
+        color: #334155 !important;
+      }
+
+      /* High-Contrast Colored Accents on White Backgrounds */
+      body.theme-light [style*="#00f2fe"],
+      body.theme-light [style*="rgb(0, 242, 254)"],
+      body.theme-light [style*="rgb(0,242,254)"],
+      body.theme-light [style*="#38bdf8"],
+      body.theme-light [style*="rgb(56, 189, 248)"],
+      body.theme-light [style*="rgb(56,189,248)"] {
+        color: #0284c7 !important; /* Deep Cyan/Blue (명확한 가독성) */
+      }
+
+      body.theme-light [style*="#4ade80"],
+      body.theme-light [style*="rgb(74, 222, 128)"],
+      body.theme-light [style*="rgb(74,222,128)"],
+      body.theme-light [style*="#22c55e"],
+      body.theme-light [style*="rgb(34, 197, 94)"],
+      body.theme-light [style*="rgb(34,197,94)"],
+      body.theme-light [style*="#34d399"],
+      body.theme-light [style*="rgb(52, 211, 153)"],
+      body.theme-light [style*="rgb(52,211,153)"] {
+        color: #15803d !important; /* Rich Forest Green */
+      }
+
+      body.theme-light [style*="#fbbf24"],
+      body.theme-light [style*="rgb(251, 191, 36)"],
+      body.theme-light [style*="rgb(251,191,36)"],
+      body.theme-light [style*="#facc15"],
+      body.theme-light [style*="rgb(250, 204, 21)"],
+      body.theme-light [style*="rgb(250,204,21)"],
+      body.theme-light [style*="#f59e0b"],
+      body.theme-light [style*="rgb(245, 158, 11)"],
+      body.theme-light [style*="rgb(245,158,11)"] {
+        color: #b45309 !important; /* Deep Amber / Bronze */
+      }
+
+      body.theme-light [style*="#a855f7"],
+      body.theme-light [style*="rgb(168, 85, 247)"],
+      body.theme-light [style*="rgb(168,85,247)"],
+      body.theme-light [style*="#c084fc"],
+      body.theme-light [style*="rgb(192, 132, 252)"],
+      body.theme-light [style*="rgb(192,132,252)"] {
+        color: #6b21a8 !important; /* Deep Royal Purple */
+      }
+
+      /* Primary Blue action buttons & colored badges MUST KEEP crisp white text */
+      body.theme-light button[style*="#3b82f6"],
+      body.theme-light button[style*="rgb(59, 130, 246)"],
+      body.theme-light button[style*="#2563eb"],
+      body.theme-light button[style*="rgb(37, 99, 235)"],
+      body.theme-light button[style*="linear-gradient"],
+      body.theme-light .btn-primary,
+      body.theme-light .badge-blue {
+        color: #ffffff !important;
+      }
+      body.theme-light button[style*="#3b82f6"] *,
+      body.theme-light button[style*="rgb(59, 130, 246)"] *,
+      body.theme-light button[style*="#2563eb"] *,
+      body.theme-light button[style*="rgb(37, 99, 235)"] *,
+      body.theme-light button[style*="linear-gradient"] * {
+        color: #ffffff !important;
+      }
+
+      /* Inputs, Selects and Code tags in Light Mode */
+      body.theme-light input,
+      body.theme-light select {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        border-color: #cbd5e1 !important;
+      }
+      body.theme-light code {
+        background: rgba(15, 23, 42, 0.06) !important;
+        color: #0f172a !important;
+        border-color: #cbd5e1 !important;
+        font-weight: 700 !important;
+      }
+
+      /* Modal Backdrop Overlays in Light Mode */
+      body.theme-light [style*="background: rgba(4, 7, 16"],
+      body.theme-light [style*="background: rgba(0, 0, 0, 0.75"] {
+        background: rgba(15, 23, 42, 0.45) !important;
+      }
+
+      /* Secondary / Navigation Buttons in Light Mode */
+      body.theme-light button[style*="background: #18181b"],
+      body.theme-light button[style*="background: rgb(24, 24, 27)"],
+      body.theme-light button[style*="background: #27272a"],
+      body.theme-light button[style*="background: rgb(39, 39, 42)"],
+      body.theme-light [style*="background: #18181b"] {
+        background: #e2e8f0 !important;
+        border-color: #cbd5e1 !important;
+        color: #0f172a !important;
+      }
+      body.theme-light button[style*="background: #18181b"] *,
+      body.theme-light button[style*="background: #27272a"] * {
+        color: #0f172a !important;
+      }
+
+      /* Bottom Footer Divider */
+      body.theme-light [style*="border-top: 1px solid #18181c"] {
+        border-top: 1px solid #cbd5e1 !important;
+        color: #475569 !important;
+      }
+
+      /* Table Styles in Light Mode */
+      body.theme-light table {
+        color: #0f172a !important;
+      }
+      body.theme-light table th {
+        background: #f1f5f9 !important;
+        color: #0f172a !important;
+        font-weight: 700 !important;
+        border-bottom: 1px solid #cbd5e1 !important;
+      }
+      body.theme-light table td {
+        border-bottom: 1px solid #e2e8f0 !important;
+        color: #0f172a !important;
+      }
+
+      /* ==========================================================================
+         SELECTED / ACTIVE CARDBOX IN LIGHT MODE (상아색 / 화이트 톤 베이스)
+         선택/눌림 상태도 화이트/상아색(#fbf9f5) 베이스 + 2px 하이라이트 보더 + 선명한 딥 블랙 텍스트로 렌더링
+         ========================================================================== */
+      body.theme-light .robot-card-selected,
+      body.theme-light [data-selected="true"],
+      body.theme-light .card-selected {
+        background: #fbf9f5 !important; /* 상아색 화이트톤 베이스 */
+        border: 2px solid #2563eb !important;
+        box-shadow: 0 8px 24px rgba(37, 99, 235, 0.16), 0 2px 8px rgba(15, 23, 42, 0.06) !important;
+      }
+
+      /* Selected Card Title & General Text in Light Mode -> Crisp Deep Black */
+      body.theme-light .robot-card-selected h1,
+      body.theme-light .robot-card-selected h2,
+      body.theme-light .robot-card-selected h3,
+      body.theme-light .robot-card-selected div,
+      body.theme-light .robot-card-selected span,
+      body.theme-light .robot-card-selected p,
+      body.theme-light .robot-card-selected b,
+      body.theme-light .robot-card-selected strong,
+      body.theme-light [data-selected="true"] div,
+      body.theme-light [data-selected="true"] span,
+      body.theme-light [data-selected="true"] p,
+      body.theme-light [data-selected="true"] b,
+      body.theme-light [data-selected="true"] strong {
+        color: #020617 !important;
+      }
+
+      /* Selected Card Subtitle */
+      body.theme-light .robot-card-selected .card-subtitle,
+      body.theme-light [data-selected="true"] .card-subtitle {
+        color: #475569 !important;
+      }
+
+      /* Selected Card Spec Chips & Borders in Light Mode */
+      body.theme-light .robot-card-selected .spec-chip,
+      body.theme-light .robot-card-selected [style*="border: 1px solid rgba(255, 255, 255"],
+      body.theme-light [data-selected="true"] [style*="border: 1px solid rgba(255, 255, 255"] {
+        background: #ffffff !important;
+        border-color: #cbd5e1 !important;
+        color: #0f172a !important;
+      }
+
+      /* Selected Card Accents: Green Status in Light Mode */
+      body.theme-light .robot-card-selected [style*="#4ade80"],
+      body.theme-light .robot-card-selected [style*="rgb(74, 222, 128)"],
+      body.theme-light [data-selected="true"] [style*="#4ade80"],
+      body.theme-light [data-selected="true"] [style*="rgb(74, 222, 128)"] {
+        color: #16a34a !important;
+      }
+
+      /* ==========================================================================
+         MODAL DIALOG POPUP IN LIGHT MODE (상아색 프레임 + 순백색 내부 카드)
+         완전한 0,0,0 흰색이 아닌 약간의 상아색(#f7f5f0)으로 프레임과 내부 카드를 명확히 분별
+         ========================================================================== */
+      /* Outer Backdrop Blur */
+      body.theme-light [style*="position: fixed"][style*="inset: 0"] {
+        background: rgba(15, 23, 42, 0.45) !important;
+        backdrop-filter: blur(10px) !important;
+      }
+
+      /* Modal Frame Dialog Box -> Warm Ivory Base (#f7f5f0) */
+      body.theme-light .stage-reveal[style*="width: min(1180px"],
+      body.theme-light [style*="max-width: 1220"],
+      body.theme-light [style*="linear-gradient(145deg, #0e1526"],
+      body.theme-light [style*="linear-gradient(145deg, #0b1120"] {
+        background: #f7f5f0 !important; /* 상아색 베이스 (Warm Ivory) */
+        border: 1.5px solid #cbd5e1 !important;
+        box-shadow: 0 24px 64px rgba(15, 23, 42, 0.18), 0 4px 16px rgba(15, 23, 42, 0.08) !important;
+        color: #020617 !important;
+      }
+
+      /* Modal Top Header Divider & Title */
+      body.theme-light [style*="border-bottom: 1px solid rgba(255, 255, 255, 0.1)"] {
+        border-bottom: 1px solid #cbd5e1 !important;
+      }
+
+      /* Modal Tabs in Light Mode */
+      body.theme-light [style*="rgba(15, 23, 42, 0.7)"] {
+        background: #ffffff !important;
+        border-color: #cbd5e1 !important;
+        color: #334155 !important;
+      }
+
+      /* Modal Close Button & Badges in Light Mode */
+      body.theme-light button[aria-label="닫기"],
+      body.theme-light button[style*="rgba(255, 255, 255, 0.08)"] {
+        background: #ffffff !important;
+        border-color: #cbd5e1 !important;
+        color: #020617 !important;
+      }
+
+      /* Modal Container Panels -> Clean Ivory Warm White (#fdfbf7) */
+      body.theme-light .stage-reveal[style*="width: min(1180px"] [style*="background: linear-gradient(145deg, rgba(16, 24, 40"],
+      body.theme-light .stage-reveal[style*="width: min(1180px"] [style*="background: rgba(16, 24, 40"],
+      body.theme-light .stage-reveal[style*="width: min(1180px"] [style*="background: #0c0d12"],
+      body.theme-light .stage-reveal[style*="width: min(1180px"] [style*="background: #0f0f13"],
+      body.theme-light .stage-reveal[style*="width: min(1180px"] [style*="background: #141419"],
+      body.theme-light .modal-panel-box,
+      body.theme-light [style*="max-width: 1220"] [style*="background: rgba(15, 23, 42, 0.6)"],
+      body.theme-light [style*="max-width: 1220"] [style*="background: rgba(15, 23, 42, 0.7)"] {
+        background: #fdfbf7 !important;
+        border: 1px solid #e2d7c7 !important;
+        box-shadow: 0 2px 10px rgba(120, 85, 40, 0.05) !important;
+      }
+
+      /* Modal 4 KPI Cards */
+      body.theme-light .modal-kpi-card,
+      body.theme-light [style*="max-width: 1220"] [style*="border-left: 3.5px"][style*="background: rgba(15, 23, 42"] {
+        background: #fdfbf7 !important;
+        border: 1px solid #e2d7c7 !important;
+      }
+      body.theme-light .modal-kpi-card div:first-child,
+      body.theme-light [style*="max-width: 1220"] [style*="border-left: 3.5px"] div:first-child {
+        color: #0c0a09 !important;
+      }
+      body.theme-light .modal-kpi-card div:last-child,
+      body.theme-light [style*="max-width: 1220"] [style*="border-left: 3.5px"] div:last-child {
+        color: #78716c !important;
+      }
+
+      /* ==========================================================================
+         CRISP WHITE MODAL CARDS (순백색 클린 카드박스: 스펙·강점·칩·오도메트리 행)
+         ========================================================================== */
+      body.theme-light .modal-ivory-card,
+      body.theme-light [style*="max-width: 1220"] [style*="background: rgba(2, 6, 23"],
+      body.theme-light [style*="max-width: 1220"] [style*="background: rgba(2, 6, 23, 0.5)"],
+      body.theme-light [style*="max-width: 1220"] [style*="background: rgba(2, 6, 23, 0.6)"],
+      body.theme-light [style*="max-width: 1220"] [style*="background: rgba(2, 6, 23, 0.8)"] {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+        color: #0f172a !important;
+      }
+
+      /* Card Internal Labels & Values */
+      body.theme-light .modal-ivory-card span,
+      body.theme-light [style*="max-width: 1220"] [style*="background: rgba(2, 6, 23"] span {
+        color: #475569 !important;
+        font-weight: 600 !important;
+      }
+      body.theme-light .modal-ivory-card b,
+      body.theme-light .modal-ivory-card strong,
+      body.theme-light [style*="max-width: 1220"] [style*="background: rgba(2, 6, 23"] b,
+      body.theme-light [style*="max-width: 1220"] [style*="background: rgba(2, 6, 23"] strong {
+        color: #0f172a !important;
+        font-weight: 800 !important;
+      }
+
+      /* 3종 공통 기본 기능 (6대 표준 기능 칩) -> 화이트 칩 */
+      body.theme-light .modal-chip-card,
+      body.theme-light [style*="max-width: 1220"] [style*="text-align: center"][style*="background: rgba(2, 6, 23"] {
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #0f172a !important;
+        font-weight: 700 !important;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+      }
+
+      /* 핵심 차별화 강점 3개 카드 */
+      body.theme-light .modal-strength-card {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        color: #0f172a !important;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+      }
+      body.theme-light .modal-strength-card b {
+        color: #0f172a !important;
+      }
+
+      /* 외형 규격 바 */
+      body.theme-light .modal-dimensions-box {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        color: #334155 !important;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+      }
+      body.theme-light .modal-dimensions-box b {
+        color: #0f172a !important;
+      }
+
+      /* 실환경 REST API & WebSocket JSON 코드 프리뷰 (<pre>) */
+      body.theme-light .modal-code-block,
+      body.theme-light [style*="max-width: 1220"] pre {
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #0f172a !important;
+        font-weight: 600 !important;
+        box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+      }
+
+      /* KC Certification Box in Modal */
+      body.theme-light [style*="max-width: 1220"] [style*="border: 1px solid rgba(59, 130, 246, 0.25)"] {
+        background: #eff6ff !important;
+        border: 1px solid #bfdbfe !important;
+      }
+      body.theme-light [style*="max-width: 1220"] [style*="border: 1px solid rgba(59, 130, 246, 0.25)"] div[style*="font-size: 12"] {
+        color: #1e40af !important;
+      }
+
+      /* Tip & Synced status badges in Modal */
+      body.theme-light .modal-tip-box,
+      body.theme-light [style*="max-width: 1220"] [style*="background: rgba(59, 130, 246, 0.12)"] {
+        background: #eff6ff !important;
+        border: 1px solid #bfdbfe !important;
+        color: #1e40af !important;
+      }
+      body.theme-light .modal-sync-box {
+        background: #ecfdf5 !important;
+        border: 1px solid #a7f3d0 !important;
+        color: #065f46 !important;
+      }
+
+      /* ==========================================================================
+         DARK THEME (사이버펑크 다크 테크 - 굵은 폰트 웨이트 + 딥 스페이스 배경)
+         ========================================================================== */
+      body.theme-dark,
+      .theme-dark {
+        background: #080a14 !important;
+        color: #ffffff !important;
+        font-family: "Malgun Gothic", "맑은 고딕", Calibri, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        font-weight: 500 !important;
+      }
+      body.theme-dark h1,
+      body.theme-dark h2,
+      body.theme-dark h3 {
+        font-weight: 800 !important;
+        color: #ffffff !important;
+      }
+      body.theme-dark b,
+      body.theme-dark strong {
+        font-weight: 800 !important;
+      }
+
+      /* Theme Toggle Button Style */
+      .theme-toggle-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 11px;
+        border-radius: 99px;
+        font-size: 11.5px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        user-select: none;
+        border: 1px solid;
+      }
+      .theme-toggle-pill:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      }
+      .theme-toggle-pill:active {
+        transform: translateY(0);
+      }
+
+      /* Light mode pill style */
+      body.theme-light .theme-toggle-pill {
+        background: #ffffff;
+        color: #0f172a;
+        border-color: #cbd5e1;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+      }
+      /* Dark mode pill style */
+      body.theme-dark .theme-toggle-pill {
+        background: rgba(30, 41, 59, 0.8);
+        color: #f1f5f9;
+        border-color: rgba(255, 255, 255, 0.18);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+      }
+
+      /* Live Modal Tab Bar (Part 6 Modal) */
+      /* --- LIGHT MODE: Crisp White Container + Soft Light Sky Blue Active Tab + Black Text --- */
+      body.theme-light .live-modal-tab-bar {
+        background: #ffffff !important; /* 라이트 모드는 흰색 계열 */
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06) !important;
+      }
+      body.theme-light .live-modal-tab-bar button[data-active="true"] {
+        background: #bae6fd !important; /* 연한 하늘색 */
+        color: #020617 !important;       /* 검정색 계열 */
+        border: 1px solid #7dd3fc !important;
+        font-weight: 800 !important;
+      }
+      body.theme-light .live-modal-tab-bar button[data-active="false"] {
+        background: transparent !important;
+        color: #0f172a !important;       /* 라이트 모드에서는 검정색 계열 글자 */
+        border: 1px solid transparent !important;
+        font-weight: 700 !important;
+      }
+
+      /* --- DARK MODE: Obsidian Black Container + Sky Blue Active Tab --- */
+      body.theme-dark .live-modal-tab-bar {
+        background: rgb(3, 7, 18) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+      }
+      body.theme-dark .live-modal-tab-bar button[data-active="true"] {
+        background: #bae6fd !important;
+        color: #020617 !important;
+        border: 1px solid #7dd3fc !important;
+        font-weight: 800 !important;
+      }
+      body.theme-dark .live-modal-tab-bar button[data-active="false"] {
+        background: transparent !important;
+        color: #ffffff !important;
+        border: 1px solid transparent !important;
+      }
+    </style>
   </head>
-  <body style="margin: 0; background: #070b14; color: #e2e8f0; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; overflow: hidden;">
+  <body class="theme-light">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

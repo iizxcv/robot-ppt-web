@@ -10,11 +10,15 @@
     {
       "id": "flag-01",
       "hostname": "flagship.robot.local",
-      "aliases": ["flag", "flagship", "ult-01", "mr-i-p2306"],
-      "display_name": "MOSS Flagship V2.1",
+      "aliases": ["flag", "flagship", "iir-01", "mr-i-ult2408"],
+      "display_name": "플래그십 에디션 (FLAGSHIP)",
+      "edition_badge": "IIR-01 · MR-I-Ult2408",
       "model_type": "ult_diff",
-      "model_code": "MR-I-P2306",
+      "model_code": "MR-I-Ult2408",
+      "target_site": "IDC 데이터센터 | 전기실 (랙이 밀집한 대규모 서버실 장시간 연속 순찰)",
       "color": "#00f2fe",
+      "rra_cert_no": "R-R-DST1-IIR-01",
+      "rra_cert_date": "2026-05-15",
       "ip": "10.200.28.63",
       "sftp": {
         "upper_port": 1002,
@@ -33,22 +37,45 @@
       "tags": [
         "#all",
         "#flagship",
+        "#IIR-01",
         "#datacenter",
-        "#rfid-highspeed",
-        "#dual-thermal",
-        "#diff-drive"
+        "#48U-coverage",
+        "#rfid-highspeed"
       ],
       "kinematics": {
-        "length_m": 0.54,
-        "width_m": 0.44,
+        "length_m": 0.56,
+        "width_m": 0.48,
         "height_m": 1.57,
+        "max_lift_height_m": 2.10,
+        "weight_kg": 113,
         "wheel_base_m": 0.36,
-        "inscribed_radius_m": 0.25,
-        "circumscribed_radius_m": 0.40,
         "laser_tf_xyz": [0.044, 0.0, 0.370],
         "lift_range_m": [0.08, 2.10],
-        "drive_type": "2WD Differential + 4 Casters",
-        "arm_type": "None (Non-contact Dual Vision & High-speed RFID)"
+        "drive_type": "라이다 SLAM 무궤도 주행 (±2cm) · 차동 구동",
+        "arm_type": "비접촉 고속 비전 & RFID 수집기 (2~48U 커버)"
+      },
+      "proposal_specs": {
+        "headline": "IDC 데이터센터 무인 점검 특화 · 최대 48U 랙 전체 높이 정밀 인식",
+        "kpi_cards": [
+          { "label": "무인 연속 운행", "value": "7×24h" },
+          { "label": "랙 점검 커버리지", "value": "2~48U" },
+          { "label": "1회 완충 주행", "value": "≥6h" },
+          { "label": "랙 1대당 점검", "value": "약 60초" }
+        ],
+        "capacity_summary": "본체 56×48×157cm(승강 시 210cm) · 약 113kg · 1회 점검 약 200개 랙 / 800㎡",
+        "basic_functions": ["자동 순찰", "실시간 모니터링", "환경 검측", "음성 인터콤", "화재 예측", "장비 검사"],
+        "optional_items": ["소음 감지", "환경 센서 (H2S · SO2)", "RFID 태그 (액티브 / 패시브)"],
+        "key_strengths": [
+          "듀얼 열화상 카메라(2ea) + 산업용 카메라(2ea)로 2~48U 랙 전체 높이 무사각 정밀 인식",
+          "캐비닛 도어를 열지 않고도 패시브/액티브 RFID 수집기로 랙 1대당 약 60초 고속 자산 실사",
+          "본체 내부 열 에어로졸 소화 패치 2개 기본 탑재 (170℃ 초과 시 자동 소화 개시)"
+        ],
+        "parts_sensors": [
+          "상단부: PTZ 영상 감시 카메라, 마이크-음성 인터콤, 터치 스크린, 리프트 장치(42U~48U)",
+          "중단부: 가시광 카메라, 열화상 카메라(2ea), 산업용 카메라(2ea), 조명등, RFID 수집기",
+          "환경센서: 온습도, 소음, 입자(PM1/2.5/10), 가스(TVOC, H2S, CO2, SO2, 포름알데히드)",
+          "하단 주행부: 네비게이션 라이다, 상태표시 디스플레이, 낙하 방지 센서, 초음파 센서, 충돌방지 스트립"
+        ]
       },
       "map_folder": "flagship",
       "is_master_map": true
@@ -56,11 +83,15 @@
     {
       "id": "pro-01",
       "hostname": "pro.robot.local",
-      "aliases": ["pro", "professional", "pro-v3.5", "mr-i-p2308"],
-      "display_name": "MOSS Professional V3.5",
+      "aliases": ["pro", "professional", "iir-02", "mr-i-p2308"],
+      "display_name": "프로페셔널 에디션 (PROFESSIONAL)",
+      "edition_badge": "IIR-02 · MR-I-P2308",
       "model_type": "profession_4wd",
       "model_code": "MR-I-P2308",
+      "target_site": "데이터센터 · 전기실 (로봇 팔 물리 조작이 필요한 무인 운용 현장)",
       "color": "#a855f7",
+      "rra_cert_no": "R-R-DST1-IIR-02",
+      "rra_cert_date": "2026-07-14",
       "ip": "10.200.28.56",
       "sftp": {
         "upper_port": 1002,
@@ -79,22 +110,45 @@
       "tags": [
         "#all",
         "#professional",
-        "#6dof-arm",
-        "#door-opener",
-        "#4wd-steering",
-        "#hybrid-patrol"
+        "#IIR-02",
+        "#6+2축-듀얼로봇팔",
+        "#도어자동개폐",
+        "#4륜독립현가조향"
       ],
       "kinematics": {
-        "length_m": 0.58,
-        "width_m": 0.54,
+        "length_m": 0.60,
+        "width_m": 0.55,
         "height_m": 1.57,
+        "max_lift_height_m": 2.20,
+        "weight_kg": 135,
         "wheel_base_m": 0.42,
-        "inscribed_radius_m": 0.28,
-        "circumscribed_radius_m": 0.41,
         "laser_tf_xyz": [0.044, 0.0, 0.370],
         "lift_range_m": [0.10, 2.20],
-        "drive_type": "4WD Hub Motors + 4 Steering Servos (Crab Walk)",
-        "arm_type": "6-DOF Main Arm + 2-DOF Sub Arm + Force Gripper"
+        "drive_type": "4륜 독립 현가 조향 (Crab Walk 횡이동 지원)",
+        "arm_type": "6축 메인 암(±0.05mm, 반경 900mm) + 2축 보조 암"
+      },
+      "proposal_specs": {
+        "headline": "6축+2축 듀얼 로봇 팔로 랙 도어를 직접 열고 점검 · 배전실까지 포괄",
+        "kpi_cards": [
+          { "label": "무인 연속 운행", "value": "7×24h" },
+          { "label": "듀얼 로봇 팔", "value": "6+2축" },
+          { "label": "1회 완충 주행", "value": "≥8h" },
+          { "label": "랙 점검 커버리지", "value": "2~42U" }
+        ],
+        "capacity_summary": "본체 60×55×157cm · 약 135kg · 보호등급 IP32 · 도어 개방 점검 약 3분 14초",
+        "basic_functions": ["자동 순찰", "실시간 모니터링", "환경 검측", "음성 인터콤", "원격 제어", "장비 검사", "자산 실사", "로봇 팔 조작", "도어 자동 개폐"],
+        "optional_items": ["부분방전(TEV/AE) 검사", "서버 버튼/차단기 조작", "계기 페이지 넘김"],
+        "key_strengths": [
+          "메인 6축 로봇 팔 — 반복 정밀도 ±0.05mm, 작업 반경 900mm",
+          "보조 2축 로봇 팔 협동으로 랙 도어 5단계(손잡이 식별➔회전➔문 열기➔검사➔문 닫기/잠금) 자율 개폐",
+          "도어를 열고 근접 촬영해 표시등 상태 확인 및 부분방전(TEV/AE) 검사로 배전실까지 단일 장비로 커버"
+        ],
+        "parts_sensors": [
+          "로봇팔/그리퍼부: 6축 메인 로봇 팔, 2축 보조 로봇 팔, 그리퍼·양안 3D 카메라, 가시광·열화상·RFID·보조조명",
+          "상단/몸체부: 음성 인터콤, 리프트 장치, 터치스크린, PTZ 영상 감시 카메라",
+          "환경센서: 입자 감지(PM1, PM2.5, PM10), 가스 감지(TVOC, H2S, CO2, SO2, 포름알데히드)",
+          "하단 주행부: 4륜 독립 현가 조향, 네비게이션 라이다, 초음파 센서, 낙하 방지 센서, 상태 LED/충돌방지 스트립"
+        ]
       },
       "map_folder": "professional",
       "is_master_map": false
@@ -102,11 +156,15 @@
     {
       "id": "power-01",
       "hostname": "power.robot.local",
-      "aliases": ["power", "pwr-01", "power-v3.0", "mr-p-2307"],
-      "display_name": "MOSS Power V3.0",
+      "aliases": ["power", "pwr-01", "iir-03", "mr-p-2307"],
+      "display_name": "파워 에디션 (POWER)",
+      "edition_badge": "IIR-03 · MR-P-2307",
       "model_type": "power_4wd",
       "model_code": "MR-P-2307",
+      "target_site": "고·저압 배전실 전용 (부분방전 검사와 계량기 판독 중심 전력 설비 현장)",
       "color": "#f59e0b",
+      "rra_cert_no": "R-R-DST1-IIR-03",
+      "rra_cert_date": "2026-07-14",
       "ip": "10.200.28.61",
       "sftp": {
         "upper_port": 1002,
@@ -125,22 +183,45 @@
       "tags": [
         "#all",
         "#power",
-        "#substation",
-        "#ptz-25x",
-        "#partial-discharge",
-        "#4wd-steering"
+        "#IIR-03",
+        "#부분방전(TEV/AE)",
+        "#2.3m고압반점검",
+        "#SF6가스누수감지"
       ],
       "kinematics": {
-        "length_m": 0.54,
-        "width_m": 0.44,
+        "length_m": 0.565,
+        "width_m": 0.465,
         "height_m": 1.58,
+        "max_lift_height_m": 2.30,
+        "weight_kg": 110,
         "wheel_base_m": 0.33,
-        "inscribed_radius_m": 0.28,
-        "circumscribed_radius_m": 0.35,
         "laser_tf_xyz": [0.044, 0.0, 0.370],
         "lift_range_m": [0.05, 2.30],
-        "drive_type": "4WD Independent Suspension & Steering",
-        "arm_type": "2-DOF Compact Arm (Partial Discharge Sensor)"
+        "drive_type": "4륜 독립 서스펜션·조향 (등판 각도 13°)",
+        "arm_type": "2축 로봇 팔 (TEV + 초음파 AE 통합 부분방전 검사)"
+      },
+      "proposal_specs": {
+        "headline": "고·저압 배전실 전용 · 부분방전(TEV/AE) 검사와 계량기 판독 특화",
+        "kpi_cards": [
+          { "label": "무인 연속 운행", "value": "7×24h" },
+          { "label": "점검 높이 대응", "value": "2.3m" },
+          { "label": "1회 완충 주행", "value": "≥6h" },
+          { "label": "배전반 1개당 점검", "value": "≤80초" }
+        ],
+        "capacity_summary": "본체 56.5×46.5×158cm · 약 110kg · 1회 최대 300개 배전반 / 약 400㎡",
+        "basic_functions": ["자동 순찰", "실시간 모니터링", "환경 검측", "음성 인터콤", "원격 제어", "장비 검사", "부분 방전 검사", "계량기 식별", "작업 안내"],
+        "optional_items": ["SF6 절연가스 감지", "연기 센서", "비전 기반 액체 누수 감지"],
+        "key_strengths": [
+          "TEV + 초음파(AE) 통합 부분방전 센서 탑재 2축 로봇 팔로 고압 배전반 절연 열화 정밀 진단",
+          "4륜 독립 서스펜션·조향(등판 13°)으로 케이블 트렌치 등 복잡한 배전실 바닥 안정 주행",
+          "승강 2.3m 리프트로 고압반 상단 계기판까지 판독 커버 및 SF6·연기·누수 감지"
+        ],
+        "parts_sensors": [
+          "상단/리프트부: 음성 인터콤, PTZ 영상 감시 카메라, 리프트 장치(2.3m 대응), 가시광·열화상·보조조명",
+          "진단/인터페이스: 터치스크린, 2축 로봇 팔(부분방전 검사 센서 내장)",
+          "환경/전력센서: 온습도, 소음, 연기, 입자(PM2.5/10), 가스(TVOC, CO2, 포름알데히드, SO2, H2S, SF6)",
+          "하단 주행부: 4륜 독립 현가 조향, 네비게이션 라이다, 낙하 방지 센서, 초음파 센서, 상태표시 디스플레이"
+        ]
       },
       "map_folder": "power",
       "is_master_map": false

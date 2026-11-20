@@ -1,31 +1,37 @@
 {
   "master_robot_id": "flag-01",
-  "description": "SE(2) 2D Rigid Transformation parameters aligning each robot's SLAM pbstream/map.pgm coordinate frame into the unified 3D World Frame.",
+  "description": "SE(2) 2D Rigid Transformation computed by OpenCV ICP/Cross-Correlation between Flagship map.pgm and Power map.pgm wall point clouds.",
   "wall_extrusion_height_m": 1.85,
   "transforms": {
     "flag-01": {
       "robot_hostname": "flagship.robot.local",
+      "map_folder": "flagship",
+      "map_origin": [-1.39123, -6.50952, 0.0],
       "dx_m": 0.0,
       "dy_m": 0.0,
       "dtheta_deg": 0.0,
       "scale": 1.0,
-      "note": "Master reference frame (Flagship map.pgm)"
-    },
-    "pro-01": {
-      "robot_hostname": "pro.robot.local",
-      "dx_m": 0.45,
-      "dy_m": -0.30,
-      "dtheta_deg": 12.5,
-      "scale": 1.0,
-      "note": "Professional robot offset & rotation relative to Flagship master frame"
+      "note": "Master reference map (Flagship map.pgm 167x164px, origin [-1.391, -6.509])"
     },
     "power-01": {
       "robot_hostname": "power.robot.local",
-      "dx_m": 1.1258,
-      "dy_m": -0.9836,
-      "dtheta_deg": -8.0,
+      "map_folder": "power",
+      "map_origin": [-2.51703, -5.52593, 0.0],
+      "dx_m": 1.65,
+      "dy_m": -5.875,
+      "dtheta_deg": 90.25,
       "scale": 1.0,
-      "note": "Power robot offset derived from origin diff [-2.517, -5.525] vs [-1.391, -6.509] and LiDAR heading offset"
+      "note": "Power map.pgm (199x425px, origin [-2.517, -5.526]) rotated +90.25° and shifted (+1.65m, -5.875m) to match Flagship walls"
+    },
+    "pro-01": {
+      "robot_hostname": "pro.robot.local",
+      "map_folder": "professional",
+      "map_origin": [-1.39123, -6.50952, 0.0],
+      "dx_m": 0.0,
+      "dy_m": -2.10,
+      "dtheta_deg": 0.0,
+      "scale": 1.0,
+      "note": "Professional robot bay offset in unified virtual space"
     }
   }
 }
