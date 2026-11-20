@@ -62,6 +62,23 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
     },
   ]);
   const [isExecuting, setIsExecuting] = useState<boolean>(false);
+  const [operatorToken, setOperatorToken] = useState<string>(() => {
+    return sessionStorage.getItem("operator_token") || localStorage.getItem("operator_token") || "";
+  });
+  const [operatorUser, setOperatorUser] = useState<any>(() => {
+    const u = sessionStorage.getItem("operator_user") || localStorage.getItem("operator_user");
+    try {
+      return u ? JSON.parse(u) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
+  const [pendingAction, setPendingAction] = useState<{ actionType: string; extraParams: any } | null>(null);
+  const [authId, setAuthId] = useState<string>("super");
+  const [authPw, setAuthPw] = useState<string>("");
+  const [authError, setAuthError] = useState<string>("");
+  const [authLoading, setAuthLoading] = useState<boolean>(false);
 
   const rId = robot.id;
   const robotFleet = fleetData?.fleet?.[rId] || fleetData?.fleet?.["flag-01"] || {};
@@ -91,18 +108,75 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
     setActionLogs((prev) => [{ time: new Date().toLocaleTimeString(), msg, type }, ...prev.slice(0, 15)]);
   };
 
-  const handleRunAction = async (actionType: string, extraParams: any = {}) => {
+  const handleOperatorLogin = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setAuthLoading(true);
+    setAuthError("");
+    try {
+      const res = await fetch("/api/v1/auth/operator_login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ account: authId, password: authPw }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.code !== 0) {
+        throw new Error(data.detail || data.msg || "인증에 실패했습니다.");
+      }
+      setOperatorToken(data.token);
+      setOperatorUser(data.user);
+      sessionStorage.setItem("operator_token", data.token);
+      sessionStorage.setItem("operator_user", JSON.stringify(data.user));
+      setShowAuthModal(false);
+      setAuthPw("");
+      addLog(`✓ 관제 운영자 인증 성공 (${data.user.displayName || data.user.account})`, "success");
+
+      if (pendingAction) {
+        const act = pendingAction;
+        setPendingAction(null);
+        handleRunAction(act.actionType, act.extraParams, data.token);
+      }
+    } catch (err: any) {
+      setAuthError(err.message || "로그인 실패");
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleOperatorLogout = () => {
+    setOperatorToken("");
+    setOperatorUser(null);
+    sessionStorage.removeItem("operator_token");
+    sessionStorage.removeItem("operator_user");
+    localStorage.removeItem("operator_token");
+    localStorage.removeItem("operator_user");
+    addLog("🔒 관제 운영자 로그아웃 (물리 제어 잠금 활성화)", "info");
+  };
+
+  const triggerControlAction = (actionType: string, extraParams: any = {}) => {
+    if (!operatorToken) {
+      setPendingAction({ actionType, extraParams });
+      setAuthError("");
+      setShowAuthModal(true);
+      return;
+    }
+    handleRunAction(actionType, extraParams, operatorToken);
+  };
+
+  const handleRunAction = async (actionType: string, extraParams: any = {}, customToken?: string) => {
+    const tokenToUse = customToken || operatorToken;
     setIsExecuting(true);
     addLog(`Dispatching [${actionType}] to http://${robot.ip}/api/...`, "info");
     try {
       if (onActionExecute) {
-        const res = await onActionExecute(actionType, extraParams);
+        const res = await onActionExecute(actionType, { ...extraParams, token: tokenToUse });
         if (res && res.result) {
           const isSuccess = res.code === 0 && res.result.status === "SUCCESS";
           addLog(`${isSuccess ? "✓" : "⚠️"} ${res.result.message || "Executed"}`, isSuccess ? "success" : "warn");
           if (res.result.details) {
             addLog(`↳ ${res.result.details}`, isSuccess ? "info" : "warn");
           }
+        } else if (res && res.detail) {
+          addLog(`⚠️ 권한 거부: ${res.detail}`, "warn");
         } else {
           addLog(`✓ Action [${actionType}] processed successfully.`, "success");
         }
@@ -110,11 +184,14 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
         // Fallback fetch
         const res = await fetch(`/api/v1/robots/${robot.hostname || robot.id}/oneclick_action`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action_type: actionType, ...extraParams }),
+          headers: {
+            "Content-Type": "application/json",
+            ...(tokenToUse ? { Authorization: `Bearer ${tokenToUse}` } : {}),
+          },
+          body: JSON.stringify({ action_type: actionType, token: tokenToUse, ...extraParams }),
         }).then((r) => r.json());
         const isSuccess = res.code === 0;
-        addLog(`${isSuccess ? "✓" : "⚠️"} ${res.msg || "Executed"}`, isSuccess ? "success" : "warn");
+        addLog(`${isSuccess ? "✓" : "⚠️"} ${res.msg || res.detail || "Executed"}`, isSuccess ? "success" : "warn");
       }
     } catch (e: any) {
       addLog(`⚠️ Operation failed: ${e.message}`, "warn");
@@ -352,7 +429,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
             {/* Quick Emergency Halt Button */}
             <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
               <button
-                onClick={() => handleRunAction("emergency_stop")}
+                onClick={() => triggerControlAction("emergency_stop")}
                 disabled={isExecuting}
                 style={{
                   flex: 1,
@@ -369,7 +446,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                 🛑 긴급 정지
               </button>
               <button
-                onClick={() => handleRunAction("resume_operation")}
+                onClick={() => triggerControlAction("resume_operation")}
                 disabled={isExecuting}
                 style={{
                   flex: 1,
@@ -419,6 +496,91 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                   >
                     <span>⚠️</span>
                     <span>현재 로봇이 <b>OFFLINE (통신 단절 / 점검 대기)</b> 상태입니다. 실시간 데이터 수신이 불가하여 텔레메트리가 N/A로 표시되며, 원격 명령이 실행되지 않습니다.</span>
+                  </div>
+                )}
+
+                {/* Operator Authentication Security Status Banner */}
+                {!operatorToken ? (
+                  <div
+                    style={{
+                      background: isDarkMode ? "rgba(239, 68, 68, 0.12)" : "#fef2f2",
+                      border: isDarkMode ? "1px solid rgba(239, 68, 68, 0.3)" : "1px solid #fecaca",
+                      borderRadius: 12,
+                      padding: "12px 16px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 12,
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span style={{ fontSize: 20 }}>🔒</span>
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 800, color: isDarkMode ? "#fca5a5" : "#991b1b" }}>
+                          로봇 물리 제어 보안 잠금 (Operator Login Required)
+                        </div>
+                        <div style={{ fontSize: 11.5, color: isDarkMode ? "#f87171" : "#b91c1c", marginTop: 2 }}>
+                          자동 순찰, 지정 위치 이동, 충전 도크 복귀는 인가된 관리자만 조작할 수 있습니다.
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => { setAuthError(""); setShowAuthModal(true); }}
+                      style={{
+                        background: "#dc2626",
+                        color: "#ffffff",
+                        border: "none",
+                        borderRadius: 8,
+                        padding: "8px 14px",
+                        fontSize: 12,
+                        fontWeight: 800,
+                        cursor: "pointer",
+                        whiteSpace: "nowrap",
+                        boxShadow: "0 2px 6px rgba(220, 38, 38, 0.25)",
+                      }}
+                    >
+                      🔐 운영자 로그인
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      background: isDarkMode ? "rgba(16, 185, 129, 0.12)" : "#f0fdf4",
+                      border: isDarkMode ? "1px solid rgba(16, 185, 129, 0.3)" : "1px solid #bbf7d0",
+                      borderRadius: 12,
+                      padding: "10px 16px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 12,
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontSize: 18 }}>🔓</span>
+                      <div>
+                        <span style={{ fontSize: 12.5, fontWeight: 800, color: isDarkMode ? "#6ee7b7" : "#166534" }}>
+                          관제 운영자 인증됨
+                        </span>
+                        <span style={{ fontSize: 11.5, color: isDarkMode ? "#a7f3d0" : "#15803d", marginLeft: 6 }}>
+                          ({operatorUser?.displayName || operatorUser?.account || "super"} · 물리 제어 권한 활성화)
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleOperatorLogout}
+                      style={{
+                        background: isDarkMode ? "rgba(255, 255, 255, 0.1)" : "#e2e8f0",
+                        color: isDarkMode ? "#ffffff" : "#475569",
+                        border: "none",
+                        borderRadius: 6,
+                        padding: "5px 10px",
+                        fontSize: 11,
+                        fontWeight: 700,
+                        cursor: "pointer",
+                      }}
+                    >
+                      로그아웃
+                    </button>
                   </div>
                 )}
 
@@ -474,7 +636,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                       <button
                         onClick={() => {
                           const currMission = missions.find((m) => String(m.missionId) === selectedPath);
-                          handleRunAction("start_patrol", {
+                          triggerControlAction("start_patrol", {
                             mission_id: currMission?.missionId,
                             mission_type_id: currMission?.missionTypeId || 1,
                             path_name: currMission?.pathName || currMission?.missionName || selectedPath,
@@ -493,7 +655,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                           whiteSpace: "nowrap",
                         }}
                       >
-                        순찰 개시
+                        {isExecuting ? "순찰 개시 중..." : (operatorToken ? "순찰 개시" : "🔒 순찰 개시 (인증 필요)")}
                       </button>
                     </div>
                   </div>
@@ -542,7 +704,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                       <button
                         onClick={() => {
                           const currPos = positions.find((p) => String(p.robotPositionId) === selectedPosition);
-                          handleRunAction("goto_position", {
+                          triggerControlAction("goto_position", {
                             position_name: currPos?.name || "Selected Point",
                             position_id: currPos?.robotPositionId ? Number(currPos.robotPositionId) : (selectedPosition ? Number(selectedPosition) : undefined),
                           });
@@ -560,7 +722,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                           whiteSpace: "nowrap",
                         }}
                       >
-                        이동 지시
+                        {isExecuting ? "이동 지시 중..." : (operatorToken ? "이동 지시" : "🔒 이동 지시 (인증 필요)")}
                       </button>
                     </div>
                   </div>
@@ -587,7 +749,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                       자체 레이저 SLAM 오차 보정으로 충전 도크에 정밀 도킹하고 충전을 시작합니다.
                     </div>
                     <button
-                      onClick={() => handleRunAction("return_dock")}
+                      onClick={() => triggerControlAction("return_dock")}
                       disabled={isExecuting}
                       style={{
                         width: "100%",
@@ -601,7 +763,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                         cursor: "pointer",
                       }}
                     >
-                      충전 도크 복귀 실행
+                      {isExecuting ? "도킹 실행 중..." : (operatorToken ? "충전 도크 복귀 실행" : "🔒 충전 도크 복귀 실행 (인증 필요)")}
                     </button>
                   </div>
 
@@ -1041,6 +1203,182 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
           </div>
         </div>
       </div>
+
+      {/* Operator Authentication Modal Dialog */}
+      {showAuthModal && (
+        <div
+          onClick={() => { setShowAuthModal(false); setPendingAction(null); }}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(15, 23, 42, 0.65)",
+            backdropFilter: "blur(6px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 100000,
+            padding: 16,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: 400,
+              maxWidth: "92vw",
+              background: isDarkMode ? "#0f172a" : "#ffffff",
+              border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.15)" : "1px solid #e2e8f0",
+              borderRadius: 16,
+              padding: 24,
+              boxShadow: "0 20px 40px rgba(0, 0, 0, 0.35)",
+              display: "flex",
+              flexDirection: "column",
+              gap: 16,
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 10,
+                  background: isDarkMode ? "rgba(220, 38, 38, 0.2)" : "#fee2e2",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 20,
+                }}
+              >
+                🛡️
+              </div>
+              <div>
+                <div style={{ fontSize: 16, fontWeight: 800, color: isDarkMode ? "#ffffff" : "#0f172a" }}>
+                  관제 운영자 인증 (Operator Auth)
+                </div>
+                <div style={{ fontSize: 11.5, color: isDarkMode ? "#94a3b8" : "#64748b" }}>
+                  로봇 물리 주행 및 하드웨어 제어 권한 획득
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
+                fontSize: 12,
+                color: isDarkMode ? "#cbd5e1" : "#475569",
+                lineHeight: 1.5,
+                background: isDarkMode ? "rgba(255, 255, 255, 0.04)" : "#f8fafc",
+                border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
+                padding: "10px 12px",
+                borderRadius: 8,
+              }}
+            >
+              ⚠️ <b>물리 안전 보안</b>: 자동 순찰 개시, 지정 위치 이동, 충전 도크 복귀 등 로봇 주행 제어는 인가된 관리자만 조작할 수 있습니다.
+            </div>
+
+            <form onSubmit={handleOperatorLogin} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: isDarkMode ? "#cbd5e1" : "#334155", marginBottom: 4 }}>
+                  운영자 아이디 (Account)
+                </label>
+                <input
+                  type="text"
+                  value={authId}
+                  onChange={(e) => setAuthId(e.target.value)}
+                  placeholder="super 또는 admin"
+                  required
+                  style={{
+                    width: "100%",
+                    padding: "9px 12px",
+                    borderRadius: 8,
+                    border: isDarkMode ? "1px solid #334155" : "1px solid #cbd5e1",
+                    background: isDarkMode ? "#020617" : "#ffffff",
+                    color: isDarkMode ? "#ffffff" : "#0f172a",
+                    fontSize: 13,
+                    boxSizing: "border-box",
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: isDarkMode ? "#cbd5e1" : "#334155", marginBottom: 4 }}>
+                  비밀번호 (Password)
+                </label>
+                <input
+                  type="password"
+                  value={authPw}
+                  onChange={(e) => setAuthPw(e.target.value)}
+                  placeholder="비밀번호 입력"
+                  autoFocus
+                  required
+                  style={{
+                    width: "100%",
+                    padding: "9px 12px",
+                    borderRadius: 8,
+                    border: isDarkMode ? "1px solid #334155" : "1px solid #cbd5e1",
+                    background: isDarkMode ? "#020617" : "#ffffff",
+                    color: isDarkMode ? "#ffffff" : "#0f172a",
+                    fontSize: 13,
+                    boxSizing: "border-box",
+                  }}
+                />
+              </div>
+
+              {authError && (
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: "#ef4444",
+                    fontWeight: 700,
+                    background: isDarkMode ? "rgba(239, 68, 68, 0.15)" : "#fee2e2",
+                    padding: "7px 10px",
+                    borderRadius: 6,
+                    border: "1px solid rgba(239, 68, 68, 0.3)",
+                  }}
+                >
+                  ⚠️ {authError}
+                </div>
+              )}
+
+              <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+                <button
+                  type="button"
+                  onClick={() => { setShowAuthModal(false); setPendingAction(null); }}
+                  style={{
+                    flex: 1,
+                    padding: "10px 0",
+                    borderRadius: 8,
+                    border: isDarkMode ? "1px solid #334155" : "1px solid #cbd5e1",
+                    background: "transparent",
+                    color: isDarkMode ? "#94a3b8" : "#64748b",
+                    fontWeight: 700,
+                    fontSize: 13,
+                    cursor: "pointer",
+                  }}
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  disabled={authLoading}
+                  style={{
+                    flex: 2,
+                    padding: "10px 0",
+                    borderRadius: 8,
+                    border: "none",
+                    background: "#3b82f6",
+                    color: "#ffffff",
+                    fontWeight: 800,
+                    fontSize: 13,
+                    cursor: "pointer",
+                    boxShadow: "0 2px 8px rgba(59, 130, 246, 0.35)",
+                  }}
+                >
+                  {authLoading ? "인증 확인 중..." : "인증 및 권한 획득"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

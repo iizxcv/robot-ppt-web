@@ -47,10 +47,15 @@ export const App: React.FC = () => {
 
   const handleExecuteAction = async (actionType: string, params: any) => {
     if (!liveOpRobot) return null;
+    const token = params?.token || sessionStorage.getItem("operator_token") || localStorage.getItem("operator_token") || "";
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
     const res = await fetch(`/api/v1/robots/${liveOpRobot.hostname || liveOpRobot.id}/oneclick_action`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action_type: actionType, ...params }),
+      headers,
+      body: JSON.stringify({ action_type: actionType, token, ...params }),
     }).then((r) => r.json());
     fetchInitialData();
     return res;

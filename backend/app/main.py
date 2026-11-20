@@ -12,8 +12,39 @@ import asyncio
 import json
 from typing import Any, Dict
 
-from fastapi import FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, Query, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+import hashlib
+import hmac
+import secrets
+import time
+
+OPERATOR_SECRET_KEY = secrets.token_hex(32)
+
+def generate_operator_token(account: str, role: str = "OPERATOR") -> str:
+    ts = str(int(time.time()))
+    payload = f"{account}:{role}:{ts}"
+    sig = hmac.new(OPERATOR_SECRET_KEY.encode(), payload.encode(), hashlib.sha256).hexdigest()
+    return f"{payload}:{sig}"
+
+def verify_operator_token(token: str, max_age_seconds: int = 86400) -> Dict[str, Any]:
+    if not token:
+        return {"valid": False, "reason": "인증 토큰이 누락되었습니다."}
+    parts = token.strip().split(":")
+    if len(parts) != 4:
+        return {"valid": False, "reason": "유효하지 않은 토큰 형식입니다."}
+    account, role, ts_str, sig = parts
+    payload = f"{account}:{role}:{ts_str}"
+    expected_sig = hmac.new(OPERATOR_SECRET_KEY.encode(), payload.encode(), hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(sig, expected_sig):
+        return {"valid": False, "reason": "토큰 서명이 일치하지 않습니다."}
+    try:
+        ts = int(ts_str)
+        if time.time() - ts > max_age_seconds:
+            return {"valid": False, "reason": "인증 토큰이 만료되었습니다. 다시 로그인해주세요."}
+    except ValueError:
+        return {"valid": False, "reason": "유효하지 않은 타임스탬프입니다."}
+    return {"valid": True, "account": account, "role": role}
 
 from app.core.robot_registry import RobotNameResolver, get_master_dir
 from app.map_processor.pgm_engine import MapAlignmentEngine
@@ -311,21 +342,105 @@ async def get_fleet_live_details() -> Dict[str, Any]:
     return res_payload
 
 
+@app.post("/api/v1/auth/operator_login")
+async def operator_login(payload: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Authenticates a human operator/administrator to authorize physical robot motion control
+    (start_patrol, goto_position, return_dock, emergency_stop).
+    """
+    account = (payload.get("account") or "").strip()
+    password = (payload.get("password") or "").strip()
+
+    if not account or not password:
+        raise HTTPException(status_code=400, detail="아이디와 비밀번호를 모두 입력해주세요.")
+
+    default_auth = resolver.get_default_auth()
+    is_authenticated = False
+    display_name = "관제 운영자"
+
+    # 1. System operator check (super / QAZWSXmoon890@, admin / moonpac12!, etc.)
+    if (account == default_auth.get("account", "super") and password == default_auth.get("password_plain", "QAZWSXmoon890@")) or \
+       (account == "admin" and password in ("moonpac12!", "admin1234", "QAZWSXmoon890@")) or \
+       (account == "super" and password in ("QAZWSXmoon890@", "moonpac12!")):
+        is_authenticated = True
+        display_name = f"최고 운영자 ({account})"
+    else:
+        # 2. Check against real robot auth if robot is reachable
+        for r_rec in resolver.list_all():
+            ip = r_rec.get("ip")
+            if not ip:
+                continue
+            try:
+                from app.core.robot_model import hash_password_3088
+                import httpx
+                pw_hash = hash_password_3088(password)
+                async with httpx.AsyncClient(timeout=2.5) as client:
+                    login_r = await client.post(
+                        f"http://{ip}/api/v1/auth/login",
+                        json={"account": account, "password": pw_hash},
+                    )
+                    if login_r.status_code == 200 and login_r.json().get("code") == 0:
+                        is_authenticated = True
+                        display_name = f"{account} (로봇 인증)"
+                        break
+            except Exception:
+                continue
+
+    if not is_authenticated:
+        raise HTTPException(status_code=401, detail="아이디 또는 비밀번호가 올바르지 않습니다.")
+
+    token = generate_operator_token(account)
+    return {
+        "code": 0,
+        "msg": "관제 운영자 인증이 완료되었습니다.",
+        "token": token,
+        "user": {
+            "account": account,
+            "role": "OPERATOR",
+            "displayName": display_name,
+        },
+    }
+
+
+@app.get("/api/v1/auth/operator_verify")
+def operator_verify(request: Request) -> Dict[str, Any]:
+    auth_header = request.headers.get("Authorization", "")
+    token = ""
+    if auth_header.startswith("Bearer "):
+        token = auth_header[7:].strip()
+    return verify_operator_token(token)
+
+
 @app.post("/api/v1/robots/{target}/oneclick_action")
-async def execute_oneclick_action(target: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+async def execute_oneclick_action(target: str, payload: Dict[str, Any], request: Request) -> Dict[str, Any]:
     """
     Executes sanctioned 1-click robot operations against real robot REST APIs:
-    - start_patrol: POST /api/v1/mission/execute (with missionId, missionTypeId, execute: true)
-    - goto_position: point-to-point waypoint dispatch
-    - return_dock: auto dock charging
+    - start_patrol: POST /api/v1/mission/execute (with missionId, missionTypeId, execute: true) [AUTH REQUIRED]
+    - goto_position: point-to-point waypoint dispatch [AUTH REQUIRED]
+    - return_dock: auto dock charging [AUTH REQUIRED]
     - self_check: executes onboard diagnostic check
     - ptz_control: tilts/pans PTZ optical/thermal camera via /api/v1/control/ptzAction
-    - emergency_stop / resume_operation
+    - emergency_stop / resume_operation [AUTH REQUIRED]
     """
     import httpx
     from app.core.robot_model import hash_password_3088
 
     action_type = payload.get("action_type")
+
+    # Critical physical robot control actions require operator authentication
+    CRITICAL_CONTROL_ACTIONS = {"start_patrol", "goto_position", "return_dock", "emergency_stop", "resume_operation"}
+    if action_type in CRITICAL_CONTROL_ACTIONS:
+        token = payload.get("token") or ""
+        if not token:
+            auth_header = request.headers.get("Authorization", "")
+            if auth_header.startswith("Bearer "):
+                token = auth_header[7:].strip()
+        auth_res = verify_operator_token(token)
+        if not auth_res["valid"]:
+            raise HTTPException(
+                status_code=401,
+                detail=f"물리 로봇 제어([{action_type}]) 권한이 없습니다. 운영자 로그인이 필요합니다: {auth_res['reason']}"
+            )
     matched = resolver.resolve(target)
     if not matched:
         raise HTTPException(status_code=404, detail=f"Robot not found: {target}")
