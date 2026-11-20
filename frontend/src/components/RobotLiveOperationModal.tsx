@@ -278,7 +278,6 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
           <div
             style={{
               padding: "20px 18px",
-              borderRight: "1px solid rgba(59, 130, 246, 0.2)",
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
@@ -293,7 +292,6 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                   height: 220,
                   borderRadius: 14,
                   overflow: "hidden",
-                  border: "1px solid rgba(59, 130, 246, 0.3)",
                   background: isDarkMode ? "#030712" : "#ffffff",
                   border: isDarkMode ? "1px solid rgba(59, 130, 246, 0.3)" : "1px solid #e2e8f0",
                   display: "flex",
