@@ -11,6 +11,7 @@ services:
       - .env
     volumes:
       # 1:1 Host Master Directory Bind Mounts (Zero Data Loss on Container Restart)
+      - ./backend/app:/app/app
       - ./docker_master/config:/app/master/config
       - ./docker_master/data:/app/master/data
       - ./docker_master/logs:/app/master/logs

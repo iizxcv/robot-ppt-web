@@ -5,3 +5,5 @@ aiortc==1.16.0
 av==18.1.0
 pillow==10.4.0
 websockets==13.1
+opencv-python-headless==5.1.0.95
+numpy>=2.0.0

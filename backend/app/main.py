@@ -428,7 +428,7 @@ async def execute_oneclick_action(target: str, payload: Dict[str, Any], request:
     action_type = payload.get("action_type")
 
     # Critical physical robot control actions require operator authentication
-    CRITICAL_CONTROL_ACTIONS = {"start_patrol", "goto_position", "return_dock", "emergency_stop", "resume_operation"}
+    CRITICAL_CONTROL_ACTIONS = {"start_patrol", "goto_position", "return_dock", "emergency_stop", "resume_operation", "ptz_control"}
     if action_type in CRITICAL_CONTROL_ACTIONS:
         token = payload.get("token") or ""
         if not token:

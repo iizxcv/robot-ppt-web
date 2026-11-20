@@ -208,7 +208,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
     setPtzPan(newPan);
     setPtzTilt(newTilt);
     setPtzZoom(newZoom);
-    handleRunAction("ptz_control", { pan: newPan, tilt: newTilt, zoom: newZoom });
+    triggerControlAction("ptz_control", { pan: newPan, tilt: newTilt, zoom: newZoom });
   };
 
   const isPower = robot.id.includes("pwr") || robot.id.includes("power");
@@ -645,7 +645,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                         }}
                         disabled={isExecuting}
                         style={{
-                          background: "#3b82f6",
+                          background: !operatorToken ? (isDarkMode ? "#334155" : "#64748b") : "#3b82f6",
                           color: "#fff",
                           border: "none",
                           borderRadius: 8,
@@ -656,7 +656,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                           whiteSpace: "nowrap",
                         }}
                       >
-                        {isExecuting ? "순찰 개시 중..." : (operatorToken ? "순찰 개시" : "🔒 순찰 개시 (인증 필요)")}
+                        {isExecuting ? "순찰 개시 중..." : (operatorToken ? "순찰 개시" : "🔒 순찰 개시 (로그인 필요)")}
                       </button>
                     </div>
                   </div>
@@ -712,7 +712,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                         }}
                         disabled={isExecuting}
                         style={{
-                          background: "#a855f7",
+                          background: !operatorToken ? (isDarkMode ? "#334155" : "#64748b") : "#a855f7",
                           color: "#fff",
                           border: "none",
                           borderRadius: 8,
@@ -723,7 +723,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                           whiteSpace: "nowrap",
                         }}
                       >
-                        {isExecuting ? "이동 지시 중..." : (operatorToken ? "이동 지시" : "🔒 이동 지시 (인증 필요)")}
+                        {isExecuting ? "이동 지시 중..." : (operatorToken ? "이동 지시" : "🔒 이동 지시 (로그인 필요)")}
                       </button>
                     </div>
                   </div>
@@ -754,7 +754,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                       disabled={isExecuting}
                       style={{
                         width: "100%",
-                        background: "#059669",
+                        background: !operatorToken ? (isDarkMode ? "#334155" : "#64748b") : "#059669",
                         color: "#fff",
                         border: "none",
                         borderRadius: 8,
@@ -764,7 +764,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                         cursor: "pointer",
                       }}
                     >
-                      {isExecuting ? "도킹 실행 중..." : (operatorToken ? "충전 도크 복귀 실행" : "🔒 충전 도크 복귀 실행 (인증 필요)")}
+                      {isExecuting ? "도킹 실행 중..." : (operatorToken ? "충전 도크 복귀 실행" : "🔒 충전 도크 복귀 실행 (로그인 필요)")}
                     </button>
                   </div>
 
@@ -921,18 +921,23 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                       boxShadow: "0 0 25px rgba(59, 130, 246, 0.15) inset",
                     }}
                   >
-                    <iframe
+                    <img
                       key={`${robotIp}-${currStream.streamName}`}
-                      src={liveStreamPlayerUrl}
-                      title={`Live Stream - ${currStream.label}`}
+                      src={`/videoStream/live/${currStream.streamName}`}
+                      alt={`Live Stream - ${currStream.label}`}
                       style={{
                         width: "100%",
                         height: "100%",
-                        border: "none",
+                        objectFit: "contain",
                         background: "#000",
                         display: "block",
                       }}
-                      allow="autoplay; fullscreen"
+                      onError={(e) => {
+                        const target = e.currentTarget;
+                        setTimeout(() => {
+                          target.src = `/videoStream/live/${currStream.streamName}?t=${Date.now()}`;
+                        }, 2000);
+                      }}
                     />
 
                     {/* Live OSD Overlay - Top Left */}
@@ -962,7 +967,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
 
                     {/* Top Right Action - Popout / Fullscreen Stream */}
                     <a
-                      href={liveStreamPlayerUrl}
+                      href={`/videoStream/stream/player/${currStream.streamName}/`}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
@@ -1006,7 +1011,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                         pointerEvents: "none",
                       }}
                     >
-                      Pipeline: <code>/videoStream/.../{currStream.streamName}/ (Port 8080 Stream)</code>
+                      Pipeline: <code>/videoStream/live/{currStream.streamName} (Port 8080 Direct Stream)</code>
                     </div>
 
                     {/* Bottom Right PTZ Coordinate Overlay */}
@@ -1044,8 +1049,13 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                       justifyContent: "space-between",
                     }}
                   >
-                    <div style={{ fontSize: 12, fontWeight: 800, color: "#ffffff", textAlign: "center" }}>
-                      🎮 PTZ 원격 조작 패널
+                    <div style={{ fontSize: 12, fontWeight: 800, color: "#ffffff", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                      <span>🎮 PTZ 원격 조작 패널</span>
+                      {!operatorToken && (
+                        <span style={{ fontSize: 10, background: "rgba(239, 68, 68, 0.2)", border: "1px solid #ef4444", color: "#f87171", padding: "1px 6px", borderRadius: 4 }}>
+                          🔒 로그인 필요
+                        </span>
+                      )}
                     </div>
 
                     {/* D-Pad Buttons */}
