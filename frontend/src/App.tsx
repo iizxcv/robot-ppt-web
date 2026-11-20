@@ -456,7 +456,6 @@ export const App: React.FC = () => {
               >
                 {currentSlide.nav_label || `SLIDE ${currentSlide.number}`}
               </span>
-              <span style={{ fontSize: 13, color: "#a1a1aa", fontWeight: 600 }}>{currentSlide.subtitle}</span>
             </div>
 
             <div style={{ display: "flex", alignItems: "center", gap: 14 }}>

@@ -1,84 +1,83 @@
 {
-  "deck_title": "SR ROBOTICS — 지능형 인프라 AI 순찰 로봇 솔루션 제안서",
-  "slides": [
-    {
-      "id": "slide-01",
-      "number": "01",
-      "nav_label": "PART 01 · 기업 소개 & 비전",
-      "title": "IT 인프라 구축부터 AI 순찰 로봇까지 지능형 인프라 솔루션",
-      "subtitle": "SR ROBOTICS COMPANY PROFILE · SMART · RELIABLE · INNOVATIVE",
-      "focus_mode": "company_overview",
-      "highlights": [
-        "2023년 설립된 SR ROBOTICS는 자체 AI 스마트 순찰 로봇을 보유하고 데이터센터 및 고·저압 배전실 솔루션을 제공합니다.",
-        "싱가포르 본사·중국 지사에서 2010년부터 21년간 전문 역량 축적, SK하이닉스·삼성SDI·신한은행 등 100건+ 성공 사례 보유",
-        "MISSION: 로봇으로 기업 인프라 운영의 효율성과 안전의 새로운 기준을 재정의합니다."
-      ]
-    },
-    {
-      "id": "slide-02",
-      "number": "02",
-      "nav_label": "PART 02 · 스마트 순찰 로봇 3종 라인업",
-      "title": "스마트 순찰 로봇 3종 라인업",
-      "subtitle": "3D 인터랙티브 공간 뷰어 및 표준 REST API 기반 SI 솔루션 확장 모델 (각 로봇 클릭 시 상세 사양·부품도·실시간 연동 패킷 확인)",
-      "focus_mode": "products_3d_interactive",
-      "highlights": [
-        "공통 기본 기능: 자동 순찰 · 실시간 모니터링 · 환경 검측 · 원격 제어 · 음성 인터콤 · 장비 검사 · 안전 관리 · 화재 감시",
-        "3종 공통 강점: 7×24시간 무인 운용 + 다차원 정밀 모니터링(AI 비전·RFID·도어개폐) + 모듈/센서 커스터마이징",
-        "SI 솔루션 확장: 표준 REST API / WebSocket 기반 고객사 커스텀 관제 및 중앙 FMS/ERP 즉각 연동 지원",
-        "국립전파연구원(RRA) 방송통신기자재 적합등록 KC 인증 완료 (IIR-01 / IIR-02 / IIR-03)"
-      ]
-    },
-    {
-      "id": "slide-03",
-      "number": "03",
-      "nav_label": "PART 03 · 4가지 핵심 기술",
-      "title": "4가지 핵심 기술",
-      "subtitle": "01 SLAM 내비게이션 · 02 6+2축 로봇 팔 · 03 표시등 비전 인식 · 04 능동/수동형 RFID",
-      "focus_mode": "core_tech_odometry",
-      "highlights": [
-        "01 SLAM 내비게이션: map.yaml 원점 + 부팅 시 오도메트리(odom) 및 센서 오차 실시간 보정으로 ±2cm 정밀 위치 추정",
-        "02 로봇 팔 복합 작업 (Pro): 6축 메인 + 2축 보조 암 협동으로 캐비닛 도어 개폐, 서버 버튼·차단기 조작",
-        "03 표시등 비전 인식 & 04 RFID 인식: 색상/점멸 빈도 판독 및 도어 폐쇄 상태 금속 메쉬 간섭 극복 무접촉 재고 실사"
-      ]
-    },
-    {
-      "id": "slide-04",
-      "number": "04",
-      "nav_label": "PLATFORM · REST API 연동 지원",
-      "title": "REST API 기반 연동 지원 (아래 자료들은 API로 불러온 data를 시각화 & 문자화 한 데모입니다)",
-      "subtitle": "실제 로봇 IP(`10.200.28.63`, `10.200.28.61`)의 Webserver Bearer 토큰 인증 및 실시간 오도메트리 수신 데이터",
-      "focus_mode": "live_platform_websocket",
-      "highlights": [
-        "가상 데모가 아닌 실제 로봇의 WebSocket 및 Redis 상태 버스에서 올라오는 실시간 좌표·배터리·리프트·센서 데이터를 직결 관제",
-        "다중 로봇 관리 · 다중 영상 동시 모니터링 · 순찰/알람 데이터 즉시 조회 · 보고서 자동 생성 및 타 플랫폼(CMDB) API 연동",
-        "SHA-512 3088라운드 보안 인증(/api/v1/auth/login) 및 설비 순찰점(/api/v1/position/list) 실시간 동기화"
-      ]
-    },
-    {
-      "id": "slide-05",
-      "number": "05",
-      "nav_label": "PART 04 · 도입 효과 & 주요 레퍼런스",
-      "title": "수동 운영 대비 도입 효과 & 글로벌 핵심 레퍼런스",
-      "subtitle": "SK하이닉스 · 삼성SDI · 남방항공 · 신한은행 · 오리온 · 화홍반도체",
-      "focus_mode": "roi_and_cases",
-      "highlights": [
-        "수동 대비 압도적 ROI: 순찰 효율 300% ↑ (일 2회➔6회), 평균 장애 발견 시간 98.7% 단축 (2시간➔5~15분), 보고서 통계 100% 자동화",
-        "대표 로봇 도입 사례: SK하이닉스(로봇 3대·900개 랙·3,000대 장비 자산실사), 삼성SDI(서버실 순찰), 남방항공(로봇 7대·930개 랙·72세트 도어 연동)",
-        "7×24H 유지보수 & SI: 서버·스토리지·네트워크·DB 전 계층 지원 (DELL, IBM, HUAWEI, VMware, NetApp, CISCO 핵심 파트너십)"
-      ]
-    },
-    {
-      "id": "slide-06",
-      "number": "06",
-      "nav_label": "PART 05 · 실시간 관제 & 원클릭 제어",
-      "title": "실환경 로봇 카메라 소켓 · 센서 텔레메트리 & 원클릭 작업 제어",
-      "subtitle": "LIVE ROBOT TELEMETRY · WEBSOCKET CAMERA · ASSET BINDING · 1-CLICK TASK DISPATCH",
-      "focus_mode": "live_control_oneclick",
-      "highlights": [
-        "실시간 카메라 & 웹소켓 스트림: ws://<IP>/websocket/, ws://<IP>/webSocket ROS 브릿지, MediaMTX WebRTC 영상 직결",
-        "실시간 센서 & 자산 현황: 온습도, 라이다, 열화상, 초음파, 리프터 승강 및 6대 캐비닛(JM-RACK-1-1~3) 자산 바인딩",
-        "REST API 기반 원클릭 작업: 자동 순찰(Welcome, RFID-TEST, JM-Task1, TestRun), 지정 위치 점검, 충전 도크 복귀, 원격 자가진단"
-      ]
-    }
-  ]
+    "deck_title": "SR ROBOTICS — 지능형 인프라 AI 순찰 로봇 솔루션 제안서",
+    "slides": [{
+            "id": "slide-01",
+            "number": "01",
+            "nav_label": "PART 01 · 기업 소개 & 비전",
+            "title": "IT 인프라 구축부터 AI 순찰 로봇까지 지능형 인프라 솔루션",
+            "subtitle": "SR ROBOTICS COMPANY PROFILE · SMART · RELIABLE · INNOVATIVE",
+            "focus_mode": "company_overview",
+            "highlights": [
+                "2023년 설립된 SR ROBOTICS는 자체 AI 스마트 순찰 로봇을 보유하고 데이터센터 및 고·저압 배전실 솔루션을 제공합니다.",
+                "싱가포르 본사·중국 지사에서 2010년부터 21년간 전문 역량 축적, SK하이닉스·삼성SDI·신한은행 등 100건+ 성공 사례 보유",
+                "MISSION: 로봇으로 기업 인프라 운영의 효율성과 안전의 새로운 기준을 재정의합니다."
+            ]
+        },
+        {
+            "id": "slide-02",
+            "number": "02",
+            "nav_label": "PART 02 · 스마트 순찰 로봇 3종 라인업",
+            "title": "스마트 순찰 로봇 3종 라인업",
+            "subtitle": "3D 인터랙티브 공간 뷰어 및 표준 REST API 기반 SI 솔루션 확장 모델 (각 로봇 클릭 시 상세 사양·부품도·실시간 연동 패킷 확인)",
+            "focus_mode": "products_3d_interactive",
+            "highlights": [
+                "공통 기본 기능: 자동 순찰 · 실시간 모니터링 · 환경 검측 · 원격 제어 · 음성 인터콤 · 장비 검사 · 안전 관리 · 화재 감시",
+                "3종 공통 강점: 7×24시간 무인 운용 + 다차원 정밀 모니터링(AI 비전·RFID·도어개폐) + 모듈/센서 커스터마이징",
+                "SI 솔루션 확장: 표준 REST API / WebSocket 기반 고객사 커스텀 관제 및 중앙 FMS/ERP 즉각 연동 지원",
+                "국립전파연구원(RRA) 방송통신기자재 적합등록 KC 인증 완료 (IIR-01 / IIR-02 / IIR-03)"
+            ]
+        },
+        {
+            "id": "slide-03",
+            "number": "03",
+            "nav_label": "PART 03 · 4가지 핵심 기술",
+            "title": "4가지 핵심 기술",
+            "subtitle": "01 SLAM 내비게이션 · 02 6+2축 로봇 팔 · 03 표시등 비전 인식 · 04 능동/수동형 RFID",
+            "focus_mode": "core_tech_odometry",
+            "highlights": [
+                "01 SLAM 내비게이션: map.yaml 원점 + 부팅 시 오도메트리(odom) 및 센서 오차 실시간 보정으로 ±2cm 정밀 위치 추정",
+                "02 로봇 팔 복합 작업 (Pro): 6축 메인 + 2축 보조 암 협동으로 캐비닛 도어 개폐, 서버 버튼·차단기 조작",
+                "03 표시등 비전 인식 & 04 RFID 인식: 색상/점멸 빈도 판독 및 도어 폐쇄 상태 금속 메쉬 간섭 극복 무접촉 재고 실사"
+            ]
+        },
+        {
+            "id": "slide-04",
+            "number": "04",
+            "nav_label": "PLATFORM · REST API 연동 지원",
+            "title": "REST API 기반 연동 지원",
+            "subtitle": "실제 로봇 IP(`10.200.28.63`, `10.200.28.61`)의 Webserver Bearer 토큰 인증 및 실시간 오도메트리 수신 데이터\n (아래 자료들은 API로 불러온 data를 시각화 & 문자화 한 데모입니다)",
+            "focus_mode": "live_platform_websocket",
+            "highlights": [
+                "가상 데모가 아닌 실제 로봇의 WebSocket 및 Redis 상태 버스에서 올라오는 실시간 좌표·배터리·리프트·센서 데이터를 직결 관제",
+                "다중 로봇 관리 · 다중 영상 동시 모니터링 · 순찰/알람 데이터 즉시 조회 · 보고서 자동 생성 및 타 플랫폼(CMDB) API 연동",
+                "SHA-512 3088라운드 보안 인증(/api/v1/auth/login) 및 설비 순찰점(/api/v1/position/list) 실시간 동기화"
+            ]
+        },
+        {
+            "id": "slide-05",
+            "number": "05",
+            "nav_label": "PART 04 · 도입 효과 & 주요 레퍼런스",
+            "title": "수동 운영 대비 도입 효과 & 글로벌 핵심 레퍼런스",
+            "subtitle": "SK하이닉스 · 삼성SDI · 남방항공 · 신한은행 · 오리온 · 화홍반도체",
+            "focus_mode": "roi_and_cases",
+            "highlights": [
+                "수동 대비 압도적 ROI: 순찰 효율 300% ↑ (일 2회➔6회), 평균 장애 발견 시간 98.7% 단축 (2시간➔5~15분), 보고서 통계 100% 자동화",
+                "대표 로봇 도입 사례: SK하이닉스(로봇 3대·900개 랙·3,000대 장비 자산실사), 삼성SDI(서버실 순찰), 남방항공(로봇 7대·930개 랙·72세트 도어 연동)",
+                "7×24H 유지보수 & SI: 서버·스토리지·네트워크·DB 전 계층 지원 (DELL, IBM, HUAWEI, VMware, NetApp, CISCO 핵심 파트너십)"
+            ]
+        },
+        {
+            "id": "slide-06",
+            "number": "06",
+            "nav_label": "PART 05 · 실시간 관제 & 원클릭 제어",
+            "title": "실환경 로봇 카메라 소켓 · 센서 텔레메트리 & 원클릭 작업 제어",
+            "subtitle": "LIVE ROBOT TELEMETRY · WEBSOCKET CAMERA · ASSET BINDING · 1-CLICK TASK DISPATCH",
+            "focus_mode": "live_control_oneclick",
+            "highlights": [
+                "실시간 카메라 & 웹소켓 스트림: ws://<IP>/websocket/, ws://<IP>/webSocket ROS 브릿지, MediaMTX WebRTC 영상 직결",
+                "실시간 센서 & 자산 현황: 온습도, 라이다, 열화상, 초음파, 리프터 승강 및 6대 캐비닛(JM-RACK-1-1~3) 자산 바인딩",
+                "REST API 기반 원클릭 작업: 자동 순찰(Welcome, RFID-TEST, JM-Task1, TestRun), 지정 위치 점검, 충전 도크 복귀, 원격 자가진단"
+            ]
+        }
+    ]
 }
