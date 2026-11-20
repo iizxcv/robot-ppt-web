@@ -558,19 +558,20 @@ export const App: React.FC = () => {
                       <div
                         key={stat.label}
                         style={{
-                          background: "rgba(8, 12, 22, 0.7)",
-                          border: "1px solid rgba(255, 255, 255, 0.08)",
+                          background: isDarkMode ? "rgba(8, 12, 22, 0.7)" : "#ffffff",
+                          border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
                           padding: "14px 14px",
                           borderRadius: 14,
+                          boxShadow: isDarkMode ? "none" : "0 1px 3px rgba(15, 23, 42, 0.04)",
                         }}
                       >
                         <div style={{ fontSize: 28, fontWeight: 900, color: stat.color, letterSpacing: "-0.5px" }}>
                           {stat.num}
                         </div>
-                        <div style={{ fontSize: 12, fontWeight: 800, color: "#ffffff", marginTop: 4 }}>
+                        <div style={{ fontSize: 12, fontWeight: 800, color: isDarkMode ? "#ffffff" : "#0f172a", marginTop: 4 }}>
                           {stat.label}
                         </div>
-                        <div style={{ fontSize: 10.5, color: "#94a3b8", marginTop: 2 }}>{stat.sub}</div>
+                        <div style={{ fontSize: 10.5, color: isDarkMode ? "#94a3b8" : "#475569", marginTop: 2 }}>{stat.sub}</div>
                       </div>
                     ))}
                   </div>
@@ -580,32 +581,36 @@ export const App: React.FC = () => {
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <div
                     style={{
-                      background: "rgba(8, 12, 22, 0.7)",
+                      background: isDarkMode ? "rgba(8, 12, 22, 0.7)" : "#ffffff",
+                      border: isDarkMode ? "none" : "1px solid #e2e8f0",
                       borderLeft: "3.5px solid #00f2fe",
                       padding: "12px 14px",
                       borderRadius: "0 12px 12px 0",
+                      boxShadow: isDarkMode ? "none" : "0 1px 3px rgba(15, 23, 42, 0.04)",
                     }}
                   >
-                    <div style={{ fontSize: 11, fontWeight: 800, color: "#00f2fe", letterSpacing: "0.5px" }}>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: isDarkMode ? "#00f2fe" : "#0284c7", letterSpacing: "0.5px" }}>
                       🎯 MISSION
                     </div>
-                    <div style={{ fontSize: 12, color: "#e2e8f0", marginTop: 4, lineHeight: 1.5, wordBreak: "keep-all" }}>
+                    <div style={{ fontSize: 12, color: isDarkMode ? "#e2e8f0" : "#334155", marginTop: 4, lineHeight: 1.5, wordBreak: "keep-all" }}>
                       로봇으로 기업 인프라의 운영 효율성과 안전의 새로운 기준을 재정의합니다.
                     </div>
                   </div>
 
                   <div
                     style={{
-                      background: "rgba(8, 12, 22, 0.7)",
+                      background: isDarkMode ? "rgba(8, 12, 22, 0.7)" : "#ffffff",
+                      border: isDarkMode ? "none" : "1px solid #e2e8f0",
                       borderLeft: "3.5px solid #3b82f6",
                       padding: "12px 14px",
                       borderRadius: "0 12px 12px 0",
+                      boxShadow: isDarkMode ? "none" : "0 1px 3px rgba(15, 23, 42, 0.04)",
                     }}
                   >
-                    <div style={{ fontSize: 11, fontWeight: 800, color: "#38bdf8", letterSpacing: "0.5px" }}>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: isDarkMode ? "#38bdf8" : "#2563eb", letterSpacing: "0.5px" }}>
                       🔭 VISION
                     </div>
-                    <div style={{ fontSize: 12, color: "#e2e8f0", marginTop: 4, lineHeight: 1.5, wordBreak: "keep-all" }}>
+                    <div style={{ fontSize: 12, color: isDarkMode ? "#e2e8f0" : "#334155", marginTop: 4, lineHeight: 1.5, wordBreak: "keep-all" }}>
                       인프라 운영의 첫 번째 파트너로 성장하여 비즈니스를 더욱 안전하고 신뢰할 수 있게 만듭니다.
                     </div>
                   </div>
@@ -643,24 +648,26 @@ export const App: React.FC = () => {
                       <div
                         key={zone.num}
                         style={{
-                          background: "rgba(8, 12, 22, 0.7)",
+                          background: isDarkMode ? "rgba(8, 12, 22, 0.7)" : "#ffffff",
+                          border: isDarkMode ? "none" : "1px solid #e2e8f0",
                           borderLeft: "3px solid #3b82f6",
                           padding: "8px 12px",
                           borderRadius: "0 8px 8px 0",
                           display: "flex",
                           flexDirection: "column",
                           gap: 2,
+                          boxShadow: isDarkMode ? "none" : "0 1px 3px rgba(15, 23, 42, 0.04)",
                         }}
                       >
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <span style={{ fontSize: 12, fontWeight: 800, color: "#f1f5f9" }}>
+                          <span style={{ fontSize: 12, fontWeight: 800, color: isDarkMode ? "#f1f5f9" : "#0f172a" }}>
                             {zone.num} {zone.name}
                           </span>
-                          <span style={{ fontSize: 10, color: "#38bdf8", fontWeight: 700 }}>
+                          <span style={{ fontSize: 10, color: isDarkMode ? "#38bdf8" : "#0284c7", fontWeight: 700 }}>
                             {zone.models}
                           </span>
                         </div>
-                        <div style={{ fontSize: 11, color: "#94a3b8" }}>{zone.desc}</div>
+                        <div style={{ fontSize: 11, color: isDarkMode ? "#94a3b8" : "#475569" }}>{zone.desc}</div>
                       </div>
                     ))}
                   </div>

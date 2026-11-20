@@ -282,7 +282,8 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
-              background: "rgba(8, 12, 22, 0.65)",
+              background: isDarkMode ? "rgba(8, 12, 22, 0.65)" : "#f8fafc",
+              borderRight: isDarkMode ? "1px solid rgba(59, 130, 246, 0.2)" : "1px solid #e2e8f0",
             }}
           >
             <div>
@@ -293,7 +294,8 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                   borderRadius: 14,
                   overflow: "hidden",
                   border: "1px solid rgba(59, 130, 246, 0.3)",
-                  background: "#030712",
+                  background: isDarkMode ? "#030712" : "#ffffff",
+                  border: isDarkMode ? "1px solid rgba(59, 130, 246, 0.3)" : "1px solid #e2e8f0",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -309,22 +311,22 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
 
               {/* Quick Telemetry Pills */}
               <div style={{ display: "flex", flexDirection: "column", gap: 7, fontSize: 12 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", background: "rgba(15, 23, 42, 0.8)", borderRadius: 8 }}>
-                  <span style={{ color: "#94a3b8" }}>상태 머신 (FSM)</span>
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", background: isDarkMode ? "rgba(15, 23, 42, 0.8)" : "#ffffff", border: isDarkMode ? "none" : "1px solid #e2e8f0", borderRadius: 8 }}>
+                  <span style={{ color: isDarkMode ? "#94a3b8" : "#475569" }}>상태 머신 (FSM)</span>
                   <span style={{ color: "#4ade80", fontWeight: 800 }}>{robot.telemetry?.fsm_state || "READY (STANDBY)"}</span>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", background: "rgba(15, 23, 42, 0.8)", borderRadius: 8 }}>
-                  <span style={{ color: "#94a3b8" }}>현재 위치</span>
-                  <span style={{ color: "#ffffff", fontWeight: 800 }}>{robot.telemetry?.position_name || "충전점 (#68)"}</span>
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", background: isDarkMode ? "rgba(15, 23, 42, 0.8)" : "#ffffff", border: isDarkMode ? "none" : "1px solid #e2e8f0", borderRadius: 8 }}>
+                  <span style={{ color: isDarkMode ? "#94a3b8" : "#475569" }}>현재 위치</span>
+                  <span style={{ color: isDarkMode ? "#ffffff" : "#0f172a", fontWeight: 800 }}>{robot.telemetry?.position_name || "충전점 (#68)"}</span>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", background: "rgba(15, 23, 42, 0.8)", borderRadius: 8 }}>
-                  <span style={{ color: "#94a3b8" }}>배터리 전압</span>
-                  <span style={{ color: "#38bdf8", fontWeight: 800 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", background: isDarkMode ? "rgba(15, 23, 42, 0.8)" : "#ffffff", border: isDarkMode ? "none" : "1px solid #e2e8f0", borderRadius: 8 }}>
+                  <span style={{ color: isDarkMode ? "#94a3b8" : "#475569" }}>배터리 전압</span>
+                  <span style={{ color: isDarkMode ? "#38bdf8" : "#0284c7", fontWeight: 800 }}>
                     {robot.telemetry?.battery_pct ?? 100}% ({robot.telemetry?.voltage_v ?? 28.09}V)
                   </span>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", background: "rgba(15, 23, 42, 0.8)", borderRadius: 8 }}>
-                  <span style={{ color: "#94a3b8" }}>리프트 승강 높이</span>
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", background: isDarkMode ? "rgba(15, 23, 42, 0.8)" : "#ffffff", border: isDarkMode ? "none" : "1px solid #e2e8f0", borderRadius: 8 }}>
+                  <span style={{ color: isDarkMode ? "#94a3b8" : "#475569" }}>리프트 승강 높이</span>
                   <span style={{ color: "#facc15", fontWeight: 800 }}>{robot.telemetry?.lift_height_m ?? 0.17} m</span>
                 </div>
               </div>
@@ -388,14 +390,15 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                   {/* Action 1: Auto Patrol */}
                   <div
                     style={{
-                      background: "rgba(15, 23, 42, 0.8)",
-                      border: "1px solid rgba(59, 130, 246, 0.35)",
+                      background: isDarkMode ? "rgba(15, 23, 42, 0.8)" : "#ffffff",
+                      border: isDarkMode ? "1px solid rgba(59, 130, 246, 0.35)" : "1px solid #bfdbfe",
+                      boxShadow: isDarkMode ? "none" : "0 2px 8px rgba(59, 130, 246, 0.06)",
                       borderRadius: 14,
                       padding: 16,
                     }}
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                      <span style={{ fontSize: 13.5, fontWeight: 800, color: "#ffffff" }}>
+                      <span style={{ fontSize: 13.5, fontWeight: 800, color: isDarkMode ? "#ffffff" : "#0f172a" }}>
                         🚀 자동 순찰 (Auto Patrol)
                       </span>
                       <span style={{ fontSize: 11, color: "#38bdf8", fontWeight: 700 }}>
@@ -411,9 +414,9 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                         onChange={(e) => setSelectedPath(e.target.value)}
                         style={{
                           flex: 1,
-                          background: "#030712",
-                          border: "1px solid rgba(255, 255, 255, 0.15)",
-                          color: "#fff",
+                          background: isDarkMode ? "#030712" : "#ffffff",
+                          border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.15)" : "1px solid #cbd5e1",
+                          color: isDarkMode ? "#ffffff" : "#0f172a",
                           borderRadius: 8,
                           padding: "8px 10px",
                           fontSize: 12,
@@ -461,14 +464,15 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                   {/* Action 2: Go to Position */}
                   <div
                     style={{
-                      background: "rgba(15, 23, 42, 0.8)",
-                      border: "1px solid rgba(168, 85, 247, 0.35)",
+                      background: isDarkMode ? "rgba(15, 23, 42, 0.8)" : "#ffffff",
+                      border: isDarkMode ? "1px solid rgba(168, 85, 247, 0.35)" : "1px solid #e9d5ff",
+                      boxShadow: isDarkMode ? "none" : "0 2px 8px rgba(168, 85, 247, 0.06)",
                       borderRadius: 14,
                       padding: 16,
                     }}
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                      <span style={{ fontSize: 13.5, fontWeight: 800, color: "#ffffff" }}>
+                      <span style={{ fontSize: 13.5, fontWeight: 800, color: isDarkMode ? "#ffffff" : "#0f172a" }}>
                         📍 지정 위치 점검 (Point Inspection)
                       </span>
                       <span style={{ fontSize: 11, color: "#c084fc", fontWeight: 700 }}>
@@ -484,9 +488,9 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                         onChange={(e) => setSelectedPosition(e.target.value)}
                         style={{
                           flex: 1,
-                          background: "#030712",
-                          border: "1px solid rgba(255, 255, 255, 0.15)",
-                          color: "#fff",
+                          background: isDarkMode ? "#030712" : "#ffffff",
+                          border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.15)" : "1px solid #cbd5e1",
+                          color: isDarkMode ? "#ffffff" : "#0f172a",
                           borderRadius: 8,
                           padding: "8px 10px",
                           fontSize: 12,
@@ -527,14 +531,15 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                   {/* Action 3: Auto Dock Return */}
                   <div
                     style={{
-                      background: "rgba(15, 23, 42, 0.8)",
-                      border: "1px solid rgba(16, 185, 129, 0.35)",
+                      background: isDarkMode ? "rgba(15, 23, 42, 0.8)" : "#ffffff",
+                      border: isDarkMode ? "1px solid rgba(16, 185, 129, 0.35)" : "1px solid #bbf7d0",
+                      boxShadow: isDarkMode ? "none" : "0 2px 8px rgba(16, 185, 129, 0.06)",
                       borderRadius: 14,
                       padding: 16,
                     }}
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                      <span style={{ fontSize: 13.5, fontWeight: 800, color: "#ffffff" }}>
+                      <span style={{ fontSize: 13.5, fontWeight: 800, color: isDarkMode ? "#ffffff" : "#0f172a" }}>
                         ⚡ 충전 도크 자동 복귀 (Auto Docking)
                       </span>
                       <span style={{ fontSize: 11, color: "#34d399", fontWeight: 700 }}>
@@ -566,14 +571,15 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                   {/* Action 4: Remote Self-Diagnostic */}
                   <div
                     style={{
-                      background: "rgba(15, 23, 42, 0.8)",
-                      border: "1px solid rgba(245, 158, 11, 0.35)",
+                      background: isDarkMode ? "rgba(15, 23, 42, 0.8)" : "#ffffff",
+                      border: isDarkMode ? "1px solid rgba(245, 158, 11, 0.35)" : "1px solid #fde68a",
+                      boxShadow: isDarkMode ? "none" : "0 2px 8px rgba(245, 158, 11, 0.06)",
                       borderRadius: 14,
                       padding: 16,
                     }}
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                      <span style={{ fontSize: 13.5, fontWeight: 800, color: "#ffffff" }}>
+                      <span style={{ fontSize: 13.5, fontWeight: 800, color: isDarkMode ? "#ffffff" : "#0f172a" }}>
                         🩺 원격 자가진단 (System Self-Check)
                       </span>
                       <span style={{ fontSize: 11, color: "#fbbf24", fontWeight: 700 }}>
@@ -828,8 +834,9 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                   {/* PTZ Remote D-Pad Control */}
                   <div
                     style={{
-                      background: "rgba(15, 23, 42, 0.8)",
-                      border: "1px solid rgba(255, 255, 255, 0.1)",
+                      background: isDarkMode ? "rgba(15, 23, 42, 0.8)" : "#ffffff",
+                      border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid #e2e8f0",
+                      boxShadow: isDarkMode ? "none" : "0 2px 8px rgba(15, 23, 42, 0.04)",
                       borderRadius: 14,
                       padding: 14,
                       display: "flex",
@@ -898,13 +905,13 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                 </div>
 
                 {/* Registered Camera Hardware List */}
-                <div style={{ background: "rgba(15, 23, 42, 0.7)", borderRadius: 12, padding: "10px 14px", border: "1px solid rgba(255, 255, 255, 0.08)" }}>
-                  <div style={{ fontSize: 12, fontWeight: 800, color: "#e2e8f0", marginBottom: 6 }}>
+                <div style={{ background: isDarkMode ? "rgba(15, 23, 42, 0.7)" : "#ffffff", borderRadius: 12, padding: "10px 14px", border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0", boxShadow: isDarkMode ? "none" : "0 2px 8px rgba(15, 23, 42, 0.04)" }}>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: isDarkMode ? "#e2e8f0" : "#0f172a", marginBottom: 6 }}>
                     📡 로봇 내장 카메라 & 센서 디바이스 등록 현황 ({cameras.length}개 디바이스)
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6, fontSize: 11 }}>
                     {cameras.slice(0, 9).map((c, i) => (
-                      <div key={i} style={{ background: "#030712", padding: "6px 8px", borderRadius: 6, border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                      <div key={i} style={{ background: isDarkMode ? "#030712" : "#f8fafc", padding: "6px 8px", borderRadius: 6, border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.05)" : "1px solid #e2e8f0" }}>
                         <span style={{ color: "#38bdf8", fontWeight: 700 }}>{c.name || `Device #${i+1}`}</span>
                         <span style={{ color: "#64748b", marginLeft: 6 }}>
                           {c.address ? `${c.address}:${c.port || 80}` : "내장 버스"}
@@ -941,9 +948,10 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                     <div
                       key={s.label}
                       style={{
-                        background: "rgba(15, 23, 42, 0.8)",
+                        background: isDarkMode ? "rgba(15, 23, 42, 0.8)" : "#ffffff",
+                        border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
                         borderLeft: `4px solid ${s.color}`,
-                        border: "1px solid rgba(255, 255, 255, 0.08)",
+                        boxShadow: isDarkMode ? "none" : "0 1px 3px rgba(15, 23, 42, 0.04)",
                         borderLeftWidth: 4,
                         borderRadius: "0 10px 10px 0",
                         padding: "10px 12px",
@@ -953,16 +961,16 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                         <span style={{ fontSize: 11.5, color: "#94a3b8", fontWeight: 700 }}>{s.label}</span>
                         <span style={{ fontSize: 10.5, color: s.color, fontWeight: 800 }}>{s.status}</span>
                       </div>
-                      <div style={{ fontSize: 15, fontWeight: 900, color: "#ffffff", marginTop: 4 }}>{s.val}</div>
+                      <div style={{ fontSize: 15, fontWeight: 900, color: isDarkMode ? "#ffffff" : "#0f172a", marginTop: 4 }}>{s.val}</div>
                       <div style={{ fontSize: 10.5, color: "#64748b", marginTop: 2 }}>{s.sub}</div>
                     </div>
                   ))}
                 </div>
 
                 {/* Live Asset Cabinets Binding Table */}
-                <div style={{ background: "rgba(15, 23, 42, 0.7)", borderRadius: 12, padding: "12px 16px", border: "1px solid rgba(255, 255, 255, 0.08)" }}>
+                <div style={{ background: isDarkMode ? "rgba(15, 23, 42, 0.7)" : "#ffffff", borderRadius: 12, padding: "12px 16px", border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0", boxShadow: isDarkMode ? "none" : "0 2px 8px rgba(15, 23, 42, 0.04)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                    <span style={{ fontSize: 13, fontWeight: 800, color: "#ffffff" }}>
+                    <span style={{ fontSize: 13, fontWeight: 800, color: isDarkMode ? "#ffffff" : "#0f172a" }}>
                       🗄️ 실시간 바인딩 캐비닛/랙 자산 목록 ({cabinets.length}개 캐비닛)
                     </span>
                     <span style={{ fontSize: 11, color: "#38bdf8" }}>/api/asset/cabinet/list 직결</span>
