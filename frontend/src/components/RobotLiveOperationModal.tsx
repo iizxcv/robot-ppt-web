@@ -868,11 +868,11 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                           fontWeight: 700,
                         }}
                       >
-                        ● MEDIA RELAY ➔ MEDIAMTX (10.200.30.110)
+                        ● HTTP/WS RELAY (PORT 8080 NATIVE)
                       </span>
                     </div>
                     <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 2 }}>
-                      소켓: <code>{robotFleet.ws_url || `ws://${robotIp}/websocket/`}</code> · 미디어 중계: <code>/videoStream/stream/player/{currStream.streamName}/</code>
+                      소켓: <code>{robotFleet.ws_url || `ws://${robotIp}/websocket/`}</code> · 스트림: <code>/videoStream/stream/player/{currStream.streamName}/ (8080 Native)</code>
                     </div>
                   </div>
 
@@ -957,7 +957,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                       }}
                     >
                       <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 8px #22c55e" }} />
-                      REC [LIVE WHEP WebRTC] · {currStream.tag} ({currStream.streamName})
+                      REC [LIVE HTTP 8080] · {currStream.tag} ({currStream.streamName})
                     </div>
 
                     {/* Top Right Action - Popout / Fullscreen Stream */}
@@ -1006,7 +1006,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                         pointerEvents: "none",
                       }}
                     >
-                      Pipeline: <code>/videoStream/.../{currStream.streamName}/ ➔ 10.200.30.110:8889</code>
+                      Pipeline: <code>/videoStream/.../{currStream.streamName}/ (Port 8080 Stream)</code>
                     </div>
 
                     {/* Bottom Right PTZ Coordinate Overlay */}
