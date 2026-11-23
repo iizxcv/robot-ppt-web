@@ -45,4 +45,8 @@ services:
       - RELAY_PORT=8088
     volumes:
       - ./media_relay:/app
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
 

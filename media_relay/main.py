@@ -22,7 +22,7 @@ logger = logging.getLogger("media_relay")
 UPSTREAM_MEDIA_SERVER = os.getenv("UPSTREAM_MEDIA_SERVER", "http://10.200.30.110:8889").rstrip("/")
 logger.info(f"Initialized 8080 Universal Media Relay with Upstream Target: {UPSTREAM_MEDIA_SERVER}")
 
-app = FastAPI(title="SR Robotics 8080 Universal Media Relay Server", version="2.1.0")
+app = FastAPI(title="SR Robotics 8080 Universal Media Relay Server", version="2.2.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -33,7 +33,7 @@ app.add_middleware(
 )
 
 # Global HTTP client
-http_client = httpx.AsyncClient(timeout=30.0)
+http_client = httpx.AsyncClient(timeout=10.0)
 
 
 class CameraStreamSession:
@@ -65,7 +65,7 @@ class CameraStreamSession:
         logger.info(f"[{self.stream_name}] Started WebRTC pull worker (On-Demand)")
 
     async def schedule_idle_check(self, delay: float = 30.0):
-        """If no subscribers remain after delay, stop WebRTC session to save CPU."""
+        """If no subscribers remain after delay, stop WebRTC session to save CPU & sockets."""
         async def _idle_stopper():
             try:
                 await asyncio.sleep(delay)
@@ -96,103 +96,115 @@ class CameraStreamSession:
         logger.info(f"[{self.stream_name}] Stopped WebRTC pull worker")
 
     async def _run_loop(self):
-        """Worker loop that connects and stays connected with automatic reconnect."""
+        """Worker loop that connects and stays connected with automatic reconnect and strict resource cleanup."""
+        retry_delay = 2.0
         while self.is_running:
             try:
                 await self._connect_and_recv()
+                retry_delay = 2.0
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                logger.warning(f"[{self.stream_name}] WebRTC pull error: {e}. Reconnecting in 2s...")
-                await asyncio.sleep(2.0)
+                logger.warning(f"[{self.stream_name}] WebRTC pull error: {e}. Reconnecting in {retry_delay:.1f}s...")
+                await asyncio.sleep(retry_delay)
+                retry_delay = min(30.0, retry_delay * 1.5)
 
     async def _connect_and_recv(self):
         pc = RTCPeerConnection()
         self.pc = pc
-        pc.addTransceiver("video", direction="recvonly")
+        try:
+            pc.addTransceiver("video", direction="recvonly")
 
-        @pc.on("track")
-        def on_track(track):
-            async def track_reader():
-                fps_timer = time.time()
-                fps_frames = 0
-                logger.info(f"[{self.stream_name}] Receiving video track frames from upstream")
-                while self.is_running:
-                    try:
-                        frame = await track.recv()
-                        now = time.time()
+            @pc.on("track")
+            def on_track(track):
+                async def track_reader():
+                    fps_timer = time.time()
+                    fps_frames = 0
+                    logger.info(f"[{self.stream_name}] Receiving video track frames from upstream")
+                    while self.is_running:
+                        try:
+                            frame = await track.recv()
+                            now = time.time()
 
-                        # Frame rate cap: max 20 fps (interval 0.05s) to save CPU and network bandwidth
-                        if now - self.last_encoded_time < 0.048:
-                            continue
-                        self.last_encoded_time = now
+                            # Frame rate cap: max 20 fps (interval 0.05s) to save CPU and network bandwidth
+                            if now - self.last_encoded_time < 0.048:
+                                continue
+                            self.last_encoded_time = now
 
-                        # Fast conversion to numpy BGR array (native PyAV)
-                        arr = frame.to_ndarray(format="bgr24")
-                        h, w = arr.shape[:2]
-                        self.latest_width = w
-                        self.latest_height = h
+                            # Fast conversion to numpy BGR array (native PyAV)
+                            arr = frame.to_ndarray(format="bgr24")
+                            h, w = arr.shape[:2]
+                            self.latest_width = w
+                            self.latest_height = h
 
-                        # Downscale if > 1280 to maintain optimal 720p HD playback over port 8080
-                        if w > 1280:
-                            target_h = int(h * (1280.0 / w))
-                            arr = cv2.resize(arr, (1280, target_h), interpolation=cv2.INTER_LINEAR)
-                        elif w < 320:
-                            # Upscale low-res thermal sensors (160x120) with Nearest Neighbor for crisp pixel viewing
-                            arr = cv2.resize(arr, (640, 480), interpolation=cv2.INTER_NEAREST)
+                            # Downscale if > 1280 to maintain optimal 720p HD playback over port 8080
+                            if w > 1280:
+                                target_h = int(h * (1280.0 / w))
+                                arr = cv2.resize(arr, (1280, target_h), interpolation=cv2.INTER_LINEAR)
+                            elif w < 320:
+                                # Upscale low-res thermal sensors (160x120) with Nearest Neighbor for crisp pixel viewing
+                                arr = cv2.resize(arr, (640, 480), interpolation=cv2.INTER_NEAREST)
 
-                        # SIMD TurboJPEG encoding (Quality 70: excellent clarity, ~40KB per frame, ~1.5ms encode)
-                        _, buf = cv2.imencode('.jpg', arr, [cv2.IMWRITE_JPEG_QUALITY, 70])
-                        jpeg_bytes = buf.tobytes()
-                        self.latest_jpeg = jpeg_bytes
+                            # SIMD TurboJPEG encoding (Quality 70: excellent clarity, ~40KB per frame, ~1.5ms encode)
+                            _, buf = cv2.imencode('.jpg', arr, [cv2.IMWRITE_JPEG_QUALITY, 70])
+                            jpeg_bytes = buf.tobytes()
+                            self.latest_jpeg = jpeg_bytes
 
-                        fps_frames += 1
-                        if now - fps_timer >= 1.0:
-                            self.fps = round(fps_frames / (now - fps_timer), 1)
-                            fps_frames = 0
-                            fps_timer = now
+                            fps_frames += 1
+                            if now - fps_timer >= 1.0:
+                                self.fps = round(fps_frames / (now - fps_timer), 1)
+                                fps_frames = 0
+                                fps_timer = now
 
-                        for q in list(self.subscribers):
-                            if q.full():
+                            for q in list(self.subscribers):
+                                if q.full():
+                                    try:
+                                        q.get_nowait()
+                                    except asyncio.QueueEmpty:
+                                        pass
                                 try:
-                                    q.get_nowait()
-                                except asyncio.QueueEmpty:
+                                    q.put_nowait(jpeg_bytes)
+                                except Exception:
                                     pass
-                            try:
-                                q.put_nowait(jpeg_bytes)
-                            except Exception:
-                                pass
-                    except asyncio.CancelledError:
-                        break
-                    except Exception as e:
-                        logger.warning(f"[{self.stream_name}] track.recv() ended: {e}")
-                        break
-            self.track_task = asyncio.create_task(track_reader())
+                        except asyncio.CancelledError:
+                            break
+                        except Exception as e:
+                            logger.warning(f"[{self.stream_name}] track.recv() ended: {e}")
+                            break
+                self.track_task = asyncio.create_task(track_reader())
 
-        offer = await pc.createOffer()
-        await pc.setLocalDescription(offer)
+            offer = await pc.createOffer()
+            await pc.setLocalDescription(offer)
 
-        whep_url = f"{UPSTREAM_MEDIA_SERVER}/stream/player/{self.stream_name}/whep"
-        resp = await http_client.post(
-            whep_url,
-            headers={"Content-Type": "application/sdp"},
-            content=pc.localDescription.sdp,
-            timeout=5.0
-        )
-        if resp.status_code != 201:
-            raise RuntimeError(f"WHEP upstream returned {resp.status_code}: {resp.text}")
+            whep_url = f"{UPSTREAM_MEDIA_SERVER}/stream/player/{self.stream_name}/whep"
+            resp = await http_client.post(
+                whep_url,
+                headers={"Content-Type": "application/sdp"},
+                content=pc.localDescription.sdp,
+                timeout=5.0
+            )
+            if resp.status_code != 201:
+                raise RuntimeError(f"WHEP upstream returned {resp.status_code}: {resp.text}")
 
-        answer = RTCSessionDescription(sdp=resp.text, type="answer")
-        await pc.setRemoteDescription(answer)
-        logger.info(f"[{self.stream_name}] Connected to upstream WHEP stream (201 Created)")
+            answer = RTCSessionDescription(sdp=resp.text, type="answer")
+            await pc.setRemoteDescription(answer)
+            logger.info(f"[{self.stream_name}] Connected to upstream WHEP stream (201 Created)")
 
-        # Keep session alive while running
-        while self.is_running and pc.connectionState != "closed" and pc.connectionState != "failed":
-            await asyncio.sleep(1.0)
+            # Keep session alive while running
+            while self.is_running and pc.connectionState not in ("closed", "failed"):
+                await asyncio.sleep(1.0)
 
-        if self.track_task:
-            self.track_task.cancel()
-        await pc.close()
+        finally:
+            # Guarantee thorough cleanup of PeerConnection and Track reader
+            if self.track_task:
+                self.track_task.cancel()
+                self.track_task = None
+            try:
+                await pc.close()
+            except Exception:
+                pass
+            if self.pc == pc:
+                self.pc = None
 
 
 class StreamManager:
@@ -211,9 +223,10 @@ stream_manager = StreamManager()
 
 @app.on_event("startup")
 async def startup_event():
-    # Pre-warm MAIN_CAMERA for instantaneous first render
-    session = stream_manager.get_or_create("MAIN_CAMERA")
-    asyncio.create_task(session.start())
+    # Pre-warm MAIN_CAMERA and DOWN_CAMERA for instantaneous first render
+    for cam in ["MAIN_CAMERA", "DOWN_CAMERA"]:
+        session = stream_manager.get_or_create(cam)
+        asyncio.create_task(session.start())
 
 
 @app.get("/health")
@@ -454,7 +467,7 @@ async def stream_fallback_proxy(request: Request, path: str):
             url=target_url,
             headers=headers,
             content=body if body else None,
-            timeout=15.0
+            timeout=10.0
         )
         return Response(
             content=resp.content,
