@@ -547,20 +547,49 @@ async def execute_oneclick_action(target: str, payload: Dict[str, Any], request:
                 if pos_id is None:
                     pos_id = 68 if "flag" in r_id else 70
 
-                exec_payload = {
-                    "missionId": 0,
-                    "missionTypeId": 6,  # 6: 지정 도착 (지정 지점 이동)
-                    "positionId": [int(pos_id)],
-                    "execute": True,
+                # 1. Primary Route: Standard MOSS /pad/giveCommand (num: 6 = 指定到达)
+                pad_payload = {
+                    "num": 6,
+                    "robotPositionId": int(pos_id),
+                    "robotId": 1,
+                    "isServer": 2,
                 }
+                cmd_r = await client.post(f"http://{ip}/pad/giveCommand", headers=headers, json=pad_payload)
+                cmd_data = cmd_r.json() if cmd_r.status_code == 200 else {}
+                code = cmd_data.get("code", cmd_r.status_code)
+                msg = cmd_data.get("msg", cmd_r.text)
 
-                # 1. Verification check
-                chk_r = await client.post(f"http://{ip}/api/v1/mission/executeCheck", headers=headers, json=exec_payload)
-                # 2. Actual execution
-                exec_r = await client.post(f"http://{ip}/api/v1/mission/execute", headers=headers, json=exec_payload)
-                exec_data = exec_r.json() if exec_r.status_code == 200 else {}
-                code = exec_data.get("code", exec_r.status_code)
-                msg = exec_data.get("msg", exec_r.text)
+                # 2. Secondary Fallback: Direct Dispatch Service (:8888/dispatch/task/sending)
+                if code != 0:
+                    try:
+                        disp_payload = {
+                            "task_type": 6,
+                            "robot_id": 1,
+                            "position_list": [{"robot_position_id": int(pos_id), "position_name": pos_name}],
+                            "task_id": int(asyncio.get_event_loop().time() * 1000),
+                        }
+                        disp_r = await client.post(f"http://{ip}:8888/dispatch/task/sending", json=disp_payload, timeout=3.0)
+                        if disp_r.status_code in (200, 201):
+                            code = 0
+                            msg = f"Dispatched via moss-dispatch:8888 ({disp_r.json().get('msg', 'Success')})"
+                    except Exception:
+                        pass
+
+                # 3. Tertiary Fallback: /api/v1/mission/execute
+                if code != 0:
+                    exec_payload = {
+                        "missionId": 0,
+                        "missionTypeId": 6,
+                        "positionId": [int(pos_id)],
+                        "execute": True,
+                    }
+                    try:
+                        exec_r = await client.post(f"http://{ip}/api/v1/mission/execute", headers=headers, json=exec_payload, timeout=3.0)
+                        if exec_r.status_code == 200:
+                            code = exec_r.json().get("code", 0)
+                            msg = exec_r.json().get("msg", "Executed")
+                    except Exception:
+                        pass
 
                 if code == 0:
                     if bot_domain:
@@ -568,29 +597,56 @@ async def execute_oneclick_action(target: str, payload: Dict[str, Any], request:
                         bot_domain.position_name = f"{pos_name} (#{pos_id})"
                         bot_domain.move_mode = "POINT_NAV"
                     log_entry["details"] = (
-                        f"Dispatched point-to-point navigation to {pos_name} (#{pos_id}). "
-                        f"POST http://{ip}/api/v1/mission/execute returned HTTP {exec_r.status_code} code={code}, msg={msg}."
+                        f"Point-to-point dispatch to {pos_name} (#{pos_id}) accepted: code={code}, msg={msg}."
                     )
                 else:
                     log_entry["status"] = "WARN"
                     log_entry["message"] = f"Dispatch rejected by robot: {msg}"
-                    log_entry["details"] = f"Robot response HTTP {exec_r.status_code} code={code}: {msg}"
+                    log_entry["details"] = f"Robot response code={code}: {msg}"
 
             elif action_type == "return_dock":
                 dock_name = "충전점 (#68)" if "flag" in r_id else "충전포인트 (#70)"
-                exec_payload = {
-                    "missionId": 0,
-                    "missionTypeId": 3,  # 3: 원클릭 복귀 (一键返回)
-                    "execute": True,
-                }
 
-                # 1. Verification check
-                chk_r = await client.post(f"http://{ip}/api/v1/mission/executeCheck", headers=headers, json=exec_payload)
-                # 2. Actual execution
-                exec_r = await client.post(f"http://{ip}/api/v1/mission/execute", headers=headers, json=exec_payload)
-                exec_data = exec_r.json() if exec_r.status_code == 200 else {}
-                code = exec_data.get("code", exec_r.status_code)
-                msg = exec_data.get("msg", exec_r.text)
+                # 1. Primary Route: Standard MOSS /pad/giveCommand (num: 3 = 一键返回)
+                pad_payload = {
+                    "num": 3,
+                    "robotId": 1,
+                    "isServer": 2,
+                }
+                cmd_r = await client.post(f"http://{ip}/pad/giveCommand", headers=headers, json=pad_payload)
+                cmd_data = cmd_r.json() if cmd_r.status_code == 200 else {}
+                code = cmd_data.get("code", cmd_r.status_code)
+                msg = cmd_data.get("msg", cmd_r.text)
+
+                # 2. Secondary Fallback: Direct Dispatch Service (:8888/dispatch/task/sending)
+                if code != 0:
+                    try:
+                        disp_payload = {
+                            "task_type": 3,
+                            "robot_id": 1,
+                            "task_id": int(asyncio.get_event_loop().time() * 1000),
+                        }
+                        disp_r = await client.post(f"http://{ip}:8888/dispatch/task/sending", json=disp_payload, timeout=3.0)
+                        if disp_r.status_code in (200, 201):
+                            code = 0
+                            msg = f"Dispatched via moss-dispatch:8888 ({disp_r.json().get('msg', 'Success')})"
+                    except Exception:
+                        pass
+
+                # 3. Tertiary Fallback: /api/v1/mission/execute
+                if code != 0:
+                    exec_payload = {
+                        "missionId": 0,
+                        "missionTypeId": 3,
+                        "execute": True,
+                    }
+                    try:
+                        exec_r = await client.post(f"http://{ip}/api/v1/mission/execute", headers=headers, json=exec_payload, timeout=3.0)
+                        if exec_r.status_code == 200:
+                            code = exec_r.json().get("code", 0)
+                            msg = exec_r.json().get("msg", "Executed")
+                    except Exception:
+                        pass
 
                 if code == 0:
                     if bot_domain:
@@ -598,13 +654,12 @@ async def execute_oneclick_action(target: str, payload: Dict[str, Any], request:
                         bot_domain.charging = True
                         bot_domain.move_mode = "DOCK_NAV"
                     log_entry["details"] = (
-                        f"Autonomous docking sequence initiated toward {dock_name}. "
-                        f"POST http://{ip}/api/v1/mission/execute returned HTTP {exec_r.status_code} code={code}, msg={msg}."
+                        f"Autonomous docking sequence accepted toward {dock_name}: code={code}, msg={msg}."
                     )
                 else:
                     log_entry["status"] = "WARN"
                     log_entry["message"] = f"Docking rejected by robot: {msg}"
-                    log_entry["details"] = f"Robot response HTTP {exec_r.status_code} code={code}: {msg}"
+                    log_entry["details"] = f"Robot response code={code}: {msg}"
 
             elif action_type == "self_check":
                 chk_r = await client.get(f"http://{ip}/api/v1/base/robot/info", headers=headers)
