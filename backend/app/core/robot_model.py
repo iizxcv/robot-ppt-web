@@ -70,6 +70,21 @@ class BaseRobot(ABC):
         self.online_mode: str = "OFFLINE_STANDBY"
         self.last_sync_time: str = "-"
         
+        # Environmental & Gas Sensors (Redis Telemetry)
+        self.env_sensors: Dict[str, float] = {
+            "formaldehyde": 0.01,
+            "co2": 1096.0,
+            "tvoc": 0.36,
+            "pm1": 0.0,
+            "pm25": 0.0,
+            "pm10": 1.0,
+            "so2": 0.0,
+            "h2s": 0.0,
+            "noise": 65.5,
+            "tem": 30.4,
+            "hum": 23.4,
+        }
+        
         # REST API cached tokens & authoritative positions
         self.api_token: Optional[str] = None
         self.api_positions: Dict[int, Dict[str, Any]] = {}
@@ -171,6 +186,7 @@ class BaseRobot(ABC):
         up_data: Dict[str, Any],
         task_data: Dict[str, Any],
         path_move: Any,
+        env_raw: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Parses and updates real telemetry data received from robot Redis."""
         pos = pos_data.get("position", {})
@@ -204,6 +220,14 @@ class BaseRobot(ABC):
             self.fsm_state = f"LIVE CHARGING @ {self.position_name}"
         else:
             self.fsm_state = f"LIVE PATROL (type={t_type}, status={self.task_status})"
+
+        if env_raw:
+            for k in ["formaldehyde", "co2", "tvoc", "pm1", "pm25", "pm10", "so2", "h2s", "noise", "tem", "hum"]:
+                if k in env_raw and env_raw[k] is not None:
+                    try:
+                        self.env_sensors[k] = round(float(env_raw[k]), 2)
+                    except (ValueError, TypeError):
+                        pass
 
         self.online_mode = "LIVE_WEBSOCKET_REDIS"
         self.last_sync_time = time.strftime("%H:%M:%S")
@@ -249,6 +273,7 @@ class BaseRobot(ABC):
                 "temp_c": self.temp_c,
                 "online_mode": self.online_mode,
                 "last_sync_time": self.last_sync_time,
+                "env_sensors": self.env_sensors,
             },
         }
 
