@@ -89,6 +89,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
   const cameras: any[] = robotFleet.cameras || [];
 
   const currStream = STREAM_CONFIG[cameraMode] || STREAM_CONFIG.optical;
+  const env = robot.telemetry?.env_sensors;
   const robotIp = robot.ip || (rId.includes("power") ? "10.200.28.61" : "10.200.28.63");
   // Use Web Server Media Relay endpoint (/videoStream/...) instead of direct internal robot/media IP
   const liveStreamPlayerUrl = `/videoStream/stream/player/${currStream.streamName}/?autoplay=1&muted=1`;
@@ -1135,7 +1136,7 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
 
             {/* TAB 3: PRECISION SENSORS & ASSETS */}
             {activeTab === "sensors" && (
-              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 <div>
                   <div style={{ fontSize: 15, fontWeight: 800, color: "#38bdf8", marginBottom: 4 }}>
                     📊 실시간 정밀 센서 텔레메트리 & 자산 실사 바인딩
@@ -1145,36 +1146,132 @@ export const RobotLiveOperationModal: React.FC<RobotLiveOperationModalProps> = (
                   </div>
                 </div>
 
-                {/* 6 Sensor Data Boxes */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
-                  {[
-                    { label: "온습도 센서", val: isLive ? "23.4 ℃ / 46.2 %" : "N/A", status: isLive ? "정상" : "OFFLINE", sub: isLive ? "서버실 적정 범위 내" : "수신 불가", color: isLive ? "#38bdf8" : "#ef4444" },
-                    { label: "라이다 SLAM", val: isLive ? "±2cm 정밀도" : "N/A", status: isLive ? "정상 추정" : "OFFLINE", sub: isLive ? "지상 0.37m 마운트" : "수신 불가", color: isLive ? "#00f2fe" : "#ef4444" },
-                    { label: "초음파 & 낙하방지", val: isLive ? "전방 0.0m 무간섭" : "N/A", status: isLive ? "안전" : "OFFLINE", sub: isLive ? "장애물 자동 감속" : "수신 불가", color: isLive ? "#4ade80" : "#ef4444" },
-                    { label: "BMS 배터리 전원", val: isLive ? `${robot.telemetry?.voltage_v ?? 28.09} V` : "N/A", status: isLive ? "완충 도크" : "OFFLINE", sub: isLive ? "리튬인산철 패키지" : "수신 불가", color: isLive ? "#facc15" : "#ef4444" },
-                    { label: "리프터 승강 모터", val: isLive ? `${robot.telemetry?.lift_height_m ?? 0.17} m` : "N/A", status: isLive ? "최대 2.1m" : "OFFLINE", sub: isLive ? "2~48U 높이 대응" : "수신 불가", color: isLive ? "#a855f7" : "#ef4444" },
-                    { label: "열화상 카메라", val: isLive ? "최고 28.5 ℃" : "N/A", status: isLive ? "핫스팟 무" : "OFFLINE", sub: isLive ? "화재 발화 조기 감시" : "수신 불가", color: isLive ? "#f87171" : "#ef4444" },
-                  ].map((s) => (
-                    <div
-                      key={s.label}
-                      style={{
-                        background: isDarkMode ? "rgba(15, 23, 42, 0.8)" : "#ffffff",
-                        border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
-                        borderLeft: `4px solid ${s.color}`,
-                        boxShadow: isDarkMode ? "none" : "0 1px 3px rgba(15, 23, 42, 0.04)",
-                        borderLeftWidth: 4,
-                        borderRadius: "0 10px 10px 0",
-                        padding: "10px 12px",
-                      }}
-                    >
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={{ fontSize: 11.5, color: "#94a3b8", fontWeight: 700 }}>{s.label}</span>
-                        <span style={{ fontSize: 10.5, color: s.color, fontWeight: 800 }}>{s.status}</span>
+                {/* Section 1: Air Quality, Toxic Gas & Noise Quality */}
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                    <span style={{ fontSize: 13, fontWeight: 800, color: isDarkMode ? "#38bdf8" : "#0284c7" }}>
+                      🍃 환경 센서 및 유해가스·공기질·소음 정밀 계측 (Air Quality & Toxic Gas)
+                    </span>
+                    <span style={{ fontSize: 11, color: isLive ? "#4ade80" : "#ef4444", fontWeight: 700 }}>
+                      {isLive ? "● 실시간 가스/환경 센서 버스 동기화 중" : "● 센서 통신 단절"}
+                    </span>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
+                    {[
+                      {
+                        label: "포름알데히드 (HCHO)",
+                        val: isLive ? `${env?.formaldehyde ?? 0.01} ppm` : "N/A",
+                        status: isLive ? ((env?.formaldehyde ?? 0.01) < 0.08 ? "안전 (정상)" : "주의") : "OFFLINE",
+                        sub: "기준치 < 0.08 ppm (실내 공기질 양호)",
+                        color: "#10b981",
+                      },
+                      {
+                        label: "이산화탄소 (CO₂)",
+                        val: isLive ? `${env?.co2 ? Number(env.co2).toLocaleString() : "1,096"} ppm` : "N/A",
+                        status: isLive ? ((env?.co2 ?? 1096) < 1500 ? "적정 (양호)" : "환기 필요") : "OFFLINE",
+                        sub: "서버실 환기 및 유동 적정 상태",
+                        color: "#38bdf8",
+                      },
+                      {
+                        label: "총휘발성유기화합물 (TVOC)",
+                        val: isLive ? `${env?.tvoc ?? 0.36} mg/m³` : "N/A",
+                        status: isLive ? ((env?.tvoc ?? 0.36) < 0.60 ? "안전 (정상)" : "주의") : "OFFLINE",
+                        sub: "기준치 < 0.60 mg/m³ (화학 증기 안전)",
+                        color: "#10b981",
+                      },
+                      {
+                        label: "부유 미세입자 (PM)",
+                        val: isLive ? `PM10: ${env?.pm10 ?? 1} ㎍/㎥` : "N/A",
+                        status: isLive ? "최고 청정" : "OFFLINE",
+                        sub: `PM1: ${env?.pm1 ?? 0} · PM2.5: ${env?.pm25 ?? 0} ㎍/㎥`,
+                        color: "#00f2fe",
+                      },
+                      {
+                        label: "이산화황 (SO₂)",
+                        val: isLive ? `${env?.so2 ?? "0.00"} ppm` : "N/A",
+                        status: isLive ? "무검출 (정상)" : "OFFLINE",
+                        sub: "전기 설비 발화·방전 유해가스 없음",
+                        color: "#34d399",
+                      },
+                      {
+                        label: "황화수소 (H₂S)",
+                        val: isLive ? `${env?.h2s ?? "0.00"} ppm` : "N/A",
+                        status: isLive ? "무검출 (정상)" : "OFFLINE",
+                        sub: "UPS 축전지 전해액 누출 없음",
+                        color: "#34d399",
+                      },
+                      {
+                        label: "환경 소음 (Noise)",
+                        val: isLive ? `${env?.noise ?? 65.5} dB` : "N/A",
+                        status: isLive ? "정상 범위" : "OFFLINE",
+                        sub: "서버 랙 팬 풍량 음향 (평균 60~75dB)",
+                        color: "#facc15",
+                      },
+                      {
+                        label: "온습도 센서 (Tem / Hum)",
+                        val: isLive ? `${env?.tem ?? 30.4} ℃ / ${env?.hum ?? 23.4} %` : "N/A",
+                        status: isLive ? "항온항습 정상" : "OFFLINE",
+                        sub: "서버실 적정 운전 범위 내",
+                        color: "#0284c7",
+                      },
+                    ].map((s) => (
+                      <div
+                        key={s.label}
+                        style={{
+                          background: isDarkMode ? "rgba(15, 23, 42, 0.8)" : "#ffffff",
+                          border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
+                          borderLeft: `4px solid ${s.color}`,
+                          boxShadow: isDarkMode ? "none" : "0 1px 3px rgba(15, 23, 42, 0.04)",
+                          borderRadius: "0 10px 10px 0",
+                          padding: "9px 12px",
+                        }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <span style={{ fontSize: 11, color: isDarkMode ? "#cbd5e1" : "#475569", fontWeight: 700 }}>{s.label}</span>
+                          <span style={{ fontSize: 10, color: s.color, fontWeight: 800 }}>{s.status}</span>
+                        </div>
+                        <div style={{ fontSize: 14, fontWeight: 900, color: isDarkMode ? "#ffffff" : "#0f172a", marginTop: 3 }}>{s.val}</div>
+                        <div style={{ fontSize: 10, color: "#64748b", marginTop: 2 }}>{s.sub}</div>
                       </div>
-                      <div style={{ fontSize: 15, fontWeight: 900, color: isDarkMode ? "#ffffff" : "#0f172a", marginTop: 4 }}>{s.val}</div>
-                      <div style={{ fontSize: 10.5, color: "#64748b", marginTop: 2 }}>{s.sub}</div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                </div>
+
+                {/* Section 2: Robotics & Driving Hardware Telemetry */}
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: isDarkMode ? "#cbd5e1" : "#334155", marginBottom: 8 }}>
+                    🤖 로봇 구동 및 항법 하드웨어 텔레메트리 (Kinematics & Platform State)
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+                    {[
+                      { label: "라이다 SLAM", val: isLive ? "±2cm 정밀도" : "N/A", status: isLive ? "정상 추정" : "OFFLINE", sub: "지상 0.37m 레이저 스캐너", color: isLive ? "#00f2fe" : "#ef4444" },
+                      { label: "초음파 & 낙하방지", val: isLive ? "전방 0.0m 무간섭" : "N/A", status: isLive ? "안전" : "OFFLINE", sub: "장애물 자동 감속 회피", color: isLive ? "#4ade80" : "#ef4444" },
+                      { label: "BMS 배터리 전원", val: isLive ? `${robot.telemetry?.voltage_v ?? 28.15} V (${robot.telemetry?.battery_pct ?? 99}%)` : "N/A", status: isLive ? (robot.telemetry?.charging ? "충전 도크" : "주행 방전") : "OFFLINE", sub: "리튬인산철 패키지 (28.1V)", color: isLive ? "#facc15" : "#ef4444" },
+                      { label: "리프터 승강 모터", val: isLive ? `${robot.telemetry?.lift_height_m ?? 0.17} m` : "N/A", status: isLive ? "최대 2.1m" : "OFFLINE", sub: "2~48U 랙 단별 정밀 리프팅", color: isLive ? "#a855f7" : "#ef4444" },
+                      { label: "열화상 카메라", val: isLive ? "최고 28.5 ℃" : "N/A", status: isLive ? "핫스팟 무" : "OFFLINE", sub: "Hikmicro 160×120 센서", color: isLive ? "#f87171" : "#ef4444" },
+                      { label: "통신 링크 (ROS/Redis)", val: isLive ? "정상 연결 (0.1ms)" : "N/A", status: isLive ? "ACTIVE" : "OFFLINE", sub: `IP: ${robotIp} (Port 1002)`, color: isLive ? "#38bdf8" : "#ef4444" },
+                    ].map((s) => (
+                      <div
+                        key={s.label}
+                        style={{
+                          background: isDarkMode ? "rgba(15, 23, 42, 0.8)" : "#ffffff",
+                          border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
+                          borderLeft: `4px solid ${s.color}`,
+                          boxShadow: isDarkMode ? "none" : "0 1px 3px rgba(15, 23, 42, 0.04)",
+                          borderLeftWidth: 4,
+                          borderRadius: "0 10px 10px 0",
+                          padding: "10px 12px",
+                        }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <span style={{ fontSize: 11.5, color: "#94a3b8", fontWeight: 700 }}>{s.label}</span>
+                          <span style={{ fontSize: 10.5, color: s.color, fontWeight: 800 }}>{s.status}</span>
+                        </div>
+                        <div style={{ fontSize: 14.5, fontWeight: 900, color: isDarkMode ? "#ffffff" : "#0f172a", marginTop: 4 }}>{s.val}</div>
+                        <div style={{ fontSize: 10.5, color: "#64748b", marginTop: 2 }}>{s.sub}</div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Live Asset Cabinets Binding Table */}

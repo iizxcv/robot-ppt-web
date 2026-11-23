@@ -70,6 +70,19 @@ export interface RobotRecord {
     temp_c?: number;
     online_mode?: string;
     last_sync_time?: string;
+    env_sensors?: {
+      formaldehyde?: number;
+      co2?: number;
+      tvoc?: number;
+      pm1?: number;
+      pm25?: number;
+      pm10?: number;
+      so2?: number;
+      h2s?: number;
+      noise?: number;
+      tem?: number;
+      hum?: number;
+    };
   };
 }
 

@@ -119,7 +119,7 @@ class MultiRobotOrchestrator:
                     try:
                         cli = self._get_ssh(r_id, host, port, user, "robot")
                         _, out, _ = cli.exec_command(
-                            "redis-cli --raw mget position_info chassis_info upper_info task_status_info path_move_info",
+                            "redis-cli --raw mget position_info chassis_info upper_info task_status_info path_move_info formaldehyde co2 tvoc pm1 pm25 pm10 so2 h2s noise tem hum",
                             timeout=2.0,
                         )
                         lines = out.read().decode("utf-8", errors="ignore").splitlines()
@@ -130,7 +130,16 @@ class MultiRobotOrchestrator:
                             task_data = json.loads(lines[3]) if len(lines) > 3 and lines[3].startswith("{") else {}
                             path_move = json.loads(lines[4]) if len(lines) > 4 and lines[4].startswith("[") else []
 
-                            bot.update_telemetry_from_redis(pos_data, chas_data, up_data, task_data, path_move)
+                            env_keys = ["formaldehyde", "co2", "tvoc", "pm1", "pm25", "pm10", "so2", "h2s", "noise", "tem", "hum"]
+                            env_raw = {}
+                            for idx, ek in enumerate(env_keys, start=5):
+                                if idx < len(lines) and lines[idx].strip():
+                                    try:
+                                        env_raw[ek] = float(lines[idx].strip())
+                                    except ValueError:
+                                        pass
+
+                            bot.update_telemetry_from_redis(pos_data, chas_data, up_data, task_data, path_move, env_raw)
                     except Exception:
                         bot.set_offline()
             except Exception:
