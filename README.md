@@ -15,3 +15,16 @@ docker compose up -d --build
 - `./docker_master/data` ➔ `/app/master/data` (`maps/*/map.pgm`, `map.yaml`, `models/*.urdf`, `showcase.db`)
 - `./docker_master/logs` ➔ `/app/master/logs`
 - `./docker_master/nginx` ➔ `/etc/nginx/conf.d`
+
+
+## 참고사항
+
+### 데이터 종류별 수집 방식 비교
+| 데이터 항목 | 수집 방식 | 프로토콜 / 엔드포인트 | 비고 |
+| --- | :---: | :---: | --- |
+| 맵 점군 지도 (`map.pgm`, `map.yaml`) | SSH / SFTP | SFTP (Port 1004) | 로봇 내부 ROS 패키지 디렉토리에서 직접 추출 |
+| 위치/충전점 목록 (26개 포인트) | REST API | HTTP POST `/api/v1/position/list` | JSON 포맷 실시간 동기화 |
+| 순찰 작업/미션 목록 | REST API | HTTP POST `/api/v1/mission/list` | JSON 포맷 실시간 동기화 |
+| 실시간 텔레메트리 (위치, 배터리, 센서) | Redis 버스 | TCP Redis (Port 6379, via SSH) | 1.5초 주기 실시간 폴링 |
+| 원격 주행/미션 지시 | REST API | HTTP POST `/pad/giveCommand`, `/mission/execute` | 웹 관제에서 명령 즉시 하달 |
+| 실시간 카메라 영상 | 미디어 중계 | WHEP (Port 8889) ➔ Nginx (Port 8080) | 단일 8080 포트 HTTP 스트림 변환 |
